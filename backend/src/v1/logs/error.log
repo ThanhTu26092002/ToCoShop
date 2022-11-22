@@ -1,0 +1,29 @@
+error: Nov-22-2022 11:01:21: 	Not found
+error: Nov-22-2022 11:02:03: 	Not found
+error: Nov-22-2022 11:02:13: 	Not found
+error: Nov-22-2022 11:10:21: 	Not found
+error: Nov-22-2022 11:10:40: 	Not found
+error: Nov-22-2022 11:11:36: 	Not found
+error: Nov-22-2022 11:11:59: 	dfsafdsaf
+error: Nov-22-2022 11:12:58: 	Not found
+error: Nov-22-2022 11:15:52: 	Not found
+error: Nov-22-2022 11:17:42: 	Not found
+error: Nov-22-2022 11:18:17: 	Not found
+error: Nov-22-2022 11:18:32: 	Not found
+error: Nov-22-2022 11:18:45: 	Not found sadfsdf
+error: Nov-22-2022 11:20:04: 	Not found sadfsdf
+error: Nov-22-2022 11:20:46: 	Not found!
+error: Nov-22-2022 11:21:26: 	a is not defined
+error: Nov-22-2022 11:24:12: 	a5e02c3e-c2e0-4d21-94e4-cf5e0cbca716----/checkstatus-----GET-----a is not defined
+error: Nov-22-2022 11:25:10: 	7437aa5c-3b61-4ab6-a98a-e77330be125c----/checkstatussd-----GET-----Not found!
+error: Nov-22-2022 14:47:16: 	e1d49bfb-d8b8-45d7-af0a-11e9799b27c5----/checkstatus-----GET-----Not found!
+error: Nov-22-2022 14:57:54: 	1b79a59f-6562-4f1e-b9bc-187ff7abf64b----/v1/checkstatus-----GET-----Not found!
+error: Nov-22-2022 15:19:11: 	177d0cea-1024-42e2-924e-110b3e30ccde----/routes/-----GET-----Not found!
+error: Nov-22-2022 15:19:22: 	d94d44b9-5d06-48d1-a640-6caa6b14b85b----/routes/v1/-----GET-----Not found!
+error: Nov-22-2022 15:19:26: 	2b545064-5389-435d-9b83-2a6e99a37e9f----/routes/v1-----GET-----Not found!
+error: Nov-22-2022 15:27:07: 	7e86bfd2-54a4-4964-b58e-4e03c2e45aa3----/v1/ord-----GET-----Not found!
+error: Nov-22-2022 15:27:32: 	3976add2-be3a-41e7-a7c2-34dc54565e63----/v1/order-----GET-----Not found!
+error: Nov-22-2022 15:37:09: 	98723b38-18cc-426f-9bce-5919e6b8aa73----/v1/categories/showList-----GET-----Not found!
+error: Nov-22-2022 15:37:25: 	e19f6cc5-a50f-45fc-9628-672037858b28----/v1/-----GET-----Not found!
+error: Nov-22-2022 15:49:24: 	c49e72f8-ee80-4de5-ab94-f48809fb9f0b----/v1/upload/image-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\images\products\file-1669106964059.jpeg'
+error: Nov-22-2022 15:51:41: 	f24a8b66-06b7-4ff8-9564-a718cca08b7e----/v1/upload/image-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\images\products\file-1669107101557.jpeg'
