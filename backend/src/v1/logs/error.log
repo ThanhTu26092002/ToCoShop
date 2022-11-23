@@ -27,3 +27,25 @@ error: Nov-22-2022 15:37:09: 	98723b38-18cc-426f-9bce-5919e6b8aa73----/v1/catego
 error: Nov-22-2022 15:37:25: 	e19f6cc5-a50f-45fc-9628-672037858b28----/v1/-----GET-----Not found!
 error: Nov-22-2022 15:49:24: 	c49e72f8-ee80-4de5-ab94-f48809fb9f0b----/v1/upload/image-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\images\products\file-1669106964059.jpeg'
 error: Nov-22-2022 15:51:41: 	f24a8b66-06b7-4ff8-9564-a718cca08b7e----/v1/upload/image-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\images\products\file-1669107101557.jpeg'
+error: Nov-22-2022 16:05:25: 	b39a2a4d-b9f1-43d6-be41-3e07deccc97f----/v1/upload/-----POST-----Not found!
+error: Nov-22-2022 16:05:52: 	1ca1653a-9fdc-42e4-adee-e9e3d77ffb50----/v1/upload/-----POST-----Not found!
+error: Nov-22-2022 16:05:59: 	97964dcb-7bb5-40cb-94a0-c30746273ee1----/v1/upload-----POST-----Not found!
+error: Nov-22-2022 16:07:08: 	8f82409a-9bfc-41a8-81b7-7bf576f852a9----/v1/upload-----POST-----Not found!
+error: Nov-22-2022 16:15:49: 	386b0509-c5fb-4f81-8e62-0ef8fc1c17a6----/v1/upload/image/dfdf33-----POST-----Not found!
+error: Nov-22-2022 16:18:55: 	dddcc4dc-0c28-4d6f-a412-485394a2a385----/v1/upload/image/dfdf33-----POST-----Only image files are allowed!
+error: Nov-23-2022 08:33:22: 	aff216db-8275-4334-a05d-2e4db80a95a8----/v1/upload/image/dfdf33-----POST-----Not found!
+error: Nov-23-2022 08:34:33: 	f67a05fb-d625-47dc-a992-598f58ff782d----/v1/upload/image/dfdf33-----POST-----Not found!
+error: Nov-23-2022 08:36:28: 	42c7447b-d911-441d-bce5-6140a3849dcc----/v1/upload/productImage/dfdf33-----POST-----Not found!
+error: Nov-23-2022 08:48:40: 	4be98405-f7d7-4939-b09f-990663e0e74b----/v1/upload/productImage/dfdf33-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\images\categories\dfdf33\file-1669168120165.jpeg'
+error: Nov-23-2022 08:50:23: 	d22a3252-366f-4677-b653-6bcc85cb73ca----/v1/upload/productImage/dfdf33-----POST-----ENOENT: no such file or directory, open 'E:\Workspace\Aptech\finalProject\ToCoShop\backend\public\uploads\images\categories\dfdf33\file-1669168223243.jpeg'
+error: Nov-23-2022 10:00:04: 	ce265ed4-70fd-4871-837a-d43a31b612b8----/v1/upload/suppliersImage/123s4f-----POST-----Url is wrong
+error: Nov-23-2022 10:01:13: 	8313d8f7-2a19-4aac-94d5-fb46c11b222f----/v1/upload/suppliersImage/123s4f-----POST-----Can not find the name Collection in the Url
+error: Nov-23-2022 10:25:19: 	013f7e91-0fef-443a-adf2-acd8d2227d64----/v1/categories/categoryImage/2324/dfg-----POST-----Not found!
+error: Nov-23-2022 10:25:24: 	3109a551-1810-4caa-9109-c98effb8db5a----/v1/categories//-----POST-----Not found!
+error: Nov-23-2022 10:25:27: 	7cc229d5-ee3d-4934-9559-ca2b76a493c0----/v1/categories/-----POST-----Not found!
+error: Nov-23-2022 10:25:29: 	553cf697-6b5d-4033-8b91-c4cddb04473b----/v1/categories-----POST-----Not found!
+error: Nov-23-2022 10:26:00: 	f4271b95-2375-488e-9f1c-aa8b6b459275----/v1/categories-----POST-----Not found!
+error: Nov-23-2022 10:26:37: 	810d6b96-9d16-404b-8814-11e1850e6239----/v1/categories/-----POST-----Not found!
+error: Nov-23-2022 10:27:35: 	3acdcb05-3434-44ac-89de-86bde1bf2d7a----/v1/categories////-----GET-----Not found!
+error: Nov-23-2022 10:27:37: 	1a24caaf-875f-4838-8dd7-5ab03d60c495----/v1/categories///-----GET-----Not found!
+error: Nov-23-2022 10:27:40: 	b91a6966-342c-4c05-9518-ad908040263c----/v1/categories//sd-----GET-----Not found!
