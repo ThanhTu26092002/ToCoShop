@@ -7,12 +7,12 @@ const formatterErrorFunc = (err, collection) =>{
       const errName = Object.keys(err.keyValue)[0];
       switch(errName){
         case "name" :
-          errors.name = 'Tên danh mục';
-          errors.message = "Tên danh mục đã tồn tại.";
+          errors.name = 'name';
+          errors.message = "Name of Category must be unique";
           break;
         case "email" :
           errors.name = 'Email';
-          errors.message = "Email đã tồn tại.";
+          errors.message = "Email of Category must be unique";
           break;
       }
       return errors;

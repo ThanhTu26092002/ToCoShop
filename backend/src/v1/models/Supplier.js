@@ -7,6 +7,7 @@ const supplierSchema = new Schema(
         name: {
             type: String,
             trim: true,
+            unique: true,
             maxLength: [100, 'Tên nhà cung cấp không quá 100 kí tự'],
             required: [true, 'Tên nhà cung cấp không được để trống']
         },
@@ -14,6 +15,7 @@ const supplierSchema = new Schema(
             type: String,
             trim: true,
             lowercase : true,
+            unique: true,
             maxLength:[ 50, 'Email không vượt quá 50 kí tự'],
             required: [true, 'Email không được để trống'],
             match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Vui lòng nhập đúng định dạng email']

@@ -49,3 +49,18 @@ error: Nov-23-2022 10:26:37: 	810d6b96-9d16-404b-8814-11e1850e6239----/v1/catego
 error: Nov-23-2022 10:27:35: 	3acdcb05-3434-44ac-89de-86bde1bf2d7a----/v1/categories////-----GET-----Not found!
 error: Nov-23-2022 10:27:37: 	1a24caaf-875f-4838-8dd7-5ab03d60c495----/v1/categories///-----GET-----Not found!
 error: Nov-23-2022 10:27:40: 	b91a6966-342c-4c05-9518-ad908040263c----/v1/categories//sd-----GET-----Not found!
+error: Nov-24-2022 09:30:34: 	a3c40e6d-c94e-4f52-8787-cfe65ea10833----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 09:31:17: 	2242b3dc-8132-40cd-be68-faf007c4e782----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 09:39:50: 	ac3ab559-0dad-4ad1-9f48-8f933ae6d77e----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 09:46:34: 	635ba85b-9193-46b7-9e98-d1fd46f54e42----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 09:47:32: 	3aab048e-fd9f-41d8-bb41-451dd49d2f9c----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 09:48:13: 	53800772-5da3-4969-8486-8328a5af108f----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Cannot read properties of undefined (reading 'filename')
+error: Nov-24-2022 11:16:06: 	92493209-e269-4c66-b324-83dbdb0eff28----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
+error: Nov-24-2022 11:17:02: 	e6f871de-3261-472b-b52e-6a42b6b77a37----/v1/upload/productImage/sdff-----GET-----Not found!
+error: Nov-24-2022 11:17:49: 	5336b493-1a01-4612-b438-78e227c3b676----/v1/upload/productImage/sdff-----POST-----Only image files are allowed!
+error: Nov-24-2022 11:17:52: 	df80e572-8efa-45dd-ae53-8f252c009180----/v1/upload/productImage/sdff-----POST-----Only image files are allowed!
+error: Nov-24-2022 11:19:53: 	82976539-d569-4adb-9e1a-aa1764f347e5----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
+error: Nov-24-2022 11:20:24: 	df353eb4-eb64-4af7-9245-4700d63ab218----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
+error: Nov-24-2022 11:32:35: 	cfd1c707-d34d-4235-9ca7-3ac452ecdcb5----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
+error: Nov-24-2022 15:07:14: 	a812280e-5d80-41c4-87e1-827ef9fd7b41----/v1//categoryImage/dsfsfdsaf-----POST-----Not found!
+error: Nov-24-2022 16:33:06: 	e94f94ea-57ef-4c23-91f3-ca4c552d4271----/v1/suppliers/insertOne-----POST-----Unexpected token , in JSON at position 183

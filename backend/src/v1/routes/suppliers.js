@@ -1,75 +1,39 @@
 "use strict";
 var express = require("express");
 var router = express.Router();
+const Supplier = require("../models/Supplier");
 const multer = require("multer");
-// const passport = require("passport");
-// const jwt = require("jsonwebtoken");
-const upload = require("../middleware/multerUpload");
-const Category = require("../models/Category");
 const fs = require("fs");
+const upload = require("../middleware/multerUpload");
+
 const {
-  COLLECTION_CATEGORIES,
   PATH_FOLDER_PUBLIC_UPLOAD,
   PATH_FOLDER_IMAGES,
+  COLLECTION_SUPPLIERS,
 } = require("../configs/constants");
-
 const { formatterErrorFunc } = require("../utils/formatterError");
-const { loadCategory, validateId } = require("../validations/commonValidators");
+const { loadSupplier, validateId } = require("../validations/commonValidators");
 
-const {
-  findDocuments,
-} = require("../utils/MongodbHelper");
-
-//
-//CHECK ROLES
-// const allowRoles = (...roles) => {
-//   //return a middleware
-//   return (req, res, next) => {
-//     //GET BEARER TOKEN FROM HEADER
-//     const bearerToken = req.get("Authorization").replace("Bearer ", "");
-//     //DECODE TOKEN
-//     const payload = jwt.decode(bearerToken, { json: true });
-//     //AFTER DECODE: GET UID FROM PAYLOAD
-//     const { uid } = payload;
-//     // FINDING BY ID
-//     findDocument(uid, COLLECTION_USER).then((document) => {
-//       console.log(document);
-//       if (document && document.roles) {
-//         let ok = false;
-//         document.roles.forEach((role) => {
-//           if (roles.includes(role)) {
-//             ok = true;
-//             return;
-//           }
-//         });
-//         if (ok) {
-//           next();
-//         } else {
-//           res.status(403).json({ message: "Forbidden" });
-//         }
-//       } else {
-//         res.status(403).json({ message: "Forbidden" });
-//       }
-//     });
-//   };
-// };
+const { findDocuments } = require("../utils/MongodbHelper");
+// const passport = require("passport");
 
 //Get all docs
-// router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("administrators"), async (req, res, next) => {
+// router.get("/",passport.authenticate("jwt", { session: false }), async (req, res, next) => {
 router.get("/", async (req, res, next) => {
   try {
-    const docs = await Category.find().sort({ _id: -1 });
-    // const docs = await Category.find();
+    const docs = await Supplier.find().sort({ _id: -1 });
+    // const docs = await Supplier.find();
     res.json({ ok: true, results: docs });
   } catch (err) {
-    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_CATEGORIES);
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_SUPPLIERS);
+
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 //
 
-// Update categoryImage
-router.post("/categoryImage/:id", loadCategory, function (req, res) {
+// Update supplierImage
+router.post("/supplierImage/:id", loadSupplier, (req, res) => {
   upload.single("file")(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       res.status(500).json({ type: "MulterError", err: err });
@@ -97,9 +61,9 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
           return;
         }
 
-        const categoryId = req.params.id;
+        const supplierId = req.params.id;
         const newImgUrl = req.file.filename
-          ? `${PATH_FOLDER_IMAGES}/${COLLECTION_CATEGORIES}/${categoryId}/${req.file.filename}`
+          ? `${PATH_FOLDER_IMAGES}/${COLLECTION_SUPPLIERS}/${supplierId}/${req.file.filename}`
           : null;
         const currentImgUrl = req.body.currentImgUrl
           ? req.body.currentImgUrl
@@ -107,8 +71,8 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
         const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
 
         const opts = { runValidators: true };
-        const updatedDoc = await Category.findByIdAndUpdate(
-          categoryId,
+        const updatedDoc = await Supplier.findByIdAndUpdate(
+          supplierId,
           { imageUrl: newImgUrl },
           opts
         );
@@ -116,7 +80,7 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
         if (!currentImgUrl) {
           res.json({
             ok: true,
-            more_detail: "Client have the new image",
+            more_detail: "The Supplier has the new image",
             message: "Update imageUrl and other data successfully",
             result: updatedDoc,
           });
@@ -171,18 +135,19 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
     }
   });
 });
+//
 
 // Insert One WITHOUT An Image
 router.post("/insertOne", async (req, res) => {
   try {
     const data = req.body;
     //Create a new blog post object
-    const newDoc = new Category(data);
+    const newDoc = new Supplier(data);
     //Insert the newDocument in our Mongodb database
     await newDoc.save();
     res.status(201).json({ ok: true, result: newDoc });
   } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_CATEGORIES);
+    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
@@ -195,13 +160,13 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
     const updateData = { ...req.body };
     const opts = { runValidators: true };
     //--Update in Mongodb
-    const updatedDoc = await Category.findByIdAndUpdate(id, updateData, opts);
+    const updatedDoc = await Supplier.findByIdAndUpdate(id, updateData, opts);
     if (!updatedDoc) {
       res.status(404).json({
         ok: true,
         error: {
           name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
         },
       });
       return;
@@ -213,7 +178,7 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       result: updatedDoc,
     });
   } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_CATEGORIES);
+    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
     res.status(400).json({ ok: true, error: errMsgMongoDB });
   }
 });
@@ -223,15 +188,14 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deleteDoc = await Category.findByIdAndDelete(id);
-    console.log("result delete: ", deleteDoc);
+    const deleteDoc = await Supplier.findByIdAndDelete(id);
     //deleteDoc !== false, is mean, finding a document with the id in the collection
     if (!deleteDoc) {
       res.status(404).json({
         ok: true,
         error: {
           name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
         },
       });
       return;
@@ -243,7 +207,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
         PATH_FOLDER_PUBLIC_UPLOAD +
         PATH_FOLDER_IMAGES +
         "/" +
-        COLLECTION_CATEGORIES +
+        COLLECTION_SUPPLIERS +
         "/" +
         id;
       if (fs.existsSync(pathFolderImages)) {
@@ -265,6 +229,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
           });
         }
       } else {
+        // console.log({ok: true, warning: 'Not existing the folder containing image for deleted document in DiskStorage', message: 'Delete the document with ID successfully, in MongoDB'})
         res.json({
           ok: true,
           warning:
@@ -282,7 +247,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
       });
     }
   } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_CATEGORIES);
+    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
     res.status(400).json({
       ok: false,
       message: "Failed to delete the document with ID",
@@ -292,110 +257,195 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 });
 //
 
-// //FUNCTION NOT STILL USE----------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------
 
-// router.get('/search-many', validateSchema(search_deleteManyCategoriesSchema), function(req, res, next) {
-//   const query= req.query;
-//   findDocuments({query: query}, COLLECTION_CATEGORIES)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({findFunction: "failed", err: err}))
-// })
+router.get("/search/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const supplier = await Supplier.findById(id);
+    //the same:  const supplier = await Supplier.findOne({ _id: id });
+    res.json({ ok: true, result: supplier });
+  } catch (err) {
+    res.status(400).json({ error: { name: err.name, message: err.message } });
+  }
+});
 //
 
-//Insert Many  -- haven't validation yet
-//  router.post('/insert-many', validateSchema(insertManyCategoriesSchema), function (req, res, next){
-//   const list = req.body;
-//   insertDocuments(list, COLLECTION_CATEGORIES)
-//   .then(result => {
-//     res.status(201).json({ok: true, result})
-//   })
-//   .catch(err =>{
-//     res.json(500).json({ok:false})
-//   })
-//  })
-
-// Update MANY
-// router.patch('/update-many',validateSchema(updateManyCategorySchema), function(req, res, next){
-//   const query = req.query;
-//   const newValues = req.body;
-//   updateDocuments(query, newValues, COLLECTION_CATEGORIES)
-//     .then(result => {
-//       res.status(201).json({update: true, result: result})
-//     })
-//     .catch(err => res.json({update: false}))
-//  })
-//
-
-//Delete file from DiskStorage
-// router.delete('/delete-file/:id', async (req, res, next) => {
-//   // router.delete('/delete-file/:id',  (req, res, next) => {
-//   try{
-//     const {id} = req.params;
-//     const category = await Category.findById(id);
-//     console.log({status: true, message: 'we have got data of a category with id from req.params'})
-//     const directoryPath ='./public' +( category.imageUrl ? category.imageUrl: '');
-//     try{
-//       //delete file image Synchronously
-//       fs.unlinkSync(directoryPath);
-//       console.log({message: 'File Image is delete from DiskStorage '})
-
-//       //handling remove the field imageUrl after delete the picture of this id
-//       removeFieldById(ObjectId(id), {imageUrl: ''}, COLLECTION_CATEGORIES)
-//       .then(result => {
-//         res.status(201).json({removing : true, message: 'Remove field imageUrl successful', result: result})
-//       })
-//       .catch(err => res.json({update: false}))
-
-//     }catch(err){
-//       res.status(500).json({ message: "Could not delete the file. " + err})
-//     }
-//   }catch(err) {
-//     res.status(400).json({ errMsgMongoDB: { name: err.name, message: err.message } })
+// router.get(
+//   "/search-many",
+//   validateSchema(search_deleteManySuppliersSchema),
+//   function (req, res, next) {
+//     const query = req.query;
+//     findDocuments({ query: query }, COLLECTION_SUPPLIERS)
+//       .then((result) => res.status(200).json(result))
+//       .catch((err) =>
+//         res.status(500).json({ findFunction: "failed", err: err })
+//       );
 //   }
-// })
-//
+// );
+// //
 
-//Delete MANY
-// router.delete('/delete-many',validateSchema(search_deleteManyCategoriesSchema), function(req, res, next) {
-//   const query= req.query;
+// //Insert Many  -- haven't validation yet
+// router.post(
+//   "/insert-many",
+//   validateSchema(insertManySuppliersSchema),
+//   function (req, res, next) {
+//     const list = req.body;
+//     insertDocuments(list, COLLECTION_SUPPLIERS)
+//       .then((result) => {
+//         res.status(200).json({ ok: true, result: result });
+//       })
+//       .catch((err) => {
+//         res.json(500).json({ ok: false });
+//       });
+//   }
+// );
+// //
 
-//   deleteMany(query, COLLECTION_CATEGORIES)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({deleteFunction: "failed", err: err}))
-// })
+// //Update MANY
+// router.patch(
+//   "/update-many",
+//   validateSchema(updateManySupplierSchema),
+//   function (req, res, next) {
+//     const query = req.query;
+//     const newValues = req.body;
+//     updateDocuments(query, newValues, COLLECTION_SUPPLIERS)
+//       .then((result) => {
+//         res.status(201).json({ update: true, result: result });
+//       })
+//       .catch((err) => res.json({ update: false }));
+//   }
+// );
+// //
 
-//HAVEN'T USED YET------------------------------------------------------------------------------------
+// //Delete MANY
+// router.delete(
+//   "/delete-many",
+//   validateSchema(search_deleteManySuppliersSchema),
+//   function (req, res, next) {
+//     const query = req.query;
 
-// Get categories with all products  --- task 18
-router.get("/products", function (req, res) {
-  const aggregate = [
+//     deleteMany(query, COLLECTION_SUPPLIERS)
+//       .then((result) => res.status(200).json(result))
+//       .catch((err) =>
+//         res.status(500).json({ deleteFunction: "failed", err: err })
+//       );
+//   }
+// );
+
+//TASK 26  --- not finished
+//---get suppliers that not sale
+router.get("/suppliersNotSale", function (req, res, next) {
+  aggregate = [
     {
       $lookup: {
         from: "products",
-        let: { categoryId: "$_id" },
+        let: { supplierId: "$_id" },
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ["$$categoryId", "$categoryId"] },
+              $expr: {
+                $and: [
+                  { $ne: ["$productId", "$$productId"] },
+                  // {$eq: ['$status', 'COMPLETED'] },
+                ],
+              },
             },
           },
-          { $project: { name: 1, price: 1, discount: 1, stock: 1 } },
         ],
         as: "products",
       },
     },
     {
-      $match: { products: { $ne: [] } }, // Solution 1
-      // $match: {products: { $exists: true,$ne: []}} // Solution 2
-      // $match : {$exists: true, $not: {$size: 0}} // Solution 3
+      $match: { products },
+    },
+    // {
+    //   $lookup: {
+    //     from: "orders",
+    //     let: {productId: "$_id"},
+    //     pipeline: [
+    //       {$unwind: "$orderDetails"},
+    //       {$match: {
+    //         $expr: {
+    //           $and: [
+    //             {$eq: ['$orderDetails.productId', '$$productId'] },
+    //             {$eq: ['$status', 'COMPLETED'] },
+
+    //           ]
+    //         }
+    //       }}
+    //     ],
+    //     as: "orders"
+    //   }},
+  ];
+  findDocuments(
+    query,
+    COLLECTION_SUPPLIERS,
+    aggregate,
+    sort,
+    limit,
+    skip,
+    projection
+  )
+    .then((result) => res.status(200).json(result))
+    .catch((err) =>
+      res.status(500).json({ findFunction: "failed :v", err: err })
+    );
+});
+//
+//
+
+// Get suppliers --- task 15
+router.get("/search", function (req, res, next) {
+  let { key, values } = req.query;
+  // change "," into "|" and remove spaces in string values for Regular Expression
+  values = values.replaceAll(",", "|");
+  values = values.replaceAll(" ", "");
+  let query = {};
+  switch (key) {
+    case "name":
+      query = { name: new RegExp(`${values}`, "gi") };
+      break;
+    default:
+  }
+  findDocuments({ query: query }, COLLECTION_SUPPLIERS)
+    .then((result) => {
+      if (result.length === 0) {
+        res.status(404).json({ message: "Not Found" });
+      } else {
+        res.status(200).json(result);
+      }
+    })
+    .catch((err) =>
+      res.status(500).json({ findFunction: "failed :v", err: err })
+    );
+});
+//
+
+// Get suppliers with all products  --- task 19
+router.get("/products", function (req, res) {
+  aggregate = [
+    {
+      $lookup: {
+        from: "products",
+        let: { supplierId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$$supplierId", "$supplierId"] },
+            },
+          },
+        ],
+        as: "products",
+      },
     },
     {
       $addFields: {
-        totalStock: { $sum: "$products.stock" },
+        totalSupply: { $sum: "$products.stock" },
       },
     },
   ];
-  findDocuments({ aggregate: aggregate }, COLLECTION_CATEGORIES)
+  findDocuments({ aggregate: aggregate }, COLLECTION_SUPPLIERS)
     .then((result) => {
       res.json(result);
     })
@@ -403,104 +453,80 @@ router.get("/products", function (req, res) {
       res.status(500).json(error);
     });
 });
-//
 
-// TASK 30
-//Show categories with totalPrice from products have sold in each Category
-router.get("/totalPrice", function (req, res) {
+//Listing suppliers that have product sold
+router.get("/suppliersNotSold", function (req, res) {
+  const { dateFrom, dateTo } = req.query;
+
+  let start = new Date(moment(dateFrom).utc().local().format("YYYY-MM-DD"));
+  let end = new Date(moment(dateTo).utc().local().format("YYYY-MM-DD"));
+
   const aggregate = [
     {
       $lookup: {
         from: "products",
-        let: { categoryId: "$_id" },
+        let: { supplierId: "$_id" },
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ["$$categoryId", "$categoryId"] },
-            },
-          },
-          {
-            $project: {
-              categoryId: 0,
-              description: 0,
-              supplierId: 0,
-              stock: 0,
+              $expr: {
+                $and: [{ $eq: ["$supplierId", "$$supplierId"] }],
+              },
             },
           },
         ],
         as: "products",
       },
     },
-
     {
       $unwind: {
         path: "$products",
         preserveNullAndEmptyArrays: true,
       },
     },
-
     {
       $lookup: {
         from: "orders",
         let: { productId: "$products._id" },
         pipeline: [
-          { $unwind: "$orderDetails" },
+          {
+            $unwind: {
+              path: "$orderDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
           {
             $match: {
               $expr: {
                 $and: [
                   { $eq: ["$$productId", "$orderDetails.productId"] },
                   { $ne: ["$status", "CANCELED"] },
+                  // {$gte: ['$createdDate', start]},
+                  // {$lte: ['$createdDate', end]}
                 ],
               },
             },
           },
-          {
-            $addFields: {
-              totalPriceOfOneOrder: {
-                $sum: {
-                  $multiply: [
-                    "$orderDetails.price",
-                    "$orderDetails.quantity",
-                    {
-                      $divide: [
-                        { $subtract: [100, "$orderDetails.discount"] },
-                        100,
-                      ],
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            $project: {
-              shippingAddress: 0,
-              description: 0,
-              "orderDetails.productId": 0,
-              customerId: 0,
-              employeeId: 0,
-            },
-          },
         ],
-        as: "listOrders",
-      },
-    },
-    {
-      $addFields: {
-        totalPriceOneProduct: { $sum: "$listOrders.totalPriceOfOneOrder" },
+        as: "orders",
       },
     },
     {
       $group: {
         _id: "$_id",
         name: { $first: "$name" },
-        description: { $first: "$description" },
-        totalPriceProducts: { $sum: "$totalPriceOneProduct" },
+        isProduct: { $push: "$products._id" },
+        isOrder: { $push: "$orders._id" },
+      },
+    },
+    {
+      $match: {
+        $or: [{ isProduct: { $eq: [] } }, { isOrder: { $eq: [] } }],
       },
     },
   ];
-  findDocuments({ aggregate: aggregate }, COLLECTION_CATEGORIES)
+
+  findDocuments({ aggregate: aggregate }, COLLECTION_SUPPLIERS)
     .then((result) => {
       res.json(result);
     })
@@ -510,5 +536,4 @@ router.get("/totalPrice", function (req, res) {
 });
 
 //------------------------------------------------------------------------------------------------
-
 module.exports = router;
