@@ -36,6 +36,7 @@ const storage = multer.diskStorage({
     } else if (req.url.indexOf("/employeeImage/") === 0) {
       nameCollection = COLLECTION_EMPLOYEES;
     } else {
+      req.directoryError = "Can not find the name Collection in the Url";
       return cb(new Error("Can not find the name Collection in the Url"), false);
     }
     let lastLocation = FOLDER_INITIATION;

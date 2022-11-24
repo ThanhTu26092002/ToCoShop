@@ -3,6 +3,37 @@
 ### V1##########################################################
 
 
-### upload
-GET {{urlDev}}/v1/upload
+### CATEGORIES
+
+###### get all
+GET {{urlDev}}/v1/categories
+
+###Update the image of one category
+POST {{urlDev}}/v1/categories/categoryImage/:id
+
+### Insert One Category
+POST {{urlDev}}/v1/categories/insertOne
+
+### Update one Category following the id
+PATCH {{urlDev}}/v1/categories/updateOne/:id
+
+### Delete one category with the id
+DELETE {{urlDev}}/v1/categories/deleteOne/:id
+ 
+###########################################################################
+###SUPPLIERS
+GET {{urlDev}}/v1/suppliers
+
+###Update the image of one category
+POST {{urlDev}}/v1/suppliers/categoryImage/:id
+
+### Insert One Category
+POST {{urlDev}}/v1/suppliers/insertOne
+
+### Update one Category following the id
+PATCH {{urlDev}}/v1/suppliers/updateOne/:id
+
+### Delete one category with the id
+DELETE {{urlDev}}/v1/categories/deleteOne/:id
+ 
 

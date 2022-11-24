@@ -62,3 +62,5 @@ error: Nov-24-2022 11:17:52: 	df80e572-8efa-45dd-ae53-8f252c009180----/v1/upload
 error: Nov-24-2022 11:19:53: 	82976539-d569-4adb-9e1a-aa1764f347e5----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
 error: Nov-24-2022 11:20:24: 	df353eb4-eb64-4af7-9245-4700d63ab218----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
 error: Nov-24-2022 11:32:35: 	cfd1c707-d34d-4235-9ca7-3ac452ecdcb5----/v1/categories/categoryImage/632c4b02ec2ad3757f85c06a-----POST-----Only image files are allowed!
+error: Nov-24-2022 15:07:14: 	a812280e-5d80-41c4-87e1-827ef9fd7b41----/v1//categoryImage/dsfsfdsaf-----POST-----Not found!
+error: Nov-24-2022 16:33:06: 	e94f94ea-57ef-4c23-91f3-ca4c552d4271----/v1/suppliers/insertOne-----POST-----Unexpected token , in JSON at position 183

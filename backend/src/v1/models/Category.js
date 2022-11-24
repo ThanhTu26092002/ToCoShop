@@ -7,19 +7,19 @@ const categorySchema = new Schema(
         name: {
             type: String,
             trim: true,
-            maxLength: [50, 'Tên danh mục không quá 50 kí tự!'],
+            unique: true,
+            maxLength: 50,
             lowercase: true,
-            required: [true, 'Tên danh mục không được để trống']
+            required: true
         },
         description: {
             type: String,
             trim: true,
-            maxLength: [500, 'Phần mô tả danh mục không quá 500 kí tự!'],
+            maxLength: 500,
         },
         imageUrl: {
             type: String,
             trim: true,
-            // required: [true, 'Đường dẫn hình ảnh phải là "Null" hoặc một đường dẫn nào đó ']
         }
     },
     {"strict": "throw"} // If the field haven't existed in MongooseSchema, throw error
