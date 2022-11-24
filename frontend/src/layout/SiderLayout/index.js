@@ -4,6 +4,9 @@ import {
   LogoutOutlined,
   SettingOutlined,
   UserOutlined,
+  HomeOutlined,
+  UnorderedListOutlined,
+  PoweroffOutlined
 } from "@ant-design/icons";
 import styles from "./SiderLayout.module.css";
 const { Sider } = Layout;
@@ -33,32 +36,53 @@ function SiderLayout() {
           //     label: `nav ${index + 1}`,
           //   }),
           // )}
+          onClick ={({key}) => {
+            if(key === "signout"){
+              console.log('Sign out')
+            }else{
+              
+            }
+          }}
         >
-          <Menu.Item key="user">
+        <Menu.Item key="/">
             <Space>
-              <UserOutlined />
-              <span>Xin chào: </span>
+              <HomeOutlined />
+              <span>Home</span>
             </Space>
           </Menu.Item>
-          <Menu.Item key="settings">
+          <Menu.Item key="/employees">
             <Space>
-              <SettingOutlined />
-              Cấu hình tài khoản
+              <UserOutlined />
+              <span>Employees</span>
+            </Space>
+          </Menu.Item>
+          <Menu.Item key="/categories">
+            <Space>
+              <UnorderedListOutlined />
+              Categories
             </Space>
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item
-            key="signOut"
-            onClick={() => {
-              // signOut();
-              console.log('Sign out!')
-            }}
+            key="/suppliers"
+            // onClick={() => {
+            //   // signOut();
+            //   console.log('Sign out!')
+            // }}
           >
             <Space>
-              <LogoutOutlined />
-              Thoát
+              <UnorderedListOutlined />
+              Suppliers
             </Space>
           </Menu.Item>
+
+          <Menu.Item key="signout">
+            <Space>
+              <PoweroffOutlined />
+              Sign out
+            </Space>
+          </Menu.Item>
+
         </Menu>
       </Sider>
     </>
