@@ -1,5 +1,10 @@
 const { ObjectID } = require("bson");
-const { COLLECTION_CATEGORIES, COLLECTION_SUPPLIERS, COLLECTION_PRODUCTS, COLLECTION_EMPLOYEES } = require("../configs/constants");
+const {
+  COLLECTION_CATEGORIES,
+  COLLECTION_SUPPLIERS,
+  COLLECTION_PRODUCTS,
+  COLLECTION_EMPLOYEES,
+} = require("../configs/constants");
 const { findDocument } = require("../utils/MongodbHelper");
 
 function validateId(req, res, next) {
@@ -17,6 +22,8 @@ function validateId(req, res, next) {
   next();
 }
 //
+
+
 function loadCategory(req, res, next) {
   const id = req.params.id;
   if (!(id && ObjectID.isValid(id))) {
@@ -66,7 +73,7 @@ function loadSupplier(req, res, next) {
     return;
   }
 
-  findDocument(id,COLLECTION_SUPPLIERS)
+  findDocument(id, COLLECTION_SUPPLIERS)
     .then((result) => {
       //result !== false, is mean, finding a document with the id in the collection
       if (result) {
@@ -102,7 +109,7 @@ function loadProduct(req, res, next) {
     return;
   }
 
-  findDocument(id,COLLECTION_PRODUCTS)
+  findDocument(id, COLLECTION_PRODUCTS)
     .then((result) => {
       //result !== false, is mean, finding a document with the id in the collection
       if (result) {
@@ -138,7 +145,7 @@ function loadEmployee(req, res, next) {
     return;
   }
 
-  findDocument(id,COLLECTION_EMPLOYEES)
+  findDocument(id, COLLECTION_EMPLOYEES)
     .then((result) => {
       //result !== false, is mean, finding a document with the id in the collection
       if (result) {

@@ -1,18 +1,27 @@
 "use strict";
 var express = require("express");
 var router = express.Router();
+const multer = require("multer");
 // const passport = require("passport");
 // const jwt = require("jsonwebtoken");
-const upload = require('../middleware/multerUpload');
-const {uploadFile, uploadMultiFile} = require('../controllers/uploadControllers');
-const Category = require("../models/Category");
-
-const fs = require("fs");
-
+const upload = require("../middleware/multerUpload");
 const {
+  uploadFile,
+  uploadMultiFile,
+} = require("../controllers/uploadControllers");
+const Category = require("../models/Category");
+const fs = require("fs");
+const {
+  FOLDER_INITIATION,
   COLLECTION_CATEGORIES,
+  COLLECTION_PRODUCTS,
+  COLLECTION_SUPPLIERS,
+  COLLECTION_EMPLOYEES,
   COLLECTION_USER,
+  PATH_FOLDER_PUBLIC_UPLOAD,
+  PATH_FOLDER_IMAGES,
 } = require("../configs/constants");
+
 
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { loadCategory, validateId } = require("../validations/commonValidators");
@@ -37,6 +46,53 @@ const {
 //   search_deleteWithId,
 //   search_deleteManyCategoriesSchema,
 // } = require("../../helpers/schemas/schemasCategoriesOnlineShop.yup");
+const path = require("path");
+
+
+// const storage = multer.diskStorage({
+//   filename: function (req, file, cb) {
+//     let extArray = file.mimetype.split("/");
+//     let extension = extArray[extArray.length - 1];
+//     cb(null, file.fieldname + "-" + Date.now() + "." + extension);
+//   },
+//   destination: function (req, file, cb) {
+//     let nameCollection = "";
+//     if (req.url.indexOf("/productImage/") === 0) {
+//       nameCollection = COLLECTION_PRODUCTS;
+//     } else if (req.url.indexOf("/categoryImage/") === 0) {
+//       nameCollection = COLLECTION_CATEGORIES;
+//     } else if (req.url.indexOf("/supplierImage/") === 0) {
+//       nameCollection = COLLECTION_SUPPLIERS;
+//     } else if (req.url.indexOf("/employeeImage/") === 0) {
+//       nameCollection = COLLECTION_EMPLOYEES;
+//     } else {
+//       return cb(new Error("Can not find the name Collection in the Url"), false);
+//     }
+//     let lastLocation = FOLDER_INITIATION;
+//     if (req.params.id) {
+//       lastLocation = req.params.id;
+//     }
+//     let storageUrl = `./public/uploads/images/${nameCollection}/${lastLocation}`;
+//     if (!fs.existsSync(storageUrl)) {
+//       fs.mkdirSync(storageUrl);
+//     }
+//     cb(null, storageUrl);
+//   },
+  
+// });
+
+// const upload = multer({
+//   storage: storage,
+//   fileFilter: function (req, file, cb) {
+//     // Accept images only
+//     if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+//       // req.fileValidationError = "Only image files are allowed!";
+//       return cb(new Error("Only image files are allowed!"));
+//     }
+
+//     cb(null,true);
+//   },
+// });
 
 //
 //CHECK ROLES
@@ -72,34 +128,129 @@ const {
 //   };
 // };
 
-
-
 //Get all docs
 // router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("administrators"), async (req, res, next) => {
-  router.get("/", async (req, res, next) => {
-    try {
-      const docs = await Category.find().sort({ _id: -1 });
-      // const docs = await Category.find();
-      res.json({ ok: true, results: docs });
-    } catch (err) {
-      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_CATEGORIES);
-      res.status(400).json({ ok: false, error: errMsgMongoDB });
-    }
-  });
-//   //
-router.post(
-  '/categoryImage/:id',
-  upload.single("file"),
-  function (req, res) {
-    const categoryId = req.params.id;
-    const newImgUrl = req.file.filename
-    ? `/images/${COLLECTION_CATEGORIES}/${categoryId}/${req.file.filename}`
-    : null;
-    res.status(200).json({ ok: true, newImgUrl, file: req.file });
+router.get("/", async (req, res, next) => {
+  try {
+    const docs = await Category.find().sort({ _id: -1 });
+    // const docs = await Category.find();
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_CATEGORIES);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
-);
+});
 
-// // Just update field: image file
+router.post("/categoryImage/:id",
+//  loadCategory,
+ function(req, res){
+
+  upload.single('file')(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      res.status(500).json({ type: "MulterError", err: err });
+    } else if (err) {
+      res.status(500).json({ type: "UnknownError", err: err });
+    }
+else{
+
+  res.status(200).json({ ok: true, message: 'check ok'});
+}
+
+    })
+  })
+  //   try {
+  //    res.json({
+  //     status: 'okkkkk'
+  //    })
+  //    return;
+  //     // if doesn't exist file in form-data then res... and return
+  //     if (!req.file) {
+  //       res.status(400).json({
+  //         ok: false,
+  //         error: {
+  //           name: "file",
+  //           message: `doesn't have any files in form-data from client`,
+  //         },
+  //       });
+  //       return;
+  //     }
+
+  //     const categoryId = req.params.id;
+  //     const newImgUrl = req.file.filename
+  //       ? `/images/${COLLECTION_CATEGORIES}/${categoryId}/${req.file.filename}`
+  //       : null;
+  //     const currentImgUrl = req.body.currentImgUrl;
+  //     const currentDirPath =
+  //       PATH_FOLDER_PUBLIC_UPLOAD + PATH_FOLDER_IMAGES + currentImgUrl;
+
+  //     const opts = { runValidators: true };
+  //     const updatedDoc =  Category.findByIdAndUpdate(
+  //       categoryId,
+  //       { imageUrl: newImgUrl },
+  //       opts
+  //     );
+  //     //if currentImgUrl =null
+  //     if (!currentImgUrl) {
+  //       res.json({
+  //         ok: true,
+  //         more_detail: "Client have the new image",
+  //         message: "Update imageUrl and other data successfully",
+  //         result: updatedDoc,
+  //       });
+  //       return;
+  //     }
+
+  //     //else, then...
+  //     try {
+  //       if (fs.existsSync(currentDirPath)) {
+  //         //If existing, removing the former uploaded image from DiskStorage
+  //         try {
+  //           //delete file image Synchronously
+  //           fs.unlinkSync(currentDirPath);
+  //           res.json({
+  //             ok: true,
+  //             message: "Update imageUrl and other data successfully",
+  //             result: updatedDoc,
+  //           });
+  //         } catch (errRmvFile) {
+  //           res.json({
+  //             ok: true,
+  //             warning: "The old uploaded file cannot delete",
+  //             message: "Update imageUrl and other data successfully",
+  //             result: updatedDoc,
+  //           });
+  //         }
+  //       } else {
+  //         res.json({
+  //           ok: true,
+  //           warning: "Not existing the old uploaded image in DiskStorage",
+  //           message: "Update imageUrl and other data successfully",
+  //           result: updatedDoc,
+  //         });
+  //       }
+  //     } catch (errCheckFile) {
+  //       res.json({
+  //         ok: true,
+  //         warning:
+  //           "Check the former uploaded image existing unsuccessfully, can not delete it",
+  //         message: "Update imageUrl and other data successfully.",
+  //         errCheckFile,
+  //         result: updatedDoc,
+  //       });
+  //     }
+  // } catch (errMongoDB) {
+  //   console.log("having error");
+  //   res.status(400).json({
+  //     status: false,
+  //     message: "Failed in upload file",
+  //   });
+//   }
+
+
+//   })
+// })
+
+
 // router.patch("/updateOnlyImage/:id", loadCategory, (req, res) => {
 //   // Func loadCategory validate id; check existing the document with id in the collection
 //   uploadImg(req, res, async function (err) {
@@ -639,7 +790,6 @@ router.post(
 //   }
 // });
 // //
-
 
 // //FUNCTION NOT STILL USE----------------------------------------------------------------------------------------------------------------------------------
 

@@ -10,14 +10,16 @@ const {
   COLLECTION_EMPLOYEES,
 } = require("../configs/constants");
 
-// const imageFilter = function (req, file, cb) {
-//   // Accept images only
-//   if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-//     // req.fileValidationError = "Only image files are allowed!";
-//     return cb(new Error("Only image files are allowed!"));
-//   }
-//   cb(tmp, tmp===null? true: false);
-// };
+const imageFilter = function (req, file, cb) {
+  let tmp = null
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+    // req.fileValidationError = "Only image files are allowed!";
+    // return cb(new Error("Only image files are allowed!"));
+    tmp=new Error("Only image files are allowed!");
+  }
+  cb(tmp, tmp===null? true: false);
+};
 
 const storage = multer.diskStorage({
   filename: function (req, file, cb) {
@@ -53,14 +55,7 @@ const storage = multer.diskStorage({
 
 const uploadFile = multer({
   storage: storage,
-  fileFilter: function (req, file, cb) {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-      req.fileValidationError = "Only image files are allowed!";
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null,true);
-  },
+  fileFilter: imageFilter,
 });
 
 module.exports = uploadFile;
