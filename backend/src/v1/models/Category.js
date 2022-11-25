@@ -24,25 +24,7 @@ const categorySchema = new Schema(
     },
     {"strict": "throw"} // If the field haven't existed in MongooseSchema, throw error
     // {
-    //     //QUERY
-    //     query: {
-    //         byName(name){
-    //             return this.where({ name: new RegExp(name, 'i')});
-    //         },
-    //     },
-    //     //VIRTUALS
-    //     virtuals: {
-    //         total: {
-    //             get(){
-    //                 return (this.price * (100 - this.discount)) / 100;
-    //             },
-    //         },
-    //     },
-    // },
 );
-//Include virtuals
-// productSchema.set('toObject', { virtuals: true});
-// productSchema.set('toJSON', {virtuals: true});
 
 //validateBeforeSave
 categorySchema.set('validateBeforeSave', true);

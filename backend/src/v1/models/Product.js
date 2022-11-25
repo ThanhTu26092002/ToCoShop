@@ -14,8 +14,8 @@ const productSchema = new Schema(
         price: Number,
         discount: Number,
         stock: Number,
-        categoryId: { type: Schema.Types.ObjectId},
-        supplierId: { type: Schema.Types.ObjectId},
+        categoryId: { type: Schema.Types.ObjectId, ref: 'Category'},
+        supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier'},
         description: {
             type: String,
             trim : true,

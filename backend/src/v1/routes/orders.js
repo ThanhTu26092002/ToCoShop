@@ -1,31 +1,50 @@
 var express = require("express");
 const Order = require("../models/Order");
 var moment = require("moment");
-const { ObjectId } = require("mongodb");
 var router = express.Router();
+const { formatterErrorFunc } = require("../utils/formatterError");
+const { validateId } = require("../validations/commonValidators");
 const {
   insertDocument,
   insertDocuments,
   updateDocument,
   updateDocuments,
-  findOne,
+  findDocument,
   findDocuments,
   deleteMany,
   deleteOneWithId,
 } = require("../utils/MongodbHelper");
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
-
+const {LookupTransportation} = require('../configs/lookups')
 //Get all orders
-router.get("/", async (req, res, next) => {
-  try {
-    const orders = await Order.find();
-    res.json(orders);
-  } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
-  }
-});
+// router.get("/", async (req, res, next) => {
+//   try {
+//     const orders = await Order.find();
+//     res.json(orders);
+//   } catch (err) {
+//     res.status(400).json({ error: { name: err.name, message: err.message } });
+//   }
+// });
 //
+router.get("/", async (req, res, next) => {
+  
+  const aggregate = [
+   LookupTransportation,
+    {
+      $addFields: { transportation: { $first: '$transportation' } },
+    },
+  ];
+
+  
+  findDocuments({ aggregate: aggregate }, COLLECTION_ORDERS)
+    .then((results) => {
+      res.json({ ok: true, results });
+    })
+    .catch((error) => {
+      res.status(500).json(error);
+    });
+});
 
 router.get("/search/:id", async (req, res, next) => {
   try {
@@ -41,32 +60,36 @@ router.get("/search/:id", async (req, res, next) => {
 
 // Insert One
 // router.post('/insert', validateSchema(addSchema), function (req, res, next){
-  router.post("/insert", async (req, res, next) => {
-    try {
-      let data = req.body;
-      //format date: YYYY-MM-DD => type of Date: string
+router.post("/insertOne", async (req, res, next) => {
+  try {
+    let data = req.body;
+    //format date: YYYY-MM-DD => type of Date: string
+    if (data.shippedDate) {
       data.shippedDate = moment(data.shippedDate)
         .utc()
         .local()
         .format("YYYY-MM-DD");
-      let createdDate = moment(new Date()).utc().local().format("YYYY-MM-DD");
-      //convert type of date from String to Date
       data.shippedDate = new Date(data.shippedDate);
-      createdDate = new Date(createdDate);
-  
-      data = { createdDate, ...data };
-      //Create a new blog post object
-      const order = new Order(data);
-      //Insert the product in our MongoDB database
-      await order.save();
-      res.status(201).json(order);
-    } catch (err) {
-      const errMsg = formatterErrorFunc(err);
-      res.status(400).json({ error: errMsg });
     }
-  });
-  
-  //
+    let createdDate = moment(new Date()).utc().local().format("YYYY-MM-DD");
+    if (data.createdDate) {
+      createdDate = moment(data.createdDate).utc().local().format("YYYY-MM-DD");
+    }
+    createdDate = new Date(createdDate);
+
+    data = { createdDate, ...data };
+    //Create a new blog post object
+    const order = new Order(data);
+    //Insert the product in our MongoDB database
+    await order.save();
+    res.status(201).json(order);
+  } catch (err) {
+    const errMsg = formatterErrorFunc(err);
+    res.status(400).json({ error: errMsg });
+  }
+});
+
+//
 // router.get(
 //   "/search-many",
 //   validateSchema(search_deleteManyOrdersSchema),
@@ -80,7 +103,6 @@ router.get("/search/:id", async (req, res, next) => {
 //   }
 // );
 // //
-
 
 // //Insert Many  -- haven't validation yet
 // router.post(
@@ -399,12 +421,10 @@ router.get("/search", function (req, res, next) {
       ];
       break;
     default:
-      res
-        .status(500)
-        .json({
-          findFunction: "failed :v",
-          err: "Sorry! Something wrong! Please recheck your query",
-        });
+      res.status(500).json({
+        findFunction: "failed :v",
+        err: "Sorry! Something wrong! Please recheck your query",
+      });
       return;
   }
   findDocuments(

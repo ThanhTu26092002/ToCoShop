@@ -1,12 +1,7 @@
 "use strict";
 var express = require("express");
 var router = express.Router();
-
 const Login = require("../models/Login");
-
-const multer = require("multer");
-const fs = require("fs");
-
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { validateId } = require("../validations/commonValidators");
 const { COLLECTION_LOGINS } = require("../configs/constants");
