@@ -29,39 +29,17 @@ const userSchema = new Schema(
                 validate: [v => Array.isArray(v) && v.length > 0, 'Bạn chưa nhập quyền cho người dùng'],
 
         },
-        
-        
-        // [
-        //     {type: String,
-        //         trim: true,
-        //         enum: ['administrators', 'managers',],
-        //         default: 'managers',
-        //     },
-        // ],
-        // required: [true, 'Quyen truy cap không được để trống']
+        status: {
+            type: String,
+            trim: true,
+            enum: ["ACTIVE", "INACTIVE"],
+            default: "ACTIVE",
+            required: true,
+          },
     },
     {"strict": "throw"} // If the field haven't existed in MongooseSchema, throw error
 
-    // {
-    //     //QUERY
-    //     query: {
-    //         byName(name){
-    //             return this.where({ name: new RegExp(name, 'i')});
-    //         },
-    //     },
-    //     //VIRTUALS
-    //     virtuals: {
-    //         total: {
-    //             get(){
-    //                 return (this.price * (100 - this.discount)) / 100;
-    //             },
-    //         },
-    //     },
-    // },
 );
-//Include virtuals
-// productSchema.set('toObject', { virtuals: true});
-// productSchema.set('toJSON', {virtuals: true});
 
 //validateBeforeSave
 userSchema.set('validateBeforeSave', true);
