@@ -22,7 +22,7 @@ const transportationSchema = new Schema(
             maxLength: 50,
             required: true,
           },
-          CompanyPhoneNumber: {
+          companyPhoneNumber: {
             type: String,
             trim: true,
             match: [
