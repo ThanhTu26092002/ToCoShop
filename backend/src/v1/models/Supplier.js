@@ -23,6 +23,7 @@ const supplierSchema = new Schema(
         phoneNumber: {
             type: String,
             trim: true,
+            unique: true,
             match: [/\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/, 'Vui lòng nhập đúng định dạng số điện thoại']
         },
         address: {
