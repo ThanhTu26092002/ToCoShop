@@ -7,7 +7,8 @@ const COLLECTION_SUPPLIERS = "suppliers";
 const COLLECTION_PRODUCTS = 'products';
 const COLLECTION_EMPLOYEES = 'employees';
 const COLLECTION_ORDERS = 'orders';
-const COLLECTION_USER = "users";
+const COLLECTION_LOGINS = "logins";
+const COLLECTION_TRANSPORTATIONS = "transportations";
 
 module.exports = {
   URL_DATA_SERVER,
@@ -19,5 +20,6 @@ module.exports = {
   COLLECTION_PRODUCTS,
   COLLECTION_EMPLOYEES,
   COLLECTION_ORDERS,
-  COLLECTION_USER,
+  COLLECTION_LOGINS,
+  COLLECTION_TRANSPORTATIONS
 };
