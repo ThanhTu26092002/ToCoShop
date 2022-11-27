@@ -27,24 +27,64 @@ const {LookupTransportation} = require('../configs/lookups')
 //   }
 // });
 //
+
+//Get all orders
 router.get("/", async (req, res, next) => {
+  try {
+    const orders = await Order.aggregate([
+      {
+              $lookup: {
+                from: "transportations", // foreign collection name
+                localField: "shippingInfo.transportationId",
+                foreignField: "_id",
+                as: "transportation", // alias
+              },
+            },
+        
+            {
+              $addFields: { "shippingInfo.transportation": { $first: '$transportation' } },
+            },
+            { $project: { "shippingInfo.transportationId": 0,
+            "shippingInfo.transportation.companyName": 0,
+            "shippingInfo.transportation.companyEmail": 0,
+            "shippingInfo.transportation.companyPhoneNumber": 0,
+            "shippingInfo.transportation.note": 0,
+          } }
+    ]);
+    res.json(orders);
+  } catch (err) {
+    res.status(400).json({ error: { name: err.name, message: err.message } });
+  }
+});
+
+
+// router.get("/",  (req, res, next) => {
   
-  const aggregate = [
-   LookupTransportation,
-    {
-      $addFields: { transportation: { $first: '$transportation' } },
-    },
-  ];
+//   // const aggregate = [
+//   //   {
+//   //     $lookup: {
+//   //       from: "transportations", // foreign collection name
+//   //       localField: "shippingInfo.transportationId",
+//   //       foreignField: "_id",
+//   //       as: "transportation", // alias
+//   //     },
+//   //   },
+
+//   //   {
+//   //     $addFields: { transportation: { $first: '$transportation' } },
+//   //   },
+//   // ];
 
   
-  findDocuments({ aggregate: aggregate }, COLLECTION_ORDERS)
-    .then((results) => {
-      res.json({ ok: true, results });
-    })
-    .catch((error) => {
-      res.status(500).json(error);
-    });
-});
+//   // findDocuments({ aggregate: aggregate }, COLLECTION_ORDERS)
+//   findDocuments({query: {}  }, COLLECTION_ORDERS)
+//     .then((results) => {
+//       res.json({ ok: true, results });
+//     })
+//     .catch((error) => {
+//       res.status(500).json(error);
+//     });
+// });
 
 router.get("/search/:id", async (req, res, next) => {
   try {
@@ -215,7 +255,7 @@ router.delete("/delete-id/:id", async (req, res, next) => {
 // );
 
 // TASK 23----Get all products with totalPrice
-// TASK 31----with totalPrice,Get all products that have shipped successfull- status:completed ; from date1 to date2
+// TASK 31----with totalPrice,Get all products that have shipped successfully- status:completed ; from date1 to date2
 router.get("/totalPrice", function (req, res, next) {
   const { status, dateFrom, dateTo } = req.query;
   //convert date from string to date with the LocalZone of VietNam with format YYYY-MM-DD HH:MM:SS
