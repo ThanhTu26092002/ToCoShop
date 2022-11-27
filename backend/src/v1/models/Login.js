@@ -4,18 +4,7 @@ const { Schema, model } = mongoose;
 const roleSchema = new Schema();
 const loginSchema = new Schema(
   {
-    email: {
-      type: String,
-      trim: true,
-      index: { unique: true },
-      lowercase: true,
-      maxLength: [50, "Email không vượt quá 50 kí tự"],
-      required: [true, "Email không được để trống"],
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Vui lòng nhập đúng định dạng email",
-      ],
-    },
+    categoryId: { type: String, ref: 'Employee'},
     password: {
       type: String,
       trim: true,

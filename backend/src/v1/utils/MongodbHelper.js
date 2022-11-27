@@ -1,11 +1,13 @@
 "use strict";
+require('dotenv').config();
 // Declaration a library MongoClient
-// writing follwing desctructuring <=> const MongoClient = require('mongodb).MongoClient
-// ObjectID involving in working with autonumber
+// writing following destructuring <=> const MongoClient = require('mongodb).MongoClient
+// ObjectID involving in working with autoNumber
 const { MongoClient, ObjectId } = require("mongodb");
 // connecting string to MongoDB
-const DATABASE_NAME = "online-shop";
-const CONNECTION_STRING = "mongodb://127.0.0.1:27017/" + DATABASE_NAME;
+const DATABASE_NAME = process.env.DATABASE_NAME
+// const CONNECTION_STRING = "mongodb://127.0.0.1:27017/" + DATABASE_NAME;
+const CONNECTION_STRING = process.env.MONGO_URL;
 
 //Get imageUrl from collection with id
 function findDocument(id, collectionName, aggregate = []) {
@@ -50,6 +52,8 @@ function findDocuments(
       useUnifiedTopology: true,
     })
       .then((client) => {
+  console.log('test apiss')
+
         const dbo = client.db(DATABASE_NAME);
         const collection = dbo.collection(collectionName);
         let cursor = collection;
@@ -193,7 +197,7 @@ function updateDocument(id, data, collectionName) {
 }
 //
 
-//UPDATE MANNY
+//UPDATE MANY
 function updateDocuments(query, data, collectionName) {
   return new Promise((resolve, reject) => {
     MongoClient.connect(CONNECTION_STRING, {
