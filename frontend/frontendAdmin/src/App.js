@@ -26,15 +26,6 @@ const { Content, Sider } = Layout;
 function App() {
   const navigate = useNavigate();
   const { signOut, auth } = useAuth((state) => state);
-  const itemsBeforeLogin = [
-    {
-      label: "Login",
-      key: "/login",
-      icon: <LoginOutlined />,
-      content: <Login />,
-    },
-  ];
-
   const itemsAfterLogin = [
     {
       label: "Home",
@@ -88,38 +79,40 @@ function App() {
   return (
     <ConfigProvider>
       <Layout>
-       { auth && <Sider
-          breakpoint="lg"
-          collapsedWidth="0"
-          onBreakpoint={(broken) => {
-            // console.log(broken);
-          }}
-          onCollapse={(collapsed, type) => {
-            // console.log(collapsed, type);
-          }}
-        >
-          <div className="logo">
-            <img
-              src="./images/logo_toCoShop.png"
-              alt="logo"
-              style={{ height: 32, width: "100%" }}
-            />
-          </div>
-          <Menu
-            theme="dark"
-            mode="inline"
-            defaultSelectedKeys={["/home"]}  
-            items={ itemsAfterLogin}
-            onClick={({ key }) => {
-              if (key === "signOut") {
-                signOut();
-                navigate("/login");
-              } else {
-                navigate(key);
-              }
+        {auth && (
+          <Sider
+            breakpoint="lg"
+            collapsedWidth="0"
+            onBreakpoint={(broken) => {
+              // console.log(broken);
             }}
-          ></Menu>
-        </Sider>}
+            onCollapse={(collapsed, type) => {
+              // console.log(collapsed, type);
+            }}
+          >
+            <div className="logo">
+              <img
+                src="./images/logo_toCoShop.png"
+                alt="logo"
+                style={{ height: 32, width: "100%" }}
+              />
+            </div>
+            <Menu
+              theme="dark"
+              mode="inline"
+              defaultSelectedKeys={["/home"]}
+              items={itemsAfterLogin}
+              onClick={({ key }) => {
+                if (key === "signOut") {
+                  signOut();
+                  navigate("/login");
+                } else {
+                  navigate(key);
+                }
+              }}
+            ></Menu>
+          </Sider>
+        )}
         <Layout>
           <HeaderLayout />
           <Content
@@ -143,7 +136,9 @@ function App() {
                   return (
                     <Route
                       path={i.key}
-                      element={auth ? i.content :  <Navigate to="/login" replace /> }
+                      element={
+                        auth ? i.content : <Navigate to="/login" replace />
+                      }
                     ></Route>
                   );
                 })}
