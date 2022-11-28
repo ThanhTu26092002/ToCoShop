@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 const roleSchema = new Schema();
 const loginSchema = new Schema(
   {
-    categoryId: { type: String, ref: 'Employee'},
+    email: { type: String, ref: 'Employee', require: true},
     password: {
       type: String,
       trim: true,

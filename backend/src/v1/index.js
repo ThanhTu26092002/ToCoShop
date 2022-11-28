@@ -1,7 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 //Add routers
-routes.use('/logins',require('./routes/login'));
+routes.use('/login',require('./routes/login'));
 routes.use('/transportations',require('./routes/transportations'));
 routes.use('/categories',require('./routes/categories'));
 routes.use('/suppliers',require('./routes/suppliers'));

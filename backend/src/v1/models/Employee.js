@@ -8,13 +8,13 @@ const employeeSchema = new Schema(
             type: String,
             trim: true,
             maxLength: 50,
-            required: true
+            // required: true
         },
         lastName: {
             type: String,
             trim: true,
             maxLength: 50,
-            required: true
+            // required: true
         },
         phoneNumber: {
             type: String,
@@ -25,7 +25,7 @@ const employeeSchema = new Schema(
             type: String,
             trim: true,
             maxLength: 500,
-            required: true
+            // required: true
         },
         email: {
             type: String,
