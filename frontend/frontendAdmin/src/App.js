@@ -1,115 +1,125 @@
 import React from "react";
 import "./App.css";
-import { ConfigProvider, Layout, Menu, Space } from "antd";
+import { ConfigProvider, Layout, Menu } from "antd";
 import {
   LoginOutlined,
   LogoutOutlined,
   UserOutlined,
   HomeOutlined,
+  UsergroupAddOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import FooterLayout from "./layout/FooterLayout";
 import HeaderLayout from "./layout/HeaderLayout";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
+import MyProfile from "./pages/MyProfile";
 import Login from "./pages/Login";
 import Employees from "./pages/Employees";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
+import useAuth from "./hooks/useAuth";
 const { Content, Sider } = Layout;
+
 function App() {
   const navigate = useNavigate();
+  const { signOut, auth } = useAuth((state) => state);
+  const itemsBeforeLogin = [
+    {
+      label: "Login",
+      key: "/login",
+      icon: <LoginOutlined />,
+      content: <Login />,
+    },
+  ];
+
+  const itemsAfterLogin = [
+    {
+      label: "Home",
+      key: "/home",
+      icon: <HomeOutlined />,
+      content: <Home />,
+    },
+    {
+      label: "Thông tin cá nhân",
+      key: "/my_profile",
+      icon: <UserOutlined />,
+      content: <MyProfile />,
+    },
+    {
+      label: "Nhân viên",
+      key: "/employees",
+      icon: <UsergroupAddOutlined />,
+      content: <Employees />,
+    },
+    {
+      label: "Danh mục sản phẩm",
+      key: "/categories",
+      icon: <UnorderedListOutlined />,
+      content: <Categories />,
+    },
+    {
+      label: "Nhà phân phối",
+      key: "/suppliers",
+      icon: <UnorderedListOutlined />,
+      content: <Suppliers />,
+    },
+    {
+      label: "Sản phẩm",
+      key: "/products",
+      icon: <UnorderedListOutlined />,
+      content: <Products />,
+    },
+    {
+      label: "Đơn hàng",
+      key: "/orders",
+      icon: <UnorderedListOutlined />,
+      content: <Orders />,
+    },
+    {
+      label: "Đăng xuất",
+      key: "signOut",
+      // onClick: ()=> signOut(),
+      icon: <LogoutOutlined />,
+    },
+  ];
   return (
     <ConfigProvider>
       <Layout>
-        <Sider
+       { auth && <Sider
           breakpoint="lg"
           collapsedWidth="0"
           onBreakpoint={(broken) => {
-            console.log(broken);
+            // console.log(broken);
           }}
           onCollapse={(collapsed, type) => {
-            console.log(collapsed, type);
+            // console.log(collapsed, type);
           }}
         >
-          <div className="logo" />
+          <div className="logo">
+            <img
+              src="./images/logo_toCoShop.png"
+              alt="logo"
+              style={{ height: 32, width: "100%" }}
+            />
+          </div>
           <Menu
             theme="dark"
             mode="inline"
-            defaultSelectedKeys={["4"]}
+            defaultSelectedKeys={["/home"]}  
+            items={ itemsAfterLogin}
             onClick={({ key }) => {
-              if (key === "signout") {
-                console.log("Sign out");
+              if (key === "signOut") {
+                signOut();
+                navigate("/login");
               } else {
-                navigate(key)
+                navigate(key);
               }
             }}
-          >
-            <Menu.Item key="/">
-              <Space>
-                <HomeOutlined />
-                <span>Home</span>
-              </Space>
-            </Menu.Item>
-            
-            <Menu.Item key="/login">
-              <Space>
-                <LoginOutlined />
-                <span>Login</span>
-              </Space>
-            </Menu.Item>
-
-            <Menu.Item key="/employees">
-              <Space>
-                <UserOutlined />
-                <span>Employees</span>
-              </Space>
-            </Menu.Item>
-
-            <Menu.Item key="/categories">
-              <Space>
-                <UnorderedListOutlined />
-                Categories
-              </Space>
-            </Menu.Item>
-            <Menu.Divider />
-            <Menu.Item
-              key="/suppliers"
-            >
-              <Space>
-                <UnorderedListOutlined />
-                Suppliers
-              </Space>
-            </Menu.Item>
-
-            <Menu.Item
-              key="/products"
-            >
-              <Space>
-                <UnorderedListOutlined />
-                Products
-              </Space>
-            </Menu.Item>
-
-            <Menu.Item
-              key="/orders"
-            >
-              <Space>
-                <UnorderedListOutlined />
-                Orders
-              </Space>
-            </Menu.Item>
-
-            <Menu.Item key="signout">
-              <Space>
-                <LogoutOutlined />
-                Sign out
-              </Space>
-            </Menu.Item>
-          </Menu>
-        </Sider>
+          ></Menu>
+        </Sider>}
         <Layout>
           <HeaderLayout />
           <Content
@@ -125,13 +135,28 @@ function App() {
               }}
             >
               <Routes>
-                <Route path="/" element={<Home />}></Route>
-                <Route path="/login" element={<Login />}></Route>
-                <Route path="/employees" element={<Employees />}></Route>
-                <Route path="/categories" element={<Categories />}></Route>
-                <Route path="/suppliers" element={<Suppliers />}></Route>
-                <Route path="/products" element={<Products />}></Route>
-                <Route path="/orders" element={<Orders />}></Route>
+                <Route
+                  path="/login"
+                  element={auth ? <Navigate to="/home" replace /> : <Login />}
+                ></Route>
+                {itemsAfterLogin.map((i, index) => {
+                  return (
+                    <Route
+                      path={i.key}
+                      element={auth ? i.content :  <Navigate to="/login" replace /> }
+                    ></Route>
+                  );
+                })}
+                {/* NO MATCH ROUTE */}
+                <Route
+                  path="*"
+                  element={<Navigate to="/home" replace />}
+                  // element={
+                  //   <main style={{ padding: "1rem" }}>
+                  //     <p>404 Page not found 😂😂😂</p>
+                  //   </main>
+                  // }
+                />
               </Routes>
             </div>
           </Content>

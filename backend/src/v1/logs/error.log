@@ -66,3 +66,4 @@ error: Nov-24-2022 15:07:14: 	a812280e-5d80-41c4-87e1-827ef9fd7b41----/v1//categ
 error: Nov-24-2022 16:33:06: 	e94f94ea-57ef-4c23-91f3-ca4c552d4271----/v1/suppliers/insertOne-----POST-----Unexpected token , in JSON at position 183
 error: Nov-25-2022 11:27:09: 	Database connection failed: MongoServerError: bad auth : Authentication failed.
 error: Nov-25-2022 22:10:40: 	c83037ff-4759-47ce-a572-710364084ea2----/ordersOnlineShopMongoose/insert-----POST-----Not found!
+error: Nov-28-2022 08:28:52: 	2da6f454-2a75-40ad-80cf-b5bf2ff1c20c----/v1/login-----GET-----Not found!
