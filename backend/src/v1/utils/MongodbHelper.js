@@ -6,8 +6,9 @@ require('dotenv').config();
 const { MongoClient, ObjectId } = require("mongodb");
 // connecting string to MongoDB
 const DATABASE_NAME = process.env.DATABASE_NAME
-// const CONNECTION_STRING = "mongodb://127.0.0.1:27017/" + DATABASE_NAME;
 const CONNECTION_STRING = process.env.MONGO_URL;
+// const DATABASE_NAME = "online-shop";
+// const CONNECTION_STRING = "mongodb://127.0.0.1:27017/" + DATABASE_NAME;
 
 //Get imageUrl from collection with id
 function findDocument(id, collectionName, aggregate = []) {

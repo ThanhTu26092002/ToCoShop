@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { ConfigProvider, Layout, Menu } from "antd";
 import {
   LogoutOutlined,
@@ -143,7 +143,7 @@ function ToCoShopV1() {
                   );
                 })}
                 {/* NO MATCH ROUTE */}
-                <Route
+                {/* <Route
                   path="*"
                   element={<Navigate to="/home" replace />}
                   // element={
@@ -151,7 +151,7 @@ function ToCoShopV1() {
                   //     <p>404 Page not found 😂😂😂</p>
                   //   </main>
                   // }
-                />
+                /> */}
               </Routes>
             </div>
           </Content>

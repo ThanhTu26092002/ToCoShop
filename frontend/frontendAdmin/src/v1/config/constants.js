@@ -5,14 +5,13 @@ const URLOrder = 'http://localhost:9000/v1/orders';
 const URLCustomer = 'http://localhost:9000/v1/customers';
 const URLEmployee = 'http://localhost:9000/v1/employees';
 const URLLogin = 'http://localhost:9000/v1/auth'
-const WEB_SERVER_URL = 'http://localhost:9000'
+const WEB_SERVER_UPLOAD_URL = 'http://localhost:9000/uploads'
 const PATH_CATEGORIES = '/categories'
-
 
 module.exports= {
     URLCategory, URLSupplier, URLCustomer,
     URLEmployee, URLOrder, URLProduct,
     URLLogin,
-    WEB_SERVER_URL,
+    WEB_SERVER_UPLOAD_URL,
     PATH_CATEGORIES,
 }
