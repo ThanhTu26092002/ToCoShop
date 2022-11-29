@@ -3,37 +3,38 @@
 ### V1##########################################################
 
 
-### CATEGORIES
+### CATEGORIES#######
 
 ###### get all
-GET {{urlDev}}/v1/categories
+# GET {{urlDev}}/v1/categories
+GET http://localhost:9000/v1/categories
 
 ###Update the image of one category
-POST {{urlDev}}/v1/categories/categoryImage/:id
+POST http://localhost:9000/v1/categories/categoryImage/:id
 
 ### Insert One Category
-POST {{urlDev}}/v1/categories/insertOne
+POST http://localhost:9000/v1/categories/insertOne
 
 ### Update one Category following the id
-PATCH {{urlDev}}/v1/categories/updateOne/:id
+PATCH http://localhost:9000/v1/categories/updateOne/:id
 
 ### Delete one category with the id
-DELETE {{urlDev}}/v1/categories/deleteOne/:id
+DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
 ###########################################################################
 ###SUPPLIERS
-GET {{urlDev}}/v1/suppliers
+GET http://localhost:9000/v1/suppliers
 
 ###Update the image of one category
-POST {{urlDev}}/v1/suppliers/categoryImage/:id
+POST http://localhost:9000/v1/suppliers/categoryImage/:id
 
 ### Insert One Category
-POST {{urlDev}}/v1/suppliers/insertOne
+POST http://localhost:9000/v1/suppliers/insertOne
 
 ### Update one Category following the id
-PATCH {{urlDev}}/v1/suppliers/updateOne/:id
+PATCH http://localhost:9000/v1/suppliers/updateOne/:id
 
 ### Delete one category with the id
-DELETE {{urlDev}}/v1/categories/deleteOne/:id
+DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
 

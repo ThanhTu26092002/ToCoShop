@@ -68,6 +68,7 @@ router.get("/", async (req, res, next) => {
 });
 //
 
+
 // Update categoryImage
 router.post("/categoryImage/:id", loadCategory, function (req, res) {
   upload.single("file")(req, res, async function (err) {
@@ -105,7 +106,7 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
           ? req.body.currentImgUrl
           : null;
         const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
-
+console.log('test speed update')
         const opts = { runValidators: true };
         const updatedDoc = await Category.findByIdAndUpdate(
           categoryId,
