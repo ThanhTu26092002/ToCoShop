@@ -35,6 +35,18 @@ router.get("/", async (req, res, next) => {
     {
       $addFields: {
         "orderDetails.productName": { $first: "$product.name" },
+        "orderDetails.finalPrice": {
+          $divide: [
+            {
+              $multiply: [
+                "$orderDetails.price",
+                "$orderDetails.quantity",
+                { $subtract: [100, "$orderDetails.discount"] },
+              ],
+            },
+            100,
+          ],
+        },
       },
     },
     {
@@ -46,6 +58,7 @@ router.get("/", async (req, res, next) => {
         shippingInfo: { $first: "$shippingInfo" },
         paymentInfo: { $first: "$paymentInfo" },
         orderDetails: { $push: "$orderDetails" },
+        totalPrice: { $sum: "$orderDetails.finalPrice" },
         handlers: { $first: "$handlers" },
       },
     },
@@ -65,6 +78,7 @@ router.get("/", async (req, res, next) => {
     {
       $project: {
         transportation: 0,
+        "orderDetails.finalPrice": 0,
       },
     },
   ];
