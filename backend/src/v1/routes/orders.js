@@ -16,75 +16,80 @@ const {
 } = require("../utils/MongodbHelper");
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
-const {LookupTransportation} = require('../configs/lookups')
-//Get all orders
-// router.get("/", async (req, res, next) => {
-//   try {
-//     const orders = await Order.find();
-//     res.json(orders);
-//   } catch (err) {
-//     res.status(400).json({ error: { name: err.name, message: err.message } });
-//   }
-// });
-//
+const { LookupTransportation } = require("../configs/lookups");
 
 //Get all orders
 router.get("/", async (req, res, next) => {
-  try {
-    const orders = await Order.aggregate([
-      {
-              $lookup: {
-                from: "transportations", // foreign collection name
-                localField: "shippingInfo.transportationId",
-                foreignField: "_id",
-                as: "transportation", // alias
-              },
-            },
-        
+  const aggregate = [
+    {
+      $unwind: "$orderDetails",
+    },
+    {
+      $lookup: {
+        from: "products", // foreign collection name
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "product", // alias
+      },
+    },
+    {
+      $addFields: {
+        "orderDetails.productName": { $first: "$product.name" },
+        "orderDetails.finalPrice": {
+          $divide: [
             {
-              $addFields: { "shippingInfo.transportation": { $first: '$transportation' } },
+              $multiply: [
+                "$orderDetails.price",
+                "$orderDetails.quantity",
+                { $subtract: [100, "$orderDetails.discount"] },
+              ],
             },
-            { $project: { "shippingInfo.transportationId": 0,
-            "shippingInfo.transportation.companyName": 0,
-            "shippingInfo.transportation.companyEmail": 0,
-            "shippingInfo.transportation.companyPhoneNumber": 0,
-            "shippingInfo.transportation.note": 0,
-          } }
-    ]);
+            100,
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        createdDate: { $first: "$createdDate" },
+        status: { $first: "$status" },
+        contactInfo: { $first: "$contactInfo" },
+        shippingInfo: { $first: "$shippingInfo" },
+        paymentInfo: { $first: "$paymentInfo" },
+        orderDetails: { $push: "$orderDetails" },
+        totalPrice: { $sum: "$orderDetails.finalPrice" },
+        handlers: { $first: "$handlers" },
+      },
+    },
+    {
+      $lookup: {
+        from: "transportations", // foreign collection name
+        localField: "shippingInfo.transportationId",
+        foreignField: "_id",
+        as: "transportation", // alias
+      },
+    },
+    {
+      $addFields: {
+        "shippingInfo.transportationName": { $first: "$transportation.name" },
+      },
+    },
+    {
+      $project: {
+        transportation: 0,
+        "orderDetails.finalPrice": 0,
+      },
+    },
+  ];
+
+  try {
+    const orders = await Order.aggregate(aggregate);
     res.json(orders);
   } catch (err) {
     res.status(400).json({ error: { name: err.name, message: err.message } });
   }
 });
-
-
-// router.get("/",  (req, res, next) => {
-  
-//   // const aggregate = [
-//   //   {
-//   //     $lookup: {
-//   //       from: "transportations", // foreign collection name
-//   //       localField: "shippingInfo.transportationId",
-//   //       foreignField: "_id",
-//   //       as: "transportation", // alias
-//   //     },
-//   //   },
-
-//   //   {
-//   //     $addFields: { transportation: { $first: '$transportation' } },
-//   //   },
-//   // ];
-
-  
-//   // findDocuments({ aggregate: aggregate }, COLLECTION_ORDERS)
-//   findDocuments({query: {}  }, COLLECTION_ORDERS)
-//     .then((results) => {
-//       res.json({ ok: true, results });
-//     })
-//     .catch((error) => {
-//       res.status(500).json(error);
-//     });
-// });
 
 router.get("/search/:id", async (req, res, next) => {
   try {
