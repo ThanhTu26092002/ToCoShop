@@ -8,10 +8,13 @@ const URLLogin = 'http://localhost:9000/v1/auth'
 const WEB_SERVER_UPLOAD_URL = 'http://localhost:9000/uploads'
 const PATH_CATEGORIES = '/categories'
 
+const ICON_NoImage = "./images/logo_toCoShop.png";
+
 module.exports= {
     URLCategory, URLSupplier, URLCustomer,
     URLEmployee, URLOrder, URLProduct,
     URLLogin,
     WEB_SERVER_UPLOAD_URL,
     PATH_CATEGORIES,
+    ICON_NoImage
 }

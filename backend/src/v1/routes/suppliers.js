@@ -191,12 +191,9 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
     const deleteDoc = await Supplier.findByIdAndDelete(id);
     //deleteDoc !== false, is mean, finding a document with the id in the collection
     if (!deleteDoc) {
-      res.status(404).json({
+      res.status(200).json({
         ok: true,
-        error: {
-          name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
-        },
+        noneExist: `the document doesn't exist in the collection ${COLLECTION_CATEGORIES}`
       });
       return;
     }

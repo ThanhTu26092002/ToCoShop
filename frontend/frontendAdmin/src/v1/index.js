@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment, useEffect } from "react";
 import { ConfigProvider, Layout, Menu } from "antd";
 import {
   LogoutOutlined,
@@ -9,7 +9,13 @@ import {
 } from "@ant-design/icons";
 import FooterLayout from "./layout/FooterLayout";
 import HeaderLayout from "./layout/HeaderLayout";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Home from "./pages/Home";
 import MyProfile from "./pages/MyProfile";
 import Login from "./pages/Login";
@@ -17,64 +23,85 @@ import Employees from "./pages/Employees";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Products from "./pages/Products";
-import Orders from "./pages/Orders";
-import useAuth from "./hooks/useAuth";
+import Orders from "./pages/orderRoutes/Orders";
+import OrderDetail from "./pages/orderRoutes/OrderDetail";
+import Statistics from "./pages/orderRoutes/Statistics";
+import useAuth, { useCurrentPage } from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
+import { ICON_NoImage } from "./config/constants";
 const { Content, Sider } = Layout;
 
 function ToCoShopV1() {
   const navigate = useNavigate();
   const { signOut, auth } = useAuth((state) => state);
+
+  function getItem(label, key, icon, content, children, type) {
+    if (key === "signOut") {
+      return {
+        key,
+        icon,
+        children,
+        label,
+        type,
+        content,
+        danger: true,
+      };
+    }
+    return {
+      key,
+      icon,
+      children,
+      label,
+      type,
+      content,
+    };
+  }
+
   const itemsAfterLogin = [
-    {
-      label: "Home",
-      key: "/home",
-      icon: <HomeOutlined />,
-      content: <Home />,
-    },
-    {
-      label: "Thông tin cá nhân",
-      key: "/my_profile",
-      icon: <UserOutlined />,
-      content: <MyProfile />,
-    },
-    {
-      label: "Nhân viên",
-      key: "/employees",
-      icon: <UsergroupAddOutlined />,
-      content: <Employees />,
-    },
-    {
-      label: "Danh mục sản phẩm",
-      key: "/categories",
-      icon: <UnorderedListOutlined />,
-      content: <Categories />,
-    },
-    {
-      label: "Nhà phân phối",
-      key: "/suppliers",
-      icon: <UnorderedListOutlined />,
-      content: <Suppliers />,
-    },
-    {
-      label: "Sản phẩm",
-      key: "/products",
-      icon: <UnorderedListOutlined />,
-      content: <Products />,
-    },
-    {
-      label: "Đơn hàng",
-      key: "/orders",
-      icon: <UnorderedListOutlined />,
-      content: <Orders />,
-    },
-    {
-      label: "Đăng xuất",
-      key: "signOut",
-      // onClick: ()=> signOut(),
-      icon: <LogoutOutlined />,
-    },
+    getItem("Home", "/home", <HomeOutlined />, <Home />),
+    getItem(
+      "Thông tin cá nhân",
+      "/my_profile",
+      <UserOutlined />,
+      <MyProfile />
+    ),
+    getItem("Nhân viên", "/employees", <UsergroupAddOutlined />, <Employees />),
+    getItem(
+      "Danh mục sản phẩm",
+      "/categories",
+      <UnorderedListOutlined />,
+      <Categories />
+    ),
+    getItem(
+      "Nhà phân phối",
+      "/suppliers",
+      <UnorderedListOutlined />,
+      <Suppliers />
+    ),
+    getItem("Sản phẩm", "/products", <UnorderedListOutlined />, <Products />),
+    getItem("Đơn hàng", "/orderList", <UnorderedListOutlined />, <Orders />, [
+      getItem(
+        "Danh sách đơn hàng",
+        "/orders",
+        <UnorderedListOutlined />,
+        <Orders />
+      ),
+      getItem(
+        "Chi tiết đơn hàng",
+        "/orderDetail",
+        <UnorderedListOutlined />,
+        <OrderDetail />
+      ),
+      getItem(
+        "Thống kê",
+        "/statistics",
+        <UnorderedListOutlined />,
+        <Statistics />
+      ),
+    ]),
+    getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
+
   return (
     <ConfigProvider>
       <Layout>
@@ -91,7 +118,7 @@ function ToCoShopV1() {
           >
             <div className={styles.logo}>
               <img
-                src="./images/logo_toCoShop.png"
+                src={ICON_NoImage}
                 alt="logo"
                 style={{ height: 32, width: "100%" }}
               />
@@ -99,13 +126,23 @@ function ToCoShopV1() {
             <Menu
               theme="dark"
               mode="inline"
-              defaultSelectedKeys={["/home"]}
+              // defaultOpenKeys={["/orderList"]}
+              defaultOpenKeys={
+                ["/orders", "/orderDetail", "/statistics"].includes(
+                  window.location.pathname
+                )
+                  ? ["/orderList"]
+                  : []
+              }
+              defaultSelectedKeys={[window.location.pathname]}
+              // selectedKeys={[currentPage]}
               items={itemsAfterLogin}
               onClick={({ key }) => {
                 if (key === "signOut") {
                   signOut();
                   navigate("/login");
                 } else {
+                  console.log("key:", key);
                   navigate(key);
                 }
               }}
@@ -132,18 +169,44 @@ function ToCoShopV1() {
                   element={auth ? <Navigate to="/home" replace /> : <Login />}
                 ></Route>
                 {itemsAfterLogin.map((i, index) => {
-                  return (
-                    <Route 
-                   key={index}
-                      path={i.key}
-                      element={
-                        auth ? i.content : <Navigate to="/login" replace />
-                      }
-                    ></Route>
-                  );
+                  if (i.children) {
+                    return (
+                      <Fragment key={index}>
+                        <Route
+                          key={index}
+                          // path={i.key}
+                        ></Route>
+                        {i.children.map((child, indexChild) => {
+                          return (
+                            <Route
+                              key={indexChild}
+                              path={child.key}
+                              element={
+                                auth ? (
+                                  child.content
+                                ) : (
+                                  <Navigate to="/login" replace />
+                                )
+                              }
+                            ></Route>
+                          );
+                        })}
+                      </Fragment>
+                    );
+                  } else {
+                    return (
+                      <Route
+                        key={index}
+                        path={i.key}
+                        element={
+                          auth ? i.content : <Navigate to="/login" replace />
+                        }
+                      ></Route>
+                    );
+                  }
                 })}
                 {/* NO MATCH ROUTE */}
-                {/* <Route
+                <Route
                   path="*"
                   element={<Navigate to="/home" replace />}
                   // element={
@@ -151,7 +214,7 @@ function ToCoShopV1() {
                   //     <p>404 Page not found 😂😂😂</p>
                   //   </main>
                   // }
-                /> */}
+                />
               </Routes>
             </div>
           </Content>
