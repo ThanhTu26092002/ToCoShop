@@ -17,6 +17,7 @@ import {
   DatePicker,
   LocaleProvider,
   Select,
+  Divider,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
@@ -55,9 +56,6 @@ function Orders() {
   const savedSendingDate = useRef(null);
   const saveReceivedDate = useRef(null);
   const savedSelectedStatus = useRef(null);
-  const createdDateUseRef = useRef();
-  const sendingDateUseRef = useRef();
-  const receivedDateUseRef = useRef();
 
   const columns = [
     {
@@ -188,6 +186,7 @@ function Orders() {
       createdDate: moment(new Date()),
       sendingDate: null,
       receivedDate: null,
+      status: "WAITING",
     },
     autoComplete: "off",
   };
@@ -195,6 +194,12 @@ function Orders() {
   const PropsFormItemCreatedDate = {
     label: <LabelCustomization title={"Ngày đặt hàng"} />,
     name: "createdDate",
+    rules: [
+      {
+        required: true,
+        message: "Ngày đặt hàng không thể để trống!",
+      },
+    ],
   };
 
   const PropsFormItemSendingDate = {
@@ -219,6 +224,10 @@ function Orders() {
 
   const disabledForSending = (current) => {
     return current < moment(savedCreatedDate.current);
+  };
+
+  const disabledForReceived = (current) => {
+    return current < moment(savedSendingDate.current);
   };
 
   const handleOk = () => {
@@ -351,7 +360,6 @@ function Orders() {
     setIsCreate(false);
     formCreate.resetFields();
   };
-  const [demo, setDemo] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -389,9 +397,7 @@ function Orders() {
     });
   }, [refresh]);
   //
-
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
-
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
@@ -412,7 +418,6 @@ function Orders() {
           >
             <Form.Item {...PropsFormItemCreatedDate}>
               <DatePicker
-              ref={createdDateUseRef}
                 showToday={false}
                 disabledDate={disabledDate}
                 format={dateFormatList}
@@ -438,16 +443,27 @@ function Orders() {
 
             <Form.Item {...PropsFormItemStatus}>
               <Select
-                defaultValue="WAITING"
                 style={{ width: 150 }}
                 onChange={(e) => {
-                  console.log("demo change status: ", e);
                   switch (e) {
                     case "SHIPPING":
-                      if (savedCreatedDate.current) {
-                        createdDateUseRef.current.forcus();
-                        message.error("Chưa nhập ngày đặt đơn hàng");
+                      formCreate.setFieldsValue({
+                        sendingDate: moment(new Date()),
+                      });
+                      formCreate.setFieldsValue({ receivedDate: null });
+                      break;
+                    case "COMPLETED":
+                      if (savedSendingDate.current === null) {
+                        formCreate.setFieldsValue({
+                          sendingDate: moment(new Date()),
+                        });
                       }
+                      formCreate.setFieldsValue({
+                        receivedDate: moment(new Date()),
+                      });
+                      break;
+                    case "CANCELED":
+                      formCreate.setFieldsValue({ receivedDate: null });
                       break;
                     default:
 
@@ -474,9 +490,22 @@ function Orders() {
                 onChange={(e) => {
                   if (e) {
                     savedSendingDate.current = e.format("YYYY-MM-DD");
+                    formCreate.setFieldsValue({ status: "SHIPPING" });
+
                     if (savedCreatedDate.current === null) {
                       message.error("Chưa nhập ngày đặt đơn hàng");
                       formCreate.setFieldsValue({ sendingDate: null });
+                    }
+
+                    if (
+                      moment(savedSendingDate.current) >
+                        moment(saveReceivedDate.current) &&
+                      saveReceivedDate.current !== null
+                    ) {
+                      message.error(
+                        "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
+                      );
+                      formCreate.setFieldsValue({ receivedDate: null });
                     }
                   } else {
                     savedSendingDate.current = null;
@@ -485,6 +514,28 @@ function Orders() {
               />
             </Form.Item>
 
+            <Form.Item {...PropsFormItemReceivedDate}>
+              <DatePicker
+                showToday={false}
+                disabledDate={disabledForReceived}
+                placeholder="dd-mm-yyyy"
+                format={dateFormatList}
+                onChange={(e) => {
+                  if (e) {
+                    saveReceivedDate.current = e.format("YYYY-MM-DD");
+                    formCreate.setFieldsValue({ status: "COMPLETED" });
+
+                    if (savedSendingDate.current === null) {
+                      message.error("Ngày nhận hàng phải sau ngày chuyển hàng");
+                      formCreate.setFieldsValue({ receivedDate: null });
+                    }
+                  } else {
+                    saveReceivedDate.current = null;
+                  }
+                }}
+              />
+            </Form.Item>
+            <Divider style={{ backgroundColor: "#e3e6f2" }} />
             <Form.Item
               wrapperCol={{
                 offset: 8,
@@ -517,6 +568,7 @@ function Orders() {
             defaultCurrent: 1,
           }}
         />
+
         {/* <Modal
         title="Chỉnh sửa thông tin danh mục"
         open={isModalOpen}
