@@ -3,6 +3,20 @@ import numeral from "numeral";
 
 const urlIcon = "./imageIcons/icon03.png";
 
+function ColorStatus({ status }) {
+  let color = '#182747';
+  if(status === 'SHIPPING'){
+    color ='#332FD0'
+  }else if( status === 'COMPLETED'){
+    color ='#38E54D'
+  }
+  else if( status === 'CANCELED'){
+    color ='#FF1E1E'
+  }
+  return <div style={{ fontWeight: 600, color }}>{status}</div>;
+}
+
+
 function LabelCustomization({ title }) {
   return <div style={{ fontWeight: 600 }}>{title}</div>;
 }
@@ -55,4 +69,4 @@ function TitleTable({ text }) {
 }
 
 export default LabelCustomization;
-export { BoldText, ImgIcon, TitleTable, NumberFormatter };
+export { BoldText, ImgIcon, TitleTable, NumberFormatter , ColorStatus};

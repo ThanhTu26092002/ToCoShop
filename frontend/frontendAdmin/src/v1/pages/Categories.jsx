@@ -13,12 +13,12 @@ import {
   Modal,
   Upload,
   Spin,
+  Space,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
   DeleteOutlined,
   EditOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
@@ -31,7 +31,9 @@ import LabelCustomization, {
 import axiosClient from "../config/axios";
 
 function Categories() {
-  const [uploading, setUploading] = useState(false);
+  const [isCreate, setIsCreate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingBtn, setLoadingBtn] = useState(false);
   const [categories, setCategories] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
   const [refresh, setRefresh] = useState(false);
@@ -52,7 +54,7 @@ function Categories() {
       width: "10%",
       fixed: "left",
       // defaultSortOrder: 'ascend',
-      sorter: (a, b) => a.name.length - b.name.length,
+      // sorter: (a, b) => a.name.length - b.name.length,
       render: (text) => {
         return <BoldText title={text} />;
       },
@@ -100,17 +102,11 @@ function Categories() {
           <div className="divActs">
             <Upload
               beforeUpload={(file) => beforeUpload(file)}
-              method="POST"
               showUploadList={false}
               name="file"
-              customRequest={(options) => {handleUploadImage(options, record)}}
-              // action={(file) => handleUploadImage(file, record)}
-              // action={
-              //   "http://localhost:9000/v1/categories/categoryImage/" +
-              //   record._id
-              // }
-              headers={{ authorization: "authorization-text" }}
-              onChange={(info) => handleChange_UploadOnlyImage(info)}
+              customRequest={(options) => {
+                handleUploadImage(options, record);
+              }}
             >
               <Button
                 title="Cập nhật ảnh"
@@ -149,13 +145,12 @@ function Categories() {
 
   //Begin: Props for components
   const PropsTable = {
+    loading: {
+      indicator: <Spin />,
+      spinning: loading || loadingBtn,
+    },
     style: { marginTop: 20 },
     rowKey: "_id",
-    locale: {
-      triggerDesc: "Giảm dần",
-      triggerAsc: "Tăng dần",
-      cancelSort: "Hủy sắp xếp",
-    },
     bordered: true,
     size: "small",
     scroll: { x: 1500, y: 400 },
@@ -205,23 +200,6 @@ function Categories() {
 
   //End: Props for components
 
-  //
-  const handleChange_UploadOnlyImage = (info) => {
-    if (info.file.status !== "uploading") {
-      setUploading(true);
-      console.log("uploading");
-    }
-    if (info.file.status === "done") {
-      console.log("done");
-      setRefresh((e) => !e);
-      message.success(`${info.file.name} được cập nhật thành công!`);
-    } else if (info.file.status === "error") {
-      message.error(`${info.file.name} file cập nhật thất bại.`);
-    }
-    setUploading(false);
-  };
-  //
-
   const beforeUpload = (file) => {
     const isImage =
       file.type === "image/jpg" ||
@@ -236,43 +214,10 @@ function Categories() {
     }
   };
   //
-  // const handleUploadImage = (file, record) => {
-  //   console.log(file)
-  //   setUploading(true);
-  //   let formData = new FormData();
-  //   let URL = URLCategory + "/categoryImage/" + record._id;
-  //   //If containing an image <=> file !== null
-  //   if (!record.imageUrl) {
-  //     formData.append("currentImgUrl", null);
-  //   } else {
-  //     formData.append("currentImgUrl", record.imageUrl);
-  //   }
-  //   formData.append("file", file);
-
-  //   //POST
-  //   axiosClient
-  //     .post(URL, formData)
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         setRefresh((e) => !e);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       message.error(
-  //         error.response.data.error.message
-  //           ? error.response.data.error.message
-  //           : error
-  //       );
-  //     })
-  //     .finally(() => {
-  //       setUploading(false);
-  //     });
-  // };
-  //
-
 
   const handleUploadImage = (options, record) => {
-    const {onSuccess, onError, file} = options
+    setLoading(true);
+    const { file } = options;
     let formData = new FormData();
     let URL = URLCategory + "/categoryImage/" + record._id;
     //If containing an image <=> file !== null
@@ -283,32 +228,26 @@ function Categories() {
     }
     formData.append("file", file);
 
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+
     //POST
     axiosClient
-      .post(URL, formData)
+      .post(URL, formData, config)
       .then((response) => {
         if (response.status === 200) {
-          onSuccess("Ok");
-          console.log("server res: ", response);
+          console.log("ok upload image");
           setRefresh((e) => !e);
+          message.success(`Cập nhật hình ảnh thành công!`);
         }
       })
       .catch((error) => {
-        console.log("Eroor: ", error);
-      const err = new Error("Some error");
-      onError({ error });
-        message.error(
-          error.response.data.error.message
-            ? error.response.data.error.message
-            : error
-        );
+        message.error(`Cập nhật hình ảnh thất bại.`);
+        setLoading(false);
       })
-      .finally(() => {
-        setUploading(false);
-      });
+      .finally(() => {});
   };
-
-
 
   const handleOk = () => {
     formUpdate.submit();
@@ -331,15 +270,17 @@ function Categories() {
   };
 
   const handleFinishCreate = (values) => {
-    setUploading(true);
+    setLoadingBtn(true);
     //SUBMIT
     let newData = { ...values };
 
     //POST
     axiosClient
-      .post("http://localhost:9000/v1/categories/insertOne", newData)
+      .post(`${URLCategory}/insertOne`, newData)
       .then((response) => {
         if (response.status === 201) {
+          setLoading(true);
+          setIsCreate(false);
           setRefresh((e) => !e);
           formCreate.resetFields();
           notification.info({
@@ -356,12 +297,11 @@ function Categories() {
         );
       })
       .finally(() => {
-        setUploading(false);
+        setLoadingBtn(false);
       });
   };
   //
   const handleFinishUpdate = (values) => {
-    setUploading(true);
     //The same values so don't need to update
     if (
       values.name === selectedRecord.name &&
@@ -370,18 +310,19 @@ function Categories() {
       setIsModalOpen(false);
       formUpdate.resetFields();
       setSelectedId(null);
-      setUploading(false);
       return;
     }
+    setLoadingBtn(true);
     //POST
     axiosClient
       .patch(
-        `http://localhost:9000/v1/categories/updateOne/${selectedId}`,
+        `${URLCategory}/updateOne/${selectedId}`,
         values
       )
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
+          setLoading(true);
           setRefresh((e) => !e);
           formUpdate.resetFields();
           setSelectedId(null);
@@ -399,17 +340,24 @@ function Categories() {
         );
       })
       .finally(() => {
-        setUploading(false);
+        setLoadingBtn(false);
       });
   };
   const handleConfirmDelete = (_id) => {
-    setUploading(true);
+    setLoading(true);
     axiosClient
       .delete(URLCategory + "/deleteOne/" + _id)
       .then((response) => {
+        console.log(response);
         if (response.status === 200) {
-          message.info("Xóa thành công");
+          if (response.data?.noneExist) {
+            console.log("test error");
+            message.warning(response.data.noneExist);
+          } else {
+            message.info("Xóa thành công");
+          }
         }
+        setRefresh((e) => !e);
       })
       .catch((error) => {
         message.error(
@@ -417,18 +365,29 @@ function Categories() {
             ? error.response.data.error.message
             : error
         );
+        setLoading(false);
       })
-      .finally(() => {
-        setRefresh((e) => !e);
-        setUploading(false);
-      });
+      .finally(() => {});
+  };
+
+  const handleCreateBtn = () => {
+    setIsCreate(true);
+  };
+  const handleCancelCreate = () => {
+    formCreate.resetFields();
+    setIsCreate(false);
+  };
+
+  const handleMouseLeaveCreate = () => {
+    setIsCreate(false);
+    formCreate.resetFields();
   };
 
   useEffect(() => {
-    setUploading(true);
+    setLoading(true);
     axiosClient.get(`${URLCategory}`).then((response) => {
       setCategories(response.data.results);
-      setUploading(false);
+      setLoading(false);
       setTotalDocs(response.data.results.length);
     });
   }, [refresh]);
@@ -436,10 +395,13 @@ function Categories() {
 
   return (
     <Layout>
-      {uploading ? (
-        <Spin tip="Đang xử lý..." size="large"></Spin>
-      ) : (
-        <Content style={{ padding: 24 }}>
+      <Content style={{ padding: 24 }}>
+        {!isCreate && (
+          <Button type="primary" onClick={handleCreateBtn}>
+            Tạo mới
+          </Button>
+        )}
+        {isCreate && (
           <Form
             {...PropsForm}
             form={formCreate}
@@ -456,58 +418,78 @@ function Categories() {
             <Form.Item {...PropsFormItemDescription}>
               <TextArea rows={3} placeholder="Mô tả danh mục mới" />
             </Form.Item>
-
             <Form.Item
               wrapperCol={{
                 offset: 8,
                 span: 16,
               }}
             >
-              <Button type="primary" htmlType="submit">
-                Tạo mới
-              </Button>
+              <Space wrap>
+                <Button type="primary" danger onClick={handleCancelCreate}>
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loadingBtn}>
+                  Tạo mới
+                </Button>
+              </Space>
             </Form.Item>
           </Form>
-          <Table
-            {...PropsTable}
-            columns={columns}
-            dataSource={categories}
-            pagination={{
-              total: totalDocs,
-              showTotal: (totalDocs, range) =>
-                `${range[0]}-${range[1]} of ${totalDocs} items`,
-              defaultPageSize: 10,
-              defaultCurrent: 1,
-            }}
-          />
-          <Modal
-            title="Chỉnh sửa thông tin danh mục"
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={handleCancel}
-            width={800}
-          >
-            <Form
-              {...PropsForm}
-              form={formUpdate}
-              name="formUpdate"
-              onFinish={handleFinishUpdate}
-              onFinishFailed={() => {
-                // message.info("Error at onFinishFailed at formUpdate");
-                console.error("Error at onFinishFailed at formUpdate");
-              }}
+        )}
+        <Table
+          {...PropsTable}
+          onRow={() =>{
+            return {onClick: handleMouseLeaveCreate}
+          }}
+          columns={columns}
+          dataSource={categories}
+          pagination={{
+            total: totalDocs,
+            showTotal: (totalDocs, range) =>
+              `${range[0]}-${range[1]} of ${totalDocs} items`,
+            defaultPageSize: 10,
+            defaultCurrent: 1,
+          }}
+        />
+        <Modal
+          title="Chỉnh sửa thông tin danh mục"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          width={800}
+          footer={[
+            <Button key="back" onClick={handleCancel}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={loadingBtn}
+              onClick={handleOk}
             >
-              <Form.Item {...PropsFormItemName}>
-                <Input placeholder="Tên danh mục " />
-              </Form.Item>
+              Sửa
+            </Button>,
+          ]}
+        >
+          <Form
+            {...PropsForm}
+            form={formUpdate}
+            name="formUpdate"
+            onFinish={handleFinishUpdate}
+            onFinishFailed={() => {
+              // message.info("Error at onFinishFailed at formUpdate");
+              console.error("Error at onFinishFailed at formUpdate");
+            }}
+          >
+            <Form.Item {...PropsFormItemName}>
+              <Input placeholder="Tên danh mục " />
+            </Form.Item>
 
-              <Form.Item {...PropsFormItemDescription}>
-                <TextArea rows={3} placeholder="Mô tả danh mục " />
-              </Form.Item>
-            </Form>
-          </Modal>
-        </Content>
-      )}
+            <Form.Item {...PropsFormItemDescription}>
+              <TextArea rows={3} placeholder="Mô tả danh mục " />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Content>
     </Layout>
   );
 }

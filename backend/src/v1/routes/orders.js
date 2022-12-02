@@ -2,6 +2,7 @@ var express = require("express");
 const Order = require("../models/Order");
 var moment = require("moment");
 var router = express.Router();
+const { ObjectId } = require("mongodb");
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { validateId } = require("../validations/commonValidators");
 const {
@@ -17,86 +18,86 @@ const {
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
 const { LookupTransportation } = require("../configs/lookups");
+const aggregateLookup = [
+  {
+    $unwind: "$orderDetails",
+  },
+  {
+    $lookup: {
+      from: "products", // foreign collection name
+      localField: "orderDetails.productId",
+      foreignField: "_id",
+      as: "product", // alias
+    },
+  },
+  {
+    $addFields: {
+      "orderDetails.productName": { $first: "$product.name" },
+      "orderDetails.finalPrice": {
+        $divide: [
+          {
+            $multiply: [
+              "$orderDetails.price",
+              "$orderDetails.quantity",
+              { $subtract: [100, "$orderDetails.discount"] },
+            ],
+          },
+          100,
+        ],
+      },
+    },
+  },
+  {
+    $group: {
+      _id: "$_id",
+      createdDate: { $first: "$createdDate" },
+      status: { $first: "$status" },
+      contactInfo: { $first: "$contactInfo" },
+      shippingInfo: { $first: "$shippingInfo" },
+      paymentInfo: { $first: "$paymentInfo" },
+      orderDetails: { $push: "$orderDetails" },
+      totalPrice: { $sum: "$orderDetails.finalPrice" },
+      handlers: { $first: "$handlers" },
+    },
+  },
+  {
+    $lookup: {
+      from: "transportations", // foreign collection name
+      localField: "shippingInfo.transportationId",
+      foreignField: "_id",
+      as: "transportation", // alias
+    },
+  },
+  {
+    $addFields: {
+      "shippingInfo.transportationName": { $first: "$transportation.name" },
+    },
+  },
+  {
+    $project: {
+      transportation: 0,
+      "orderDetails.finalPrice": 0,
+    },
+  },
+];
 
 //Get all orders
 router.get("/", async (req, res, next) => {
-  const aggregate = [
-    {
-      $unwind: "$orderDetails",
-    },
-    {
-      $lookup: {
-        from: "products", // foreign collection name
-        localField: "orderDetails.productId",
-        foreignField: "_id",
-        as: "product", // alias
-      },
-    },
-    {
-      $addFields: {
-        "orderDetails.productName": { $first: "$product.name" },
-        "orderDetails.finalPrice": {
-          $divide: [
-            {
-              $multiply: [
-                "$orderDetails.price",
-                "$orderDetails.quantity",
-                { $subtract: [100, "$orderDetails.discount"] },
-              ],
-            },
-            100,
-          ],
-        },
-      },
-    },
-    {
-      $group: {
-        _id: "$_id",
-        createdDate: { $first: "$createdDate" },
-        status: { $first: "$status" },
-        contactInfo: { $first: "$contactInfo" },
-        shippingInfo: { $first: "$shippingInfo" },
-        paymentInfo: { $first: "$paymentInfo" },
-        orderDetails: { $push: "$orderDetails" },
-        totalPrice: { $sum: "$orderDetails.finalPrice" },
-        handlers: { $first: "$handlers" },
-      },
-    },
-    {
-      $lookup: {
-        from: "transportations", // foreign collection name
-        localField: "shippingInfo.transportationId",
-        foreignField: "_id",
-        as: "transportation", // alias
-      },
-    },
-    {
-      $addFields: {
-        "shippingInfo.transportationName": { $first: "$transportation.name" },
-      },
-    },
-    {
-      $project: {
-        transportation: 0,
-        "orderDetails.finalPrice": 0,
-      },
-    },
-  ];
-
+ 
   try {
-    const orders = await Order.aggregate(aggregate);
-    res.json(orders);
+    const docs = await Order.aggregate(aggregateLookup);
+    res.json({ ok: true, results: docs });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 
-router.get("/search/:id", async (req, res, next) => {
+router.get("/search/:id", validateId, async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const order = await Order.findById(id);
-    //the same:  const order = await Order.findOne({ _id: id });
-    res.json(order);
+    const id = new ObjectId(req.params.id);
+    const docs = await Order.aggregate([{ "$match": { "_id":  id }}, ...aggregateLookup ]);
+    res.json({ ok: true, results: docs });
   } catch (err) {
     res.status(400).json({ error: { name: err.name, message: err.message } });
   }
@@ -176,7 +177,7 @@ router.post("/insertOne", async (req, res, next) => {
 // //
 
 //Update One with _Id
-router.patch("/update-one/:id", async (req, res, next) => {
+router.patch("/updateOne/:id",validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -233,7 +234,7 @@ router.patch("/update-one/:id", async (req, res, next) => {
 // //
 
 //Delete ONE with ID
-router.delete("/delete-id/:id", async (req, res, next) => {
+router.delete("/delete-id/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
 
