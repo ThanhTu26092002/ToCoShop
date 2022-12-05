@@ -1,56 +1,74 @@
+
 const mongoose = require('mongoose');
-const {Schema, model } = mongoose;
+const { Schema, model } = mongoose;
 
 
 const productSchema = new Schema(
     {
         name: {
             type: String,
-            trim : true,
+            trim: true,
             maxLength: 50,
             unique: true,
             required: true
         },
         price: Number,
-        discount: Number,
+        discount: {
+            type: Number,
+            min: [0,"phai lon hon hoac bang 0 va nho hon hoac bang 100"],
+            max: [100,"phai lon hon hoac bang 0 va nho hon hoac bang 100"]
+        },
+        
+        size:[
+            String,
+        ],
         stock: Number,
-        categoryId: { type: Schema.Types.ObjectId, ref: 'Category'},
-        supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier'},
+        categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
+        supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier' },
         description: {
             type: String,
-            trim : true,
+            trim: true,
             required: true
         },
-        imageUrl: {
-            type: String,
-            trim: true,
-            // required: [true, 'Đường dẫn hình ảnh phải là "Null" hoặc một đường dẫn nào đó ']
-        }
+        promotionPosition: [
+            String
+        ],
+        CoverImage: String,
+        imageUrls: [
+            Object,
+            {
+                ImgUrl: {
+                    type: String,
+                },
+                sortOrder: Number,
+                
+            }
+        ]
     },
-    {"strict": "throw"}, // If the field haven't existed in MongooseSchema, throw error
-
+    
     {
-        //QUERY
+        // QUERY
         query: {
-            byName(name){
-                return this.where({ name: new RegExp(name, 'i')});
+            byName(name) {
+                return this.where({ name: new RegExp(name, 'i') });
             },
         },
-        //VIRTUALS
+        // VIRTUALS
         virtuals: {
             total: {
-                get(){
+                get() {
                     return (this.price * (100 - this.discount)) / 100;
                 },
             },
+            
         },
     },
 );
-//Include virtuals
-productSchema.set('toObject', { virtuals: true});
-productSchema.set('toJSON', {virtuals: true});
+// Include virtuals
+productSchema.set('toObject', { virtuals: true });
+productSchema.set('toJSON', { virtuals: true });
 
-//validateBeforeSave
+// validateBeforeSave
 productSchema.set('validateBeforeSave', true);
 
 const Product = model('Product', productSchema);
