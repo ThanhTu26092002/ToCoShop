@@ -422,11 +422,11 @@ function Orders() {
               cardNumber: "5105105105105100",
             }}
           >
-<ChosenProducts/>
+            {/* <ChosenProducts /> */}
             {/* Part 1 - date&&status*/}
             <Text strong style={{ color: "blue" }}>
-               Trạng thái đơn hàng
-              </Text>
+              Trạng thái đơn hàng
+            </Text>
             <Fragment>
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -616,7 +616,7 @@ function Orders() {
                   },
                 ]}
               >
-                <Input placeholder="Số điện thoại của nhan vien" />
+                <Input placeholder="Số điện thoại của người nhận hàng" />
               </Form.Item>
 
               <Form.Item
@@ -634,16 +634,21 @@ function Orders() {
                     );
                     setOnChangeCountry((e) => !e);
                   }}
-                >
-                  {countryList &&
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    countryList &&
                     countryList.map((e) => {
-                      return (
-                        <Select.Option key={e.id} value={e.name}>
-                          {e.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -656,22 +661,26 @@ function Orders() {
                   style={{ width: 150 }}
                   placeholder="Chọn..."
                   onChange={(value) => {
-                    console.log("states: ", statesList);
                     savedSelectedState.current = statesList.states.find(
                       (e) => e.name === value
                     );
                     setOnChangeState((e) => !e);
                   }}
-                >
-                  {statesList &&
-                    statesList.states.map((state) => {
-                      return (
-                        <Select.Option key={state.id} value={state.name}>
-                          {state.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    statesList &&
+                    statesList.states.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -680,16 +689,24 @@ function Orders() {
                   name: "cityContactInfo",
                 })}
               >
-                <Select placeholder="Chọn..." style={{ width: 150 }}>
-                  {cityList &&
-                    cityList?.cities?.map((city) => {
-                      return (
-                        <Select.Option key={city.id} value={city.name}>
-                          {city.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    cityList &&
+                    cityList.cities.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
