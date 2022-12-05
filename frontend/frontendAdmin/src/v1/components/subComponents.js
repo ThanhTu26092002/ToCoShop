@@ -54,7 +54,7 @@ function ImgIcon() {
   );
 }
 //
-function TitleTable({ text }) {
+function TitleTable({ title }) {
   return (
     <div
       style={{
@@ -63,7 +63,7 @@ function TitleTable({ text }) {
         textTransform: "uppercase",
       }}
     >
-      {text}
+      {title}
     </div>
   );
 }

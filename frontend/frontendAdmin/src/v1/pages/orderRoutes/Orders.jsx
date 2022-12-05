@@ -18,6 +18,7 @@ import {
   LocaleProvider,
   Select,
   Divider,
+  Typography,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
@@ -36,6 +37,18 @@ import LabelCustomization, {
 } from "../../components/subComponents";
 import axiosClient from "../../config/axios";
 import formattedDate from "../../utils/commonFuncs";
+import {
+  PropsForm,
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItemStatus,
+  PropsFormItem_Label_Name,
+  PropsTable,
+} from "../../config/props";
+const { Title, Text } = Typography;
 
 function Orders() {
   const [isCreate, setIsCreate] = useState(false);
@@ -43,7 +56,12 @@ function Orders() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [orders, setOrders] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
+  const [countryList, setCountryList] = useState(null);
+  const [statesList, setStatesList] = useState(null);
+  const [cityList, setCityList] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [onChangeCountry, setOnChangeCountry] = useState(false);
+  const [onchangeState, setOnChangeState] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -55,7 +73,8 @@ function Orders() {
   const savedCreatedDate = useRef(moment(new Date()));
   const savedSendingDate = useRef(null);
   const saveReceivedDate = useRef(null);
-  const savedSelectedStatus = useRef(null);
+  const savedSelectedCountry = useRef(null);
+  const savedSelectedState = useRef(null);
 
   const columns = [
     {
@@ -162,60 +181,6 @@ function Orders() {
   //
 
   //Begin: Props for components
-  const PropsTable = {
-    loading: {
-      indicator: <Spin />,
-      spinning: loading || loadingBtn,
-    },
-    style: { marginTop: 20 },
-    rowKey: "_id",
-    bordered: true,
-    size: "small",
-    scroll: { x: 1500, y: 400 },
-    title: () => {
-      return <TitleTable title="danh sách đơn đặt hàng" />;
-    },
-    footer: () =>
-      "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 002233442",
-  };
-
-  const PropsForm = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-    initialValues: {
-      createdDate: moment(new Date()),
-      sendingDate: null,
-      receivedDate: null,
-      status: "WAITING",
-    },
-    autoComplete: "off",
-  };
-
-  const PropsFormItemCreatedDate = {
-    label: <LabelCustomization title={"Ngày đặt hàng"} />,
-    name: "createdDate",
-    rules: [
-      {
-        required: true,
-        message: "Ngày đặt hàng không thể để trống!",
-      },
-    ],
-  };
-
-  const PropsFormItemSendingDate = {
-    label: <LabelCustomization title={"Ngày chuyển hàng"} />,
-    name: "sendingDate",
-  };
-
-  const PropsFormItemReceivedDate = {
-    label: <LabelCustomization title={"Ngày nhận hàng"} />,
-    name: "receivedDate",
-  };
-
-  const PropsFormItemStatus = {
-    label: <LabelCustomization title={"Tình trạng"} />,
-    name: "status",
-  };
 
   //End: Props for components
   const disabledDate = (current) => {
@@ -360,7 +325,6 @@ function Orders() {
     setIsCreate(false);
     formCreate.resetFields();
   };
-
   useEffect(() => {
     setLoading(true);
     axiosClient.get(`${URLOrder}`).then((response) => {
@@ -397,6 +361,26 @@ function Orders() {
     });
   }, [refresh]);
   //
+  useEffect(() => {
+    fetch("http://localhost:3000/data/countries+states+cities.json")
+      .then((response) => response.json())
+      .then((data) => setCountryList(data))
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  
+  useEffect(() => {
+    console.log("country: ",savedSelectedCountry.current)
+    setStatesList(savedSelectedCountry.current);
+  }, [onChangeCountry]);
+
+  useEffect(() => {
+    console.log("state: ",savedSelectedState.current)
+
+    setCityList(savedSelectedState.current);
+  }, [onchangeState]);
+
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
   return (
     <Layout>
@@ -415,8 +399,28 @@ function Orders() {
             onFinishFailed={() => {
               console.error("Error at onFinishFailed at formCreate");
             }}
+            initialValues={{
+              createdDate: moment(new Date()),
+              sendingDate: null,
+              receivedDate: null,
+              status: "WAITING",
+              country: null,
+              state: null,
+              city: null,
+            }}
           >
-            <Form.Item {...PropsFormItemCreatedDate}>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Ngày đặt hàng",
+                name: "createdDate",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Ngày đặt hàng không thể để trống!",
+                },
+              ]}
+            >
               <DatePicker
                 showToday={false}
                 disabledDate={disabledDate}
@@ -441,7 +445,12 @@ function Orders() {
               />
             </Form.Item>
 
-            <Form.Item {...PropsFormItemStatus}>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Tình trạng",
+                name: "status",
+              })}
+            >
               <Select
                 style={{ width: 150 }}
                 onChange={(e) => {
@@ -481,7 +490,12 @@ function Orders() {
               </Select>
             </Form.Item>
 
-            <Form.Item {...PropsFormItemSendingDate}>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Ngày chuyển hàng",
+                name: "sendingDate",
+              })}
+            >
               <DatePicker
                 showToday={false}
                 disabledDate={disabledForSending}
@@ -514,7 +528,12 @@ function Orders() {
               />
             </Form.Item>
 
-            <Form.Item {...PropsFormItemReceivedDate}>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Ngày nhận hàng",
+                name: "receivedDate",
+              })}
+            >
               <DatePicker
                 showToday={false}
                 disabledDate={disabledForReceived}
@@ -535,7 +554,120 @@ function Orders() {
                 }}
               />
             </Form.Item>
+
             <Divider style={{ backgroundColor: "#e3e6f2" }} />
+
+            <Text strong style={{ color: "blue" }}>
+              Thông tin người đặt hàng
+            </Text>
+            <Form.Item {...PropsFormItemFirstName} name='firstNameContactInfo'>
+              <Input placeholder="Họ" />
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemLastName} name='lastNameContactInfo'>
+              <Input placeholder="Last name" />
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemEmail} name='emailContactInfo' >
+              <Input placeholder="Email" />
+            </Form.Item>
+
+            <Form.Item
+              {...PropsFormItemPhoneNumber} name="phoneNumberContactInfo"
+              rules={[
+                ...PropsFormItemPhoneNumber.rules,
+                {
+                  required: true,
+                  message: "Trường dữ liệu không thể bỏ trống",
+                },
+              ]}
+            >
+              <Input placeholder="Số điện thoại của nhan vien" />
+            </Form.Item>
+
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Quốc gia",
+                name: "countryContactInfo",
+              })}
+            >
+              <Select
+                placeholder="Chọn..."
+                style={{ width: 150 }}
+                onChange={(value) => {
+                  savedSelectedCountry.current = countryList.find(
+                    (e) => e.name === value
+                  );
+                  setOnChangeCountry(e => !e)
+
+                }}
+              >
+                {countryList &&
+                  countryList.map((e) => {
+                    return (
+                      <Select.Option key={e.id} value={e.name}>
+                        {e.name}
+                      </Select.Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Tỉnh",
+                name: "stateContactInfo",
+              })}
+            >
+              <Select
+                style={{ width: 150 }}
+                placeholder="Chọn..."
+                onChange={(value) => {
+                  console.log('states: ', statesList)
+                  savedSelectedState.current = statesList.states.find(
+                    (e) => e.name === value
+                  );
+                  setOnChangeState(e => !e)
+                }}
+              >
+                {statesList &&
+                  statesList.states.map((state) => {
+                    return (
+                      <Select.Option key={state.id} value={state.name}>
+                        {state.name}
+                      </Select.Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Thành phố/ Huyện",
+                name: "cityContactInfo",
+              })}
+            >
+              <Select placeholder="Chọn..." style={{ width: 150 }}>
+                {cityList &&
+                  cityList?.cities?.map((city) => {
+                    return (
+                      <Select.Option key={city.id} value={city.name}>
+                        {city.name}
+                      </Select.Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemDetailAddress} name= 'detailAddressContactInfo'>
+              <Input placeholder="Địa chỉ cụ thể" />
+            </Form.Item>
+
+            <Divider style={{ backgroundColor: "#e3e6f2" }} />
+            
+            
+            <Divider style={{ backgroundColor: "#e3e6f2" }} />
+
             <Form.Item
               wrapperCol={{
                 offset: 8,
@@ -554,7 +686,11 @@ function Orders() {
           </Form>
         )}
         <Table
-          {...PropsTable}
+          {...PropsTable({
+            title: "danh sách đơn đặt hàng",
+            isLoading: loading,
+            isLoadingBtn: loadingBtn,
+          })}
           onRow={() => {
             return { onClick: handleMouseLeaveCreate };
           }}

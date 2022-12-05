@@ -1,8 +1,10 @@
 import React from 'react'
+import Countrystatecity from '../components/selectAddress'
 
 function Products() {
   return (
-    <div>Products
+    <div>
+    <Countrystatecity/>
     </div>
   )
 }

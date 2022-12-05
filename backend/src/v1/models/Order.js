@@ -9,7 +9,13 @@ const addressSchema = new Schema(
       maxLength: 50,
       required: true,
     },
-    province: {
+    state: {
+      type: String,
+      trim: true,
+      maxLength: 50,
+      required: true,
+    },
+    city: {
       type: String,
       trim: true,
       maxLength: 50,
@@ -19,6 +25,8 @@ const addressSchema = new Schema(
       type: String,
       trim: true,
       required: true,
+      maxLength: 500,
+
     },
   },
   { _id: false }
