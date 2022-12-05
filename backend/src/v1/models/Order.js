@@ -104,11 +104,6 @@ const shippingInfoSchema = new Schema(
       type: addressSchema,
       required: true,
     },
-    shippingDuration: {
-      type: String,
-      trim: true,
-      maxLength: 200,
-    },
     note: {
       type: String,
       trim: true,
