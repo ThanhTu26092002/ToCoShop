@@ -1032,3 +1032,12 @@ error: Dec-02-2022 15:39:55: 	20601d17-c10f-440a-9755-dec46e1dd07a----/uploads/i
 error: Dec-02-2022 15:39:55: 	0049f089-aab3-4c69-89ba-3c662d3b89f3----/uploads/images/categories/632c5b7820b1aa1ad2791c2a/file-1669731600811.jpeg-----GET-----Not found test!
 error: Dec-02-2022 15:39:55: 	55c1852a-f163-4630-9a40-9d40538364fb----/uploads/images/categories/632c4b02ec2ad3757f85c06a/file-1669773378576.jpeg-----GET-----Not found test!
 error: Dec-02-2022 15:40:08: 	b38fdd5d-7693-4e2b-a1b8-13e72a26b14f----/uploads/images/suppliers/632c5e631bd2dcb57d9772c7/file-1667321986741.jpeg-----GET-----Not found test!
+error: Dec-05-2022 14:49:58: 	c2cbef01-fd22-47ac-8722-a8d7af0b17d6----/v1/employees-----GET-----findDocuments is not a function
+error: Dec-05-2022 14:53:08: 	6d173ea1-01ae-4020-a639-aa5dd8f1da81----/v1/insert-----GET-----Not found test!
+error: Dec-05-2022 14:53:52: 	d7c4f974-4e36-49db-aed7-6cd1e7b60da5----/v1/insert-----POST-----Not found test!
+error: Dec-05-2022 14:57:21: 	cc2dde08-18cc-494a-a3b8-29e35e1e773c----/v1/insert-----POST-----Unexpected token , in JSON at position 234
+error: Dec-05-2022 15:00:49: 	2829cb8a-9a9c-4104-9c84-f6e6adb18246----/v1/insert-----POST-----Unexpected token , in JSON at position 234
+error: Dec-05-2022 15:00:52: 	b2f317d0-ea71-4f1c-8110-6938e6bdb551----/v1/insert-----POST-----Unexpected token , in JSON at position 234
+error: Dec-05-2022 15:01:00: 	7c5da83e-325d-4d1b-bda1-ff922cae7f0b----/v1/insert-----POST-----Not found test!
+error: Dec-05-2022 15:01:26: 	d7ae5ba3-92c7-45c3-be25-0285929d757e----/v1/insert-----POST-----Not found test!
+error: Dec-05-2022 15:02:11: 	ba9673af-b41c-4ef6-9066-da7a927e072b----/v1/insert-----POST-----Not found test!
