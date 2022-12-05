@@ -14,12 +14,11 @@ const {
   insertDocuments, 
   updateDocument,
   updateDocuments,
-  findOne,
   findDocuments,
   deleteOneWithId,
   deleteMany,
   
-  } = require("../models/schemas/schemasEmployeesOnlineShop.yup");
+  } = require("../utils/MongodbHelper");
 const { 
   validateSchema,
   search_deleteWithId,
@@ -32,6 +31,7 @@ const {
 } 
 = require('../models/schemas/schemasEmployeesOnlineShop.yup');
 const { date } = require('yup');
+const Employee = require('../models/Employee');
 
 //Get all categories
 router.get('/', function(req, res, next) {
@@ -61,7 +61,8 @@ router.get('/search-many', validateSchema(search_deleteManyEmployeesSchema), fun
 
 // Insert One
 // router.post('/insert', validateSchema(addSchema), function (req, res, next){
-  router.post('/insert',validateSchema(insertOneEmployeeSchema), function (req, res, next){
+  router.post('/insert',async function (req, res, next){
+    try{
     const data = req.body;
     if(data.birthday) {
       //format date: YYYY-MM-Đ => type of Date: string
@@ -70,14 +71,15 @@ router.get('/search-many', validateSchema(search_deleteManyEmployeesSchema), fun
       data.birthday= new Date(data.birthday)
     }
   
-    insertDocument(data, COLLECTION_NAME)
-    .then(result => {
-      res.status(200).json({ok: true, result: result})
-    })
-    .catch(err =>{
-      res.json(500).json({ok:false})
-    })
-   })
+    const newDoc = new Employee(data);
+    //Insert the newDocument in our Mongodb database
+    await newDoc.save();
+    res.status(201).json({ ok: true, result: newDoc });
+  } catch (errMongoDB) {
+    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_CATEGORIES);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
  //Insert Many  -- haven't validation yet
  router.post('/insert-many', validateSchema(insertManyEmployeesSchema), function (req, res, next){
   const listBirthdays = req.body;
