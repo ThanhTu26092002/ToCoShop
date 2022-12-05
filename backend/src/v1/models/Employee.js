@@ -29,7 +29,8 @@ const employeeSchema = new Schema(
         },
         email: {
             type: String,
-            trim: true,
+            trim: true, 
+            unique: true,
             lowercase : true,
             maxLength: 50,
             required: true,
