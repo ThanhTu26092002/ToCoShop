@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./css/CommonStyle.css";
+import "../css/CommonStyle.css";
 import axios from "axios";
 import moment from "moment";
 import "moment/locale/vi";
@@ -25,12 +25,12 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLEmployee, WEB_SERVER_URL } from "../";
+import { URLEmployee, WEB_SERVER_URL } from "../config/constants";
 import LabelCustomization, {
   ImgIcon,
   BoldText,
   TitleTable,
-} from "./components/subComponents";
+} from "../components/subComponents";
 import ConfigProvider from "antd/es/config-provider";
 
 function Employees() {
@@ -184,7 +184,7 @@ function Employees() {
     size: "small",
     scroll: { x: 1500, y: 400 },
     title: () => {
-      return <TitleTable title="danh sách danh mục hàng hóa" />;
+      return <TitleTable title="danh sách nhân viên" />;
     },
     footer: () =>
       "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 002233442",
@@ -302,7 +302,7 @@ function Employees() {
     },
   };
 
-  const PropsFormItemUpload = {
+  const PropsFormItemUpload = { 
     label: <LabelCustomization title={"Hình ảnh"} />,
     name: "file",
     valuePropName: "fileList",
@@ -382,10 +382,10 @@ function Employees() {
     let newData = { ...values };
     delete newData.file;
 
-    let URL = URLEmployee + "/insertWithoutImage";
+    let URL = URLEmployee + "/insert";
     //If containing an image <=> file !== null
     if (file) {
-      URL = URLEmployee + "/insertWithImage";
+      URL = URLEmployee + "/insert";
       formData = new FormData();
       for (let key in values) {
         formData.append(key, values[key]);
@@ -424,33 +424,13 @@ function Employees() {
   };
   //
   const handleFinishUpdate = (values) => {
+    console.log('values', values)
     //SUBMIT
-    let formData = null;
-    let isChangeImgUrl = true;
-    if (!isChangeValueUpload && !isChangedImage) {
-      isChangeImgUrl = false;
-    }
-    let newData = {
-      ...values,
-      imageUrl: currentImageUrl,
-      isChangeImgUrl,
-    };
-    delete newData.file;
 
-    let URL = URLEmployee + "/updateByIdWithoutImage/" + selectedId;
-    //If containing an image <=> file !== null
-    if (file) {
-      formData = new FormData();
-      for (let key in values) {
-        formData.append(key, values[key]);
-      }
-      formData.append("file", file);
-      URL = URLEmployee + "/updateByIdWithImage/" + selectedId;
-      newData = formData;
-    }
+    let URL = URLEmployee + "/updateOne/" + selectedId;
     //POST
     axios
-      .patch(URL, newData)
+      .patch(URL, values)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -480,7 +460,7 @@ function Employees() {
   };
   //
   const handleConfirmDelete = (_id) => {
-    axios.delete(URLEmployee + "/delete-id/" + _id).then((response) => {
+    axios.delete(URLEmployee + "/deleteOne/" + _id).then((response) => {
       if (response.status === 200) {
         setRefresh((e) => !e);
         message.info("Xóa thành công");
@@ -490,7 +470,9 @@ function Employees() {
 
   useEffect(() => {
     axios.get(URLEmployee).then((response) => {
-      const employees = response.data.results;
+      const employees = response.data;
+
+      //console.log("data",response.data)
       let newEmployees = [];
       employees.map((e) => {
         // Formatting birthday before showing
@@ -557,7 +539,7 @@ function Employees() {
               <TextArea rows={3} placeholder="Dia chi nhan vien" />
             </Form.Item>
 
-            <Form.Item
+            {/* <Form.Item
               {...PropsFormItemUpload}
               //Handling update fileList
               getValueFromEvent={normFile}
@@ -577,7 +559,7 @@ function Employees() {
                   Tải ảnh
                 </Button>
               </Upload>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item
               wrapperCol={{
@@ -649,29 +631,6 @@ function Employees() {
             </Form.Item>
             <Form.Item {...PropsFormItemAddress}>
               <TextArea rows={3} placeholder="Dia chi nhan vien" />
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItemUpload}
-              //Handling update fileList
-              getValueFromEvent={normFile}
-            >
-              <Upload
-                listType="picture"
-                showUploadList={true}
-                beforeUpload={(file) => {
-                  setIsChangedImage(true);
-                  setFile(file);
-                  return false;
-                }}
-                onRemove={() => {
-                  setFile(null);
-                }}
-              >
-                <Button icon={<UploadOutlined />} loading={uploading}>
-                  Tải ảnh
-                </Button>
-              </Upload>
             </Form.Item>
           </Form>
         </Modal>
