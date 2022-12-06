@@ -1042,3 +1042,8 @@ error: Dec-05-2022 15:01:00: 	7c5da83e-325d-4d1b-bda1-ff922cae7f0b----/v1/insert
 error: Dec-05-2022 15:01:26: 	d7ae5ba3-92c7-45c3-be25-0285929d757e----/v1/insert-----POST-----Not found test!
 error: Dec-05-2022 15:02:11: 	ba9673af-b41c-4ef6-9066-da7a927e072b----/v1/insert-----POST-----Not found test!
 
+error: Dec-06-2022 13:34:58: 	a39a5c9b-a3ef-45f2-b21e-bc0c03f0f8ce----/uploads/images/categories/632c5c372c717789c1e4926f/file-1669773494070.jpeg-----GET-----Not found test!
+error: Dec-06-2022 13:34:58: 	efcb8768-398a-4eee-a72a-f6f378bb3d69----/uploads/images/categories/632c5b9820b1aa1ad2791c2b/file-1669731594600.jpeg-----GET-----Not found test!
+error: Dec-06-2022 13:34:58: 	a263cc20-b984-44ab-aebb-4fd777f0625e----/uploads/images/categories/632c5b7820b1aa1ad2791c2a/file-1669731600811.jpeg-----GET-----Not found test!
+error: Dec-06-2022 13:34:58: 	63ba33d2-bf46-489e-af1e-19570a1bf226----/uploads/images/categories/632c4b02ec2ad3757f85c06a/file-1669773378576.jpeg-----GET-----Not found test!
+error: Dec-06-2022 13:35:00: 	ce4c4a42-4963-431d-9f5b-884e3f004de6----/uploads/images/suppliers/632c5e631bd2dcb57d9772c7/file-1667321986741.jpeg-----GET-----Not found test!
