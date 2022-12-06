@@ -25,14 +25,6 @@ const lookupSupplier = {
     as: 'suppliers', // alias
   },
 };
-router.get('/', async (req, res, next) => {
-    try {
-      const products = await Product.find();
-      res.json(products);
-    } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
-    }
-  });
   router.get('/producttype/Assort/:id', async (req, res, next) => {kkkkkkkk
     try {
       const { id } = req.params;
@@ -134,7 +126,7 @@ router.get('/', async (req, res, next) => {
       res.status(400).json({ error: { name: err.name, messgae: err.message } });
     }
   });
-  router.get('/questions/17', function (req, res, next) {
+  router.get('/', function (req, res, next) {
 
     const aggregate = [
       lookupCategory,
