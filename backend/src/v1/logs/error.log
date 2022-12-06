@@ -1041,4 +1041,4 @@ error: Dec-05-2022 15:00:52: 	b2f317d0-ea71-4f1c-8110-6938e6bdb551----/v1/insert
 error: Dec-05-2022 15:01:00: 	7c5da83e-325d-4d1b-bda1-ff922cae7f0b----/v1/insert-----POST-----Not found test!
 error: Dec-05-2022 15:01:26: 	d7ae5ba3-92c7-45c3-be25-0285929d757e----/v1/insert-----POST-----Not found test!
 error: Dec-05-2022 15:02:11: 	ba9673af-b41c-4ef6-9066-da7a927e072b----/v1/insert-----POST-----Not found test!
-error: Dec-05-2022 15:13:43: 	Database connection failed: MongooseServerSelectionError: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://docs.atlas.mongodb.com/security-whitelist/
+

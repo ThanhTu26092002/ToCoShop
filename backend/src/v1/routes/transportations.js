@@ -15,10 +15,10 @@ const { COLLECTION_TRANSPORTATIONS} = require("../configs/constants");
 router.get("/", async (req, res, next) => {
   try {
     const docs = await Transportation.find();
-    console.log("test api: ", docs);
-    res.json(docs);
+    res.json({ ok: true, results: docs });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_CATEGORIES);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 //

@@ -196,8 +196,108 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 
     const opts = { runValidators: true };
 
-    const order = await Supplier.findByIdAndUpdate(id, updateData, opts);
-    res.json(Supplier);
+    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
+    if (!updatedDoc) {
+      res.status(404).json({
+        ok: true,
+        error: {
+          name: "id",
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+        },
+      });
+      return;
+    }
+
+    res.json({
+      ok: true,
+      message: "Update the Id successfully",
+      result: updatedDoc,
+    });
+  } catch (err) {
+    const errMsg = formatterErrorFunc(err);
+    res.status(400).json({ error: errMsg });
+  }
+});
+//
+
+//
+// router.get(
+//   "/search-many",
+//   validateSchema(search_deleteManyOrdersSchema),
+//   function (req, res, next) {
+//     const query = req.query;
+//     findDocuments({ query: query }, COLLECTION_ORDERS)
+//       .then((result) => res.status(200).json(result))
+//       .catch((err) =>
+//         res.status(500).json({ findFunction: "failed", err: err })
+//       );
+//   }
+// );
+// //
+
+// //Insert Many  -- haven't validation yet
+// router.post(
+//   "/insert-many",
+//   validateSchema(insertManyOrdersSchema),
+//   function (req, res, next) {
+//     const listData = req.body;
+
+//     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
+//     listData.map((order) => {
+//       order.shippedDate = new Date(
+//         moment(order.shippedDate).utc().local().format("YYYY-MM-DD")
+//       );
+//       order.createdDate = new Date(moment().utc().local().format("YYYY-MM-DD"));
+//     });
+
+//     insertDocuments(listData, COLLECTION_ORDERS)
+//       .then((result) => {
+//         res.status(200).json({ ok: true, result: result });
+//       })
+//       .catch((err) => {
+//         res.json(500).json({ ok: false });
+//       });
+//   }
+// );
+// //
+
+//Just update array products
+router.patch("/updateOne/:id",validateId, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    //if updating [createdDate, shippedDate]
+    //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
+    if (updateData.shippedDate) {
+      updateData.shippedDate = new Date(
+        moment(updateData.shippedDate).utc().local().format("YYYY-MM-DD")
+      );
+    }
+    if (updateData.createdDate) {
+      updateData.createdDate = new Date(
+        moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
+      );
+    }
+
+    const opts = { runValidators: true };
+
+    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
+    if (!updatedDoc) {
+      res.status(404).json({
+        ok: true,
+        error: {
+          name: "id",
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+        },
+      });
+      return;
+    }
+
+    res.json({
+      ok: true,
+      message: "Update the Id successfully",
+      result: updatedDoc,
+    });
   } catch (err) {
     const errMsg = formatterErrorFunc(err);
     res.status(400).json({ error: errMsg });
@@ -234,14 +334,30 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 // //
 
 //Delete ONE with ID
-router.delete("/delete-id/:id", validateId, async (req, res, next) => {
+router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const deleteOrder = await Order.findByIdAndDelete(id);
-    res.status(200).json(deleteOrder);
+    const deleteDoc = await Order.findByIdAndDelete(id);
+    if (!deleteDoc) {
+      res.status(200).json({
+        ok: true,
+        noneExist: `the document doesn't exist in the collection ${COLLECTION_ORDERS}`,
+      });
+      return;
+    }
+    res.json({
+      ok: true,
+      message:
+        "Delete the document in MongoDB successfully",
+    });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+    res.status(400).json({
+      ok: false,
+      message: "Failed to delete the document with ID",
+      error: errMsgMongoDB,
+    });
   }
 });
 // //
