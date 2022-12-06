@@ -7,19 +7,16 @@ const addressSchema = new Schema(
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     state: {
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     city: {
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     detailAddress: {
       type: String,
