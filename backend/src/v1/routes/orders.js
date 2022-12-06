@@ -334,14 +334,30 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 // //
 
 //Delete ONE with ID
-router.delete("/delete-id/:id", validateId, async (req, res, next) => {
+router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const deleteOrder = await Order.findByIdAndDelete(id);
-    res.status(200).json(deleteOrder);
+    const deleteDoc = await Order.findByIdAndDelete(id);
+    if (!deleteDoc) {
+      res.status(200).json({
+        ok: true,
+        noneExist: `the document doesn't exist in the collection ${COLLECTION_ORDERS}`,
+      });
+      return;
+    }
+    res.json({
+      ok: true,
+      message:
+        "Delete the document in MongoDB successfully",
+    });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+    res.status(400).json({
+      ok: false,
+      message: "Failed to delete the document with ID",
+      error: errMsgMongoDB,
+    });
   }
 });
 // //
