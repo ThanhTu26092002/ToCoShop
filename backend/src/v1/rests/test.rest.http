@@ -3,7 +3,7 @@
 ### V1##########################################################
 
 
-### CATEGORIES#######
+############################################################## CATEGORIES##################################################################
 
 ###### get all
 # GET {{urlDev}}/v1/categories
@@ -21,8 +21,7 @@ PATCH http://localhost:9000/v1/categories/updateOne/:id
 ### Delete one category with the id
 DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
-###########################################################################
-###SUPPLIERS
+##############################################################SUPPLIERS###########################################################
 GET http://localhost:9000/v1/suppliers
 
 ###Update the image of one category
@@ -37,4 +36,10 @@ PATCH http://localhost:9000/v1/suppliers/updateOne/:id
 ### Delete one category with the id
 DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
+###################################EMPLOYEES################################################################
 
+
+
+
+###################################PRODUCTS################################################################
+GET http://localhost:9000/v1/products

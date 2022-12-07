@@ -5,6 +5,13 @@ const { Schema, model } = mongoose;
 
 const productSchema = new Schema(
     {
+        productCode:{
+            type: String,
+            trim: true,
+            unique: true,
+            required: true,
+            maxLength: 10,
+        },
         name: {
             type: String,
             trim: true,
@@ -20,7 +27,12 @@ const productSchema = new Schema(
         },
         
         size:[
-            String,
+            Object,{
+                typeSize:{
+                    type: String,
+                },
+                salary:Number
+            }
         ],
         stock: Number,
         categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
