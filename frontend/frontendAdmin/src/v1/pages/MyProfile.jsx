@@ -158,6 +158,7 @@ function Employees() {
                 style={{ fontWeight: 600 }}
                 onClick={() => {}}
                 title="Xóa"
+                //asdasd
               ></Button>
             </Popconfirm>
           </div>
@@ -496,103 +497,7 @@ function Employees() {
   //
 
   return (
-    <Layout>
-      <Content style={{ padding: 24 }}>
-        <ConfigProvider locale={locale}>
-          <Form
-            {...PropsForm}
-            form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formCreate");
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-          >
-            <Form.Item {...PropsFormItemFirstName}>
-              <Input placeholder="First name" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemLastName}>
-              <Input placeholder="Last name" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemEmail}>
-              <Input placeholder="Email" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemPhoneNumber}>
-              <Input placeholder="Số điện thoại của nhan vien" />
-            </Form.Item>
-            <Form.Item {...PropsFormItemBirthday}>
-              <DatePicker
-                allowClear={false}
-                showToday={false}
-                disabledDate={disabledDate}
-                placeholder="dd/mm/yyyy"
-                format={dateFormatList}
-                locale={locale}
-                renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
-              />
-            </Form.Item>
-            <Form.Item {...PropsFormItemAddress}>
-              <TextArea rows={3} placeholder="Dia chi nhan vien" />
-            </Form.Item>
-
-            {/* <Form.Item
-              {...PropsFormItemUpload}
-              //Handling update fileList
-              getValueFromEvent={normFile}
-            >
-              <Upload
-                listType="picture"
-                showUploadList={true}
-                beforeUpload={(file) => {
-                  setFile(file);
-                  return false;
-                }}
-                onRemove={() => {
-                  setFile(null);
-                }}
-              >
-                <Button icon={<UploadOutlined />} loading={uploading}>
-                  Tải ảnh
-                </Button>
-              </Upload>
-            </Form.Item> */}
-
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Button type="primary" htmlType="submit">
-                Tạo mới
-              </Button>
-            </Form.Item>
-          </Form>
-        </ConfigProvider>
-
-        <Table
-          {...PropsTable}
-          columns={columns}
-          dataSource={employees}
-          pagination={{
-            total: totalDocs,
-            showTotal: (totalDocs, range) =>
-              `${range[0]}-${range[1]} of ${totalDocs} items`,
-            defaultPageSize: 10,
-            defaultCurrent: 1,
-          }}
-        />
-        <Modal
-          title="Chỉnh sửa thông tin danh mục"
-          open={isModalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          width={800}
-        >
+    <Layout>    
           <Form
             {...PropsForm}
             form={formUpdate}
@@ -633,8 +538,6 @@ function Employees() {
               <TextArea rows={3} placeholder="Dia chi nhan vien" />
             </Form.Item>
           </Form>
-        </Modal>
-      </Content>
     </Layout>
   );
 }
