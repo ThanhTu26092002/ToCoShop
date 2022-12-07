@@ -10,6 +10,7 @@ const WEB_SERVER_UPLOAD_URL = 'http://localhost:9000/uploads'
 const PATH_CATEGORIES = '/categories'
 
 const ICON_NoImage = "./images/logo_toCoShop.png";
+const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 
 module.exports= {
     URLCategory, URLSupplier, URLCustomer,
@@ -18,5 +19,6 @@ module.exports= {
     URLTransportation,
     WEB_SERVER_UPLOAD_URL,
     PATH_CATEGORIES,
-    ICON_NoImage
+    ICON_NoImage,
+    dateFormatList
 }

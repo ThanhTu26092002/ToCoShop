@@ -462,10 +462,8 @@ function Orders() {
             }}
           >
             {/* <ChosenProducts /> */}
-            <Fragment >
-              <Form.List name="products"
-             
-              >
+            <Fragment>
+              <Form.List name="products">
                 {(fields, { add, remove }) => (
                   <>
                     {fields.map(({ key, name, ...restField }) => (
@@ -478,8 +476,8 @@ function Orders() {
                         // align="baseline"
                       >
                         <Form.Item
-                        labelCol={{spand:4}}
-                        wrapperCol={{spand: 16}}
+                          labelCol={{ spand: 4 }}
+                          wrapperCol={{ spand: 16 }}
                           {...restField}
                           name={[name, "first"]}
                           rules={[
@@ -705,6 +703,11 @@ function Orders() {
                     }
                   }}
                 />
+
+                {/* <MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        style={{ color: "#ff4d4f" }}
+                      />  */}
               </Form.Item>
             </Fragment>
 
@@ -741,7 +744,7 @@ function Orders() {
                   },
                 ]}
               >
-                <Input placeholder="Số điện thoại của người nhận hàng" />
+                <Input placeholder="Số điện thoại của người đặt hàng" />
               </Form.Item>
 
               <Form.Item

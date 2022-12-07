@@ -31,7 +31,11 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLOrder, URLTransportation } from "../../config/constants";
+import {
+  dateFormatList,
+  URLOrder,
+  URLTransportation,
+} from "../../config/constants";
 import LabelCustomization, {
   NumberFormatter,
   BoldText,
@@ -52,13 +56,14 @@ import {
   PropsTable,
 } from "../../config/props";
 import ChosenProducts from "./components/ChosenProducts";
+import { customDisabledDate } from "../../config/helperFuncs";
 const { Title, Text } = Typography;
 
 function Orders() {
   const paymentMethodList = ["CREDIT CARD", "COD"];
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 
-  const [isCreate, setIsCreate] = useState(false);
+  // const [isCreate, setIsCreate] = useState(false);
   const [selectedPaymentCreditCard, setSelectedPaymentCreditCard] =
     useState(null);
   const [loading, setLoading] = useState(false);
@@ -85,8 +90,6 @@ function Orders() {
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
-
-  const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 
   const columns = [
     {
@@ -205,15 +208,6 @@ function Orders() {
     return current >= moment();
   };
 
-  const disabledForSending = (current) => {
-    // return current < moment(savedCreatedDate.current);
-    return current < moment(createdDateState);
-  };
-
-  const disabledForReceived = (current) => {
-    return current < moment(sendingDateState);
-  };
-
   const handleOk = () => {
     formUpdate.submit();
   };
@@ -242,7 +236,7 @@ function Orders() {
   };
 
   const handleFinishCreate = (values) => {
-    console.log('values create:', values)
+    console.log("values create:", values);
     return;
     setLoadingBtn(true);
     //SUBMIT
@@ -254,7 +248,7 @@ function Orders() {
       .then((response) => {
         if (response.status === 201) {
           setLoading(true);
-          setIsCreate(false);
+          // setIsCreate(false);
           setRefresh((e) => !e);
           formCreate.resetFields();
           notification.info({
@@ -344,15 +338,15 @@ function Orders() {
   };
 
   const handleCreateBtn = () => {
-    setIsCreate(true);
+    // setIsCreate(true);
   };
   const handleCancelCreate = () => {
     formCreate.resetFields();
-    setIsCreate(false);
+    // setIsCreate(false);
   };
 
   const handleMouseLeaveCreate = () => {
-    setIsCreate(false);
+    // setIsCreate(false);
     formCreate.resetFields();
   };
   useEffect(() => {
@@ -405,178 +399,125 @@ function Orders() {
       setTransportationList(response.data.results);
     });
   }, []);
-  const formItemLayout = {
-    labelCol: {
-      xs: {
-        span: 24,
-      },
-      sm: {
-        span: 4,
-      },
-    },
-    wrapperCol: {
-      xs: {
-        span: 24,
-      },
-      sm: {
-        span: 20,
-      },
-    },
-  };
-  const formItemLayoutWithOutLabel = {
-    wrapperCol: {
-      xs: {
-        span: 24,
-        offset: 0,
-      },
-      sm: {
-        span: 20,
-        offset: 4,
-      },
-    },
-  };
+  const prefixSelectorProduct = (
+    <Form.Item name="productCode" noStyle>
+     <Select
+                  placeholder="Mã sản phẩm"
+                  style={{ width: 150 }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    countryList &&
+                    countryList.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
+    </Form.Item>
+  );
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
-        {!isCreate && (
-          <Button type="primary" onClick={handleCreateBtn}>
-            Tạo mới
-          </Button>
-        )}
-        {isCreate && (
-          <Form
-            {...PropsForm}
-            form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-            initialValues={{
-              createdDate: moment(new Date()),
-              sendingDate: null,
-              receivedDate: null,
-              status: "WAITING",
-              country: null,
-              state: null,
-              city: null,
-              cardNumber: "5105105105105100",
-            }}
-          >
-            {/* <ChosenProducts /> */}
-            <Fragment >
-              <Form.List name="products"
-             
-              >
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, ...restField }) => (
-                      <Form.Item>
-                      <Space
-                        key={key}
-                        style={{
-                          display: "flex",
-                          marginBottom: 8,
-                        }}
-                        // align="baseline"
-                      >
-                        <Form.Item
-                        label='Mã sản phẩm'
-                          {...restField}
-                          name={[name, "productId"]}
-                          rules={[
-                            {
-                              required: true,
-                              message: "Missing first name",
-                            },
-                          ]}
-                        >
-                          <Input placeholder="First Name" />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, "quantity"]}
-                          rules={[
-                            {
-                              required: true,
-                              message: "Missing last name",
-                            },
-                          ]}
-                        >
-                          <Input placeholder="Số lượng" />
-                        </Form.Item>
-                        <MinusCircleOutlined onClick={() => remove(name)} />
-                      </Space>
-                      </Form.Item>
-                    ))}
+        <Form
+          {...PropsForm}
+          form={formCreate}
+          name="formCreate"
+          onFinish={handleFinishCreate}
+          onFinishFailed={() => {
+            console.error("Error at onFinishFailed at formCreate");
+          }}
+          initialValues={{
+            sendingDate: null,
+            receivedDate: null,
+            status: "WAITING",
+            country: null,
+            state: null,
+            city: null,
+            cardNumber: "5105105105105100",
+          }}
+        >
+          {/* <ChosenProducts /> */}
+          <Fragment>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Ngày đặt hàng",
+                name: "createdDate",
+              })}
+            >
+              <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
+            </Form.Item>
+            <Form.Item {...PropsFormItemEmail} name="emailContactInfo">
+              <Input placeholder="Email" />
+            </Form.Item>
 
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                      >
-                        Add field
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            </Fragment>
-            {/* Part 1 - date&&status*/}
-            <Text strong style={{ color: "blue" }}>
+            <Form.Item
+              {...PropsFormItemPhoneNumber}
+              name="phoneNumberContactInfo"
+              rules={[
+                ...PropsFormItemPhoneNumber.rules,
+                {
+                  required: true,
+                  message: "Trường dữ liệu không thể bỏ trống",
+                },
+              ]}
+            >
+              <Input placeholder="Số điện thoại của người đặt hàng" />
+            </Form.Item>
+            <Form.List name="products">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }, index) => (
+                    <Form.Item
+        name="phone"
+        label={`Sản phẩm ${index}`}
+        rules={[
+          {
+            required: true,
+            message: 'Please input your phone number!',
+          },
+        ]}
+      >
+        <Input
+          addonBefore={prefixSelectorProduct}
+          placeholder='Số lượng'
+          style={{
+            width: '100%',
+          }}
+          addonAfter={<MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        style={{ color: "#ff4d4f" }}
+                      /> }
+        />
+      </Form.Item>
+                  )
+                  )
+                  }
+                  <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Thêm sản phẩm
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+          </Fragment>
+          {/* Part 1 - date&&status*/}
+          {/* <Text strong style={{ color: "blue" }}>
               Trạng thái đơn hàng
-            </Text>
-            <Fragment>
-              <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Ngày đặt hàng",
-                  name: "createdDate",
-                })}
-                rules={[
-                  {
-                    required: true,
-                    message: "Ngày đặt hàng không thể để trống!",
-                  },
-                ]}
-              >
-                <DatePicker
-                  showToday={false}
-                  disabledDate={disabledDate}
-                  format={dateFormatList}
-                  onChange={(e) => {
-                    if (e) {
-                      console.log("show ", sendingDateState);
-                      console.log("show format: ", e.format("YYYY-MM-DD"));
-                      setCreatedDateState(e.format("YYYY-MM-DD"));
-                      if (
-                        moment(e.format("YYYY-MM-DD")) >
-                        moment(sendingDateState)
-                      ) {
-                        message.error(
-                          "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
-                        );
-                        formCreate.setFieldsValue({
-                          sendingDate: null,
-                          receivedDate: null,
-                        });
-                        setSendingDateState(null);
-                        setReceivedDateState(null);
-                      }
-                    } else {
-                      formCreate.setFieldsValue({
-                        sendingDate: null,
-                        receivedDate: null,
-                      });
-                      setSendingDateState(null);
-                      setReceivedDateState(null);
-                    }
-                  }}
-                />
-              </Form.Item>
-
-              <Form.Item
+            </Text> */}
+          <Fragment>
+            {/* <Form.Item
                 {...PropsFormItem_Label_Name({
                   label: "Tình trạng",
                   name: "status",
@@ -660,9 +601,12 @@ function Orders() {
                   name: "sendingDate",
                 })}
               >
+
+
+              
                 <DatePicker
                   showToday={false}
-                  disabledDate={disabledForSending}
+                  disabledDate={(current) => customDisabledDate(current, createdDateState)}
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}
                   value={moment(sendingDateState)}
@@ -696,7 +640,7 @@ function Orders() {
               >
                 <DatePicker
                   showToday={false}
-                  disabledDate={disabledForReceived}
+                  disabledDate={(current) => customDisabledDate(current, sendingDateState)}
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}
                   onChange={(e) => {
@@ -708,11 +652,11 @@ function Orders() {
                     }
                   }}
                 />
-              </Form.Item>
-            </Fragment>
+              </Form.Item> */}
+          </Fragment>
 
-            {/* Part 05- Adding a note for description of employee's action */}
-            <Fragment>
+          {/* Part 05- Adding a note for description of employee's action */}
+          {/* <Fragment>
               <Form.Item
                 {...PropsFormItem_Label_Name({
                   label: "Mô tả thao tác",
@@ -721,25 +665,24 @@ function Orders() {
               >
                 <TextArea rows={3} placeholder="Mô tả thao tác của bạn" />
               </Form.Item>
-            </Fragment>
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Space wrap>
-                <Button type="primary" danger onClick={handleCancelCreate}>
-                  Hủy
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loadingBtn}>
-                  Tạo mới
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        )}
-       
+            </Fragment> */}
+          <Form.Item
+            wrapperCol={{
+              offset: 8,
+              span: 16,
+            }}
+          >
+            <Space wrap>
+              <Button type="primary" danger onClick={handleCancelCreate}>
+                Hủy
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loadingBtn}>
+                Tạo mới
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+        {/* )} */}
       </Content>
     </Layout>
   );
