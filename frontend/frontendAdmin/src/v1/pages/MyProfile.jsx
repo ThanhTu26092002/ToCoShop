@@ -44,10 +44,17 @@ function Employees() {
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [isChangedImage, setIsChangedImage] = useState(false);
   const [isChangeValueUpload, setIsChangeValueUpload] = useState(false);
+  
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
+  //const myprofile = localStorage.getItem('auth-toCoShop');
+  const payload = localStorage.getItem('auth-toCoShop');
+  
+  //console.log("ok true",myprofile);
+  console.log("hi",payload);
+
 
   const columns = [
     {
@@ -494,8 +501,9 @@ function Employees() {
       setTotalDocs(newEmployees.length);
     });
   }, [refresh]);
-  //
 
+  
+///myinfo
   return (
     <Layout>    
           <Form
