@@ -26,6 +26,8 @@ import {
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
@@ -65,11 +67,16 @@ function Orders() {
   const [transportationList, setTransportationList] = useState();
   const [totalDocs, setTotalDocs] = useState(0);
   const [countryList, setCountryList] = useState(null);
-  const [statesList, setStatesList] = useState(null);
-  const [cityList, setCityList] = useState(null);
+  const [statesListContactInfo, setStatesListContactInfo] = useState(null);
+  const [cityListContactInfo, setCityListContactInfo] = useState(null);
+  const [statesListShippingInfo, setStatesListShippingInfo] = useState(null);
+  const [cityListShippingInfo, setCityListShippingInfo] = useState(null);
   const [refresh, setRefresh] = useState(false);
-  const [onChangeCountry, setOnChangeCountry] = useState(false);
-  const [onchangeState, setOnChangeState] = useState(false);
+  const [createdDateState, setCreatedDateState] = useState(
+    moment(new Date()).format("YYYY-MM-DD")
+  );
+  const [sendingDateState, setSendingDateState] = useState(null);
+  const [receivedDateState, setReceivedDateState] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -80,11 +87,6 @@ function Orders() {
   const [formUpdate] = Form.useForm();
 
   const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
-  const savedCreatedDate = useRef(moment(new Date()));
-  const savedSendingDate = useRef(null);
-  const saveReceivedDate = useRef(null);
-  const savedSelectedCountry = useRef(null);
-  const savedSelectedState = useRef(null);
 
   const columns = [
     {
@@ -204,11 +206,12 @@ function Orders() {
   };
 
   const disabledForSending = (current) => {
-    return current < moment(savedCreatedDate.current);
+    // return current < moment(savedCreatedDate.current);
+    return current < moment(createdDateState);
   };
 
   const disabledForReceived = (current) => {
-    return current < moment(savedSendingDate.current);
+    return current < moment(sendingDateState);
   };
 
   const handleOk = () => {
@@ -396,18 +399,40 @@ function Orders() {
   }, []);
 
   useEffect(() => {
-    setStatesList(savedSelectedCountry.current);
-  }, [onChangeCountry]);
-
-  useEffect(() => {
-    setCityList(savedSelectedState.current);
-  }, [onchangeState]);
-
-  useEffect(() => {
     axiosClient.get(`${URLTransportation}`).then((response) => {
       setTransportationList(response.data.results);
     });
   }, []);
+  const formItemLayout = {
+    labelCol: {
+      xs: {
+        span: 24,
+      },
+      sm: {
+        span: 4,
+      },
+    },
+    wrapperCol: {
+      xs: {
+        span: 24,
+      },
+      sm: {
+        span: 20,
+      },
+    },
+  };
+  const formItemLayoutWithOutLabel = {
+    wrapperCol: {
+      xs: {
+        span: 24,
+        offset: 0,
+      },
+      sm: {
+        span: 20,
+        offset: 4,
+      },
+    },
+  };
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
@@ -437,6 +462,63 @@ function Orders() {
             }}
           >
             {/* <ChosenProducts /> */}
+            <Fragment>
+              <Form.List name="products">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }) => (
+                      <Space
+                        key={key}
+                        style={{
+                          display: "flex",
+                          marginBottom: 8,
+                        }}
+                        // align="baseline"
+                      >
+                        <Form.Item
+                          labelCol={{ spand: 4 }}
+                          wrapperCol={{ spand: 16 }}
+                          {...restField}
+                          name={[name, "first"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Missing first name",
+                            },
+                          ]}
+                        >
+                          <Input placeholder="First Name" />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "last"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Missing last name",
+                            },
+                          ]}
+                        >
+                          <Input placeholder="Last Name" />
+                        </Form.Item>
+                        <MinusCircleOutlined onClick={() => remove(name)} />
+                      </Space>
+                    ))}
+
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Add field
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
+            </Fragment>
             {/* Part 1 - date&&status*/}
             <Text strong style={{ color: "blue" }}>
               Trạng thái đơn hàng
@@ -460,19 +542,30 @@ function Orders() {
                   format={dateFormatList}
                   onChange={(e) => {
                     if (e) {
-                      savedCreatedDate.current = e.format("YYYY-MM-DD");
+                      console.log("show ", sendingDateState);
+                      console.log("show format: ", e.format("YYYY-MM-DD"));
+                      setCreatedDateState(e.format("YYYY-MM-DD"));
                       if (
-                        moment(savedCreatedDate.current) >
-                          moment(savedSendingDate.current) &&
-                        savedCreatedDate.current !== null
+                        moment(e.format("YYYY-MM-DD")) >
+                        moment(sendingDateState)
                       ) {
                         message.error(
                           "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
                         );
-                        formCreate.setFieldsValue({ sendingDate: null });
+                        formCreate.setFieldsValue({
+                          sendingDate: null,
+                          receivedDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
                       }
                     } else {
-                      savedCreatedDate.current = null;
+                      formCreate.setFieldsValue({
+                        sendingDate: null,
+                        receivedDate: null,
+                      });
+                      setSendingDateState(null);
+                      setReceivedDateState(null);
                     }
                   }}
                 />
@@ -493,38 +586,56 @@ function Orders() {
                           receivedDate: null,
                           sendingDate: null,
                         });
-                        saveReceivedDate.current = null;
-                        savedSendingDate.current = null;
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
                         break;
                       case "SHIPPING":
-                        formCreate.setFieldsValue({
-                          sendingDate: moment(new Date()),
-                        });
-                        formCreate.setFieldsValue({ receivedDate: null });
-                        savedSendingDate.current = moment(new Date());
-                        saveReceivedDate.current = null;
-
-                        break;
-                      case "COMPLETED":
-                      console.log('test date:',savedSendingDate.current )
-                        if (savedSendingDate.current === null) {
+                        if (sendingDateState) {
+                          formCreate.setFieldsValue({
+                            receivedDate: null,
+                          });
+                          setReceivedDateState(null);
+                        } else {
                           formCreate.setFieldsValue({
                             sendingDate: moment(new Date()),
+                            receivedDate: null,
                           });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(null);
                         }
-                        formCreate.setFieldsValue({
-                          receivedDate: moment(new Date()),
-                        });
-                        savedSendingDate.current = moment(new Date());
-                        saveReceivedDate.current = moment(new Date());
+                        break;
+                      case "COMPLETED":
+                        if (sendingDateState) {
+                          formCreate.setFieldsValue({
+                            receivedDate: moment(new Date()),
+                          });
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        } else {
+                          formCreate.setFieldsValue({
+                            sendingDate: moment(new Date()),
+                            receivedDate: moment(new Date()),
+                          });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        }
                         break;
                       case "CANCELED":
-                        formCreate.setFieldsValue({ receivedDate: null });
-                        saveReceivedDate.current = null;
+                        formCreate.setFieldsValue({
+                          receivedDate: null,
+                          sendingDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
                         break;
                       default:
-
-                      // formCreate.setFieldsValue({ sendingDate: null });
                     }
                   }}
                 >
@@ -549,28 +660,24 @@ function Orders() {
                   disabledDate={disabledForSending}
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}
+                  value={moment(sendingDateState)}
                   onChange={(e) => {
+                    console.log("receivedDate:", receivedDateState);
                     if (e) {
-                      savedSendingDate.current = e.format("YYYY-MM-DD");
-                      formCreate.setFieldsValue({ status: "SHIPPING" });
-
-                      if (savedCreatedDate.current === null) {
-                        message.error("Chưa nhập ngày đặt đơn hàng");
-                        formCreate.setFieldsValue({ sendingDate: null });
-                      }
-
+                      setSendingDateState(e.format("YYYY-MM-DD"));
                       if (
-                        moment(savedSendingDate.current) >
-                          moment(saveReceivedDate.current) &&
-                        saveReceivedDate.current !== null
+                        moment(e.format("YYYY-MM-DD")) >
+                        moment(receivedDateState)
                       ) {
                         message.error(
-                          "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
+                          "Ngày chuyển hàng không thể lớn hơn ngày nhận hàng"
                         );
                         formCreate.setFieldsValue({ receivedDate: null });
+                        setReceivedDateState(null);
                       }
                     } else {
-                      savedSendingDate.current = null;
+                      formCreate.setFieldsValue({ receivedDate: null });
+                      setReceivedDateState(null);
                     }
                   }}
                 />
@@ -589,20 +696,18 @@ function Orders() {
                   format={dateFormatList}
                   onChange={(e) => {
                     if (e) {
-                      saveReceivedDate.current = e.format("YYYY-MM-DD");
+                      setReceivedDateState(e.format("YYYY-MM-DD"));
                       formCreate.setFieldsValue({ status: "COMPLETED" });
-
-                      if (savedSendingDate.current === null) {
-                        message.error(
-                          "Ngày nhận hàng phải sau ngày chuyển hàng"
-                        );
-                        formCreate.setFieldsValue({ receivedDate: null });
-                      }
                     } else {
-                      saveReceivedDate.current = null;
+                      setReceivedDateState(null);
                     }
                   }}
                 />
+
+                {/* <MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        style={{ color: "#ff4d4f" }}
+                      />  */}
               </Form.Item>
             </Fragment>
 
@@ -639,7 +744,7 @@ function Orders() {
                   },
                 ]}
               >
-                <Input placeholder="Số điện thoại của người nhận hàng" />
+                <Input placeholder="Số điện thoại của người đặt hàng" />
               </Form.Item>
 
               <Form.Item
@@ -652,10 +757,13 @@ function Orders() {
                   placeholder="Chọn..."
                   style={{ width: 150 }}
                   onChange={(value) => {
-                    savedSelectedCountry.current = countryList.find(
-                      (e) => e.name === value
+                    setStatesListContactInfo(
+                      countryList.find((e) => e.name === value)
                     );
-                    setOnChangeCountry((e) => !e);
+                    formCreate.setFieldsValue({
+                      stateContactInfo: null,
+                      cityContactInfo: null,
+                    });
                   }}
                   showSearch
                   optionFilterProp="children"
@@ -684,10 +792,10 @@ function Orders() {
                   style={{ width: 150 }}
                   placeholder="Chọn..."
                   onChange={(value) => {
-                    savedSelectedState.current = statesList.states.find(
-                      (e) => e.name === value
+                    setCityListContactInfo(
+                      statesListContactInfo.states.find((e) => e.name === value)
                     );
-                    setOnChangeState((e) => !e);
+                    formCreate.setFieldsValue({ cityContactInfo: null });
                   }}
                   showSearch
                   optionFilterProp="children"
@@ -697,8 +805,8 @@ function Orders() {
                       .includes(input.toLowerCase())
                   }
                   options={
-                    statesList &&
-                    statesList.states.map((e) => {
+                    statesListContactInfo &&
+                    statesListContactInfo.states.map((e) => {
                       const tmp = { value: e.name, label: e.name };
                       return tmp;
                     })
@@ -723,8 +831,8 @@ function Orders() {
                       .includes(input.toLowerCase())
                   }
                   options={
-                    cityList &&
-                    cityList.cities.map((e) => {
+                    cityListContactInfo &&
+                    cityListContactInfo.cities.map((e) => {
                       const tmp = { value: e.name, label: e.name };
                       return tmp;
                     })
@@ -830,21 +938,29 @@ function Orders() {
                   placeholder="Chọn..."
                   style={{ width: 150 }}
                   onChange={(value) => {
-                    savedSelectedCountry.current = countryList.find(
-                      (e) => e.name === value
+                    setStatesListShippingInfo(
+                      countryList.find((e) => e.name === value)
                     );
-                    setOnChangeCountry((e) => !e);
+                    formCreate.setFieldsValue({
+                      stateShippingInfo: null,
+                      cityShippingInfo: null,
+                    });
                   }}
-                >
-                  {countryList &&
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    countryList &&
                     countryList.map((e) => {
-                      return (
-                        <Select.Option key={e.id} value={e.name}>
-                          {e.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -857,22 +973,28 @@ function Orders() {
                   style={{ width: 150 }}
                   placeholder="Chọn..."
                   onChange={(value) => {
-                    console.log("states: ", statesList);
-                    savedSelectedState.current = statesList.states.find(
-                      (e) => e.name === value
+                    setCityListShippingInfo(
+                      statesListShippingInfo.states.find(
+                        (e) => e.name === value
+                      )
                     );
-                    setOnChangeState((e) => !e);
+                    formCreate.setFieldsValue({ cityShippingInfo: null });
                   }}
-                >
-                  {statesList &&
-                    statesList.states.map((state) => {
-                      return (
-                        <Select.Option key={state.id} value={state.name}>
-                          {state.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    statesListShippingInfo &&
+                    statesListShippingInfo.states.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -881,16 +1003,24 @@ function Orders() {
                   name: "cityShippingInfo",
                 })}
               >
-                <Select placeholder="Chọn..." style={{ width: 150 }}>
-                  {cityList &&
-                    cityList?.cities?.map((city) => {
-                      return (
-                        <Select.Option key={city.id} value={city.name}>
-                          {city.name}
-                        </Select.Option>
-                      );
-                    })}
-                </Select>
+                <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    cityListShippingInfo &&
+                    cityListShippingInfo.cities.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -910,7 +1040,7 @@ function Orders() {
               </Form.Item>
             </Fragment>
             <Divider style={{ backgroundColor: "#e3e6f2" }} />
-            {/* Part 04 */}
+            {/* Part 04 - Payment Method */}
             <Fragment>
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -1024,11 +1154,12 @@ function Orders() {
             {/* Part 05- Adding a note for description of employee's action */}
             <Fragment>
               <Form.Item
-                {...PropsFormItemDetailAddress}
-                label="Mô tả thao tác"
-                name="handlerAction"
+                {...PropsFormItem_Label_Name({
+                  label: "Mô tả thao tác",
+                  name: "handlerAction",
+                })}
               >
-                <Input placeholder="Mô tả thao tác của bạn" />
+                <TextArea rows={3} placeholder="Mô tả thao tác của bạn" />
               </Form.Item>
             </Fragment>
             <Form.Item
@@ -1048,7 +1179,7 @@ function Orders() {
             </Form.Item>
           </Form>
         )}
-        <Table
+        {/* <Table
           {...PropsTable({
             title: "danh sách đơn đặt hàng",
             isLoading: loading,
@@ -1258,7 +1389,7 @@ function Orders() {
               </Form.Item>
             </Fragment>
           </Form>
-        </Modal>
+        </Modal> */}
       </Content>
     </Layout>
   );
