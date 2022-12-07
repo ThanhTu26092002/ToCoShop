@@ -21,7 +21,7 @@ const Login = () => {
         // localStorage.setItem("auth", JSON.stringify(response.data));
         // Zustand: method
         console.log(response)
-        signIn({ payload: response.data.payload, token: response.data.token });
+        signIn({ payload: response.data.payload, token: response.data.token, employeeInfo: response.data.employeeInfo });
         message.success("Login success");
         navigate("/home");
       })
