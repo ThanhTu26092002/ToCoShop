@@ -31,10 +31,9 @@ const productSchema = new Schema(
                 typeSize:{
                     type: String,
                 },
-                salary:Number
+                amount:Number
             }
         ],
-        stock: Number,
         categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
         supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier' },
         description: {
@@ -45,11 +44,11 @@ const productSchema = new Schema(
         promotionPosition: [
             String
         ],
-        CoverImage: String,
+        coverImage: String,
         imageUrls: [
             Object,
             {
-                ImgUrl: {
+                imgUrl: {
                     type: String,
                 },
                 sortOrder: Number,
