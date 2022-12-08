@@ -18,7 +18,7 @@ const Login = () => {
     axios
       .post("http://localhost:9000/v1/login", { email, password })
       .then((response) => {
-        // localStorage.setItem("auth", JSON.stringify(response.data));
+        // localStorage.setItem("employeeInfo", JSON.stringify(response.data.employeeInfo));
         // Zustand: method
         console.log(response)
         signIn({ payload: response.data.payload, token: response.data.token, employeeInfo: response.data.employeeInfo });

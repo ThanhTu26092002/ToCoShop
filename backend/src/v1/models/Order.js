@@ -21,9 +21,9 @@ const addressSchema = new Schema(
     detailAddress: {
       type: String,
       trim: true,
-      required: true,
+      default: "unknown",
       maxLength: 500,
-
+      required: true,
     },
   },
   { _id: false }
@@ -36,12 +36,14 @@ const contactInfoSchema = new Schema(
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     lastName: {
       type: String,
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     phoneNumber: {
       type: String,
@@ -82,12 +84,14 @@ const shippingInfoSchema = new Schema(
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     lastName: {
       type: String,
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     phoneNumber: {
       type: String,
@@ -230,7 +234,7 @@ const orderSchema = new Schema(
     },
     paymentInfo: {
       type: paymentInfoSchema,
-      required: true,
+      // required: true,
     },
     orderDetails: {
       type: [orderDetailSchema],
