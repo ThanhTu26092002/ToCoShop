@@ -50,10 +50,18 @@ function Employees() {
   const [formUpdate] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
   //const myprofile = localStorage.getItem('auth-toCoShop');
-  const payload = localStorage.getItem('auth-toCoShop');
+  // const payload = localStorage.getItem('auth-toCoShop');
   
   //console.log("ok true",myprofile);
-  console.log("hi",payload);
+  // console.log("hi",payload);
+  const payload = localStorage.getItem('auth-toCoShop'); 
+  // payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
+  // convert type of payload: from STRING to OBJECT
+  const convertedPayload = JSON.parse(payload)
+  //console.log("ok true",myprofile);
+  console.log("get type of employee:",typeof(convertedPayload));
+  // Lấy ra từng phần nhỏ trong Object
+  console.log('get',convertedPayload.state.auth.employeeInfo)
 
 
   const columns = [
