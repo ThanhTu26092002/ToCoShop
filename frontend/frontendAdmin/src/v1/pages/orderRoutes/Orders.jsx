@@ -20,6 +20,7 @@ import {
   Select,
   Divider,
   Typography,
+  InputNumber,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
@@ -56,7 +57,6 @@ import {
   PropsFormItem_Label_Name,
   PropsTable,
 } from "../../config/props";
-import ChosenProducts from "./components/ChosenProducts";
 import { customDisabledDate } from "../../config/helperFuncs";
 const { Text } = Typography;
 
@@ -405,49 +405,15 @@ function Orders() {
   useEffect(() => {
     axiosClient.get(`${URLProduct}`).then((response) => {
       setProducts(response.data);
-      console.log("demo:", response.data);
     });
   }, []);
 
-  const prefixSelectorProduct = (key) => {
-    return (
-      <Form.Item name="productCode" noStyle style={{ minWidth: 150 }}>
-        <Select
-          loading={!products}
-          placeholder="Mã số"
-          style={{ width: 100 }}
-          showSearch
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-          }
-          options={
-            products &&
-            products.map((e) => {
-              const tmp = { value: e._id, label: e.productCode };
-              return tmp;
-            })
-          }
-          //     onChange={(value)=>{
-          //       // console.log(products.find((e) => e._id === value).name)
-          //       // formCreate.setFieldsValue({products: 'demo'})
-          //       const fields = formCreate.getFieldsValue()
-          //       console.log(fields)
-          //       console.log(key)
-          //       console.log(value)
-          // const { products } = fields
-          // Object.assign(products[key], { chosenProductName: 'after' })
-          // formCreate.setFieldsValue({ products })
-          //     }}
-        />
-      </Form.Item>
-    );
-  };
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
         <Form
           {...PropsForm}
+          labelCol={{ span: 0 }}
           form={formCreate}
           name="formCreate"
           onFinish={handleFinishCreate}
@@ -462,283 +428,140 @@ function Orders() {
             state: null,
             city: null,
             cardNumber: "5105105105105100",
+            orderDetails: [{ quantity: 1 }],
           }}
         >
-          {/* <ChosenProducts /> */}
-          <Fragment>
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Ngày đặt hàng",
-                name: "createdDate",
-              })}
-            >
-              <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
-            </Form.Item>
-            <Form.Item {...PropsFormItemEmail} name="emailContactInfo">
-              <Input placeholder="Email" />
-            </Form.Item>
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Ngày đặt hàng",
+              name: "createdDate",
+            })}
+          >
+            <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
+          </Form.Item>
+          {/* <Form.Item {...PropsFormItemEmail} name="emailContactInfo">
+            <Input placeholder="Email của người đặt hàng" />
+          </Form.Item> */}
 
-            <Form.Item
-              {...PropsFormItemPhoneNumber}
-              name="phoneNumberContactInfo"
-              rules={[
-                ...PropsFormItemPhoneNumber.rules,
-                {
-                  required: true,
-                  message: "Trường dữ liệu không thể bỏ trống",
-                },
-              ]}
-            >
-              <Input placeholder="Số điện thoại của người đặt hàng" />
-            </Form.Item>
-            <Form.List name="chosenProducts" initialValue={[{ quantity: "12" }]}>
-              {(fields, { add, remove }) => (
-                <>
-                  {fields.map(({ key, name, ...restField }, index) => (
-                    <Space
-                      key={key}
-                      style={{
-                        display: "flex",
-                        marginBottom: 8,
-                      }}
-                      align="baseline"
+          <Form.Item
+            {...PropsFormItemPhoneNumber}
+            name="phoneNumberContactInfo"
+            rules={[
+              ...PropsFormItemPhoneNumber.rules,
+              {
+                required: true,
+                message: "Trường dữ liệu không thể bỏ trống",
+              },
+            ]}
+          >
+            <Input placeholder="Số điện thoại của người đặt hàng" />
+          </Form.Item>
+          <Form.List name="orderDetails">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <Space
+                    key={key}
+                    style={{
+                      display: "flex",
+                      marginBottom: 8,
+                    }}
+                    align="baseline"
+                  >
+                    <Form.Item
+                      {...restField}
+                      label=<LabelCustomization title={`Tên sản phẩm`} />
+                      name={[name, "productName"]}
                     >
-                      <Form.Item
-                        label={`Mã sản phẩm ${key+1}`}
-                        {...restField}
-                        name={[name, "productCode"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Missing productCode",
-                          },
-                        ]}
-                      >
-                        <Select
-                          loading={!products}
-                          placeholder="Mã số"
-                          style={{ width: 100 }}
-                          showSearch
-                          optionFilterProp="children"
-                          filterOption={(input, option) =>
-                            (option?.label ?? "")
-                              .toLowerCase()
-                              .includes(input.toLowerCase())
-                          }
-                          options={
-                            products &&
-                            products.map((e) => {
-                              const tmp = {
-                                value: e._id,
-                                label: e.productCode,
-                              };
-                              return tmp;
-                            })
-                          }
-                          onChange={(value) => {
-                            let productName = products.find((e) => e._id === value).name
-                            const fields = formCreate.getFieldsValue();
-                            console.log(fields);
-                            console.log(`key: ${key} ; value: ${value}`);
-                            const { chosenProducts } = fields;
-                            Object.assign(chosenProducts[key], {
-                              productName: productName,
-                            });
-                            formCreate.setFieldsValue({ chosenProducts });
-                          }}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        label="Ten san pham"
-                        name={[name, "productName"]}
-                      >
-                        <Input placeholder="productName"  disabled/>
-                      </Form.Item>
-                      <Form.Item
-                        label="Số lượng"
-                        {...restField}
-                        name={[name, "quantity"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Missing quantity",
-                          },
-                        ]}
-                      >
-                        <Input placeholder="quantity" />
-                      </Form.Item>
-                      <MinusCircleOutlined onClick={() => remove(name)} />
-                    </Space>
-                  ))}
-                  <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
+                      <Input
+                        placeholder="Tên sản phẩm"
+                        disabled
+                        addonBefore={
+                          <Form.Item
+                            // label=<LabelCustomization
+                            //   title={`Mã sản phẩm ${name + 1}`}
+                            // />
+                            // {...restField}
+                            name={[name, "productCode"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn mã sản phẩm",
+                              },
+                            ]}
+                            noStyle
+                          >
+                            <Select
+                              loading={!products}
+                              placeholder="Mã số"
+                              style={{ width: 100 }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                products &&
+                                products.map((e) => {
+                                  const tmp = {
+                                    value: e._id,
+                                    label: e.productCode,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                              onChange={(value) => {
+                                //Get name of product and set it into value of input_productName
+                                let productName = products.find(
+                                  (e) => e._id === value
+                                ).name;
+                                const fields = formCreate.getFieldsValue();
+                                const { orderDetails } = fields;
+                                Object.assign(orderDetails[name], {
+                                  productName: productName,
+                                });
+                                formCreate.setFieldsValue({ orderDetails });
+                              }}
+                            />
+                          </Form.Item>
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label=<LabelCustomization title={`Số lượng`} />
+                      {...restField}
+                      name={[name, "quantity"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Chưa nhập số lượng",
+                        },
+                      ]}
                     >
-                      Thêm sản phẩm
-                    </Button>
-                  </Form.Item>
-                </>
-              )}
-            </Form.List>
-          </Fragment>
-          {/* Part 1 - date&&status*/}
-          {/* <Text strong style={{ color: "blue" }}>
-              Trạng thái đơn hàng
-            </Text> */}
-          <Fragment>
-            {/* <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Tình trạng",
-                  name: "status",
-                })}
-              >
-                <Select
-                  style={{ width: 150 }}
-                  onChange={(e) => {
-                    switch (e) {
-                      case "WAITING":
-                        formCreate.setFieldsValue({
-                          receivedDate: null,
-                          sendingDate: null,
-                        });
-                        setSendingDateState(null);
-                        setReceivedDateState(null);
-                        break;
-                      case "SHIPPING":
-                        if (sendingDateState) {
-                          formCreate.setFieldsValue({
-                            receivedDate: null,
-                          });
-                          setReceivedDateState(null);
-                        } else {
-                          formCreate.setFieldsValue({
-                            sendingDate: moment(new Date()),
-                            receivedDate: null,
-                          });
-                          setSendingDateState(
-                            moment(new Date()).format("YYYY-MM-DD")
-                          );
-                          setReceivedDateState(null);
-                        }
-                        break;
-                      case "COMPLETED":
-                        if (sendingDateState) {
-                          formCreate.setFieldsValue({
-                            receivedDate: moment(new Date()),
-                          });
-                          setReceivedDateState(
-                            moment(new Date()).format("YYYY-MM-DD")
-                          );
-                        } else {
-                          formCreate.setFieldsValue({
-                            sendingDate: moment(new Date()),
-                            receivedDate: moment(new Date()),
-                          });
-                          setSendingDateState(
-                            moment(new Date()).format("YYYY-MM-DD")
-                          );
-                          setReceivedDateState(
-                            moment(new Date()).format("YYYY-MM-DD")
-                          );
-                        }
-                        break;
-                      case "CANCELED":
-                        formCreate.setFieldsValue({
-                          receivedDate: null,
-                          sendingDate: null,
-                        });
-                        setSendingDateState(null);
-                        setReceivedDateState(null);
-                        break;
-                      default:
-                    }
-                  }}
-                >
-                  {statusList.map((s, index) => {
-                    return (
-                      <Select.Option key={index + 1} value={s}>
-                        {s}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Ngày chuyển hàng",
-                  name: "sendingDate",
-                })}
-              >
-
-
-              
-                <DatePicker
-                  showToday={false}
-                  disabledDate={(current) => customDisabledDate(current, createdDateState)}
-                  placeholder="dd-mm-yyyy"
-                  format={dateFormatList}
-                  value={moment(sendingDateState)}
-                  onChange={(e) => {
-                    console.log("receivedDate:", receivedDateState);
-                    if (e) {
-                      setSendingDateState(e.format("YYYY-MM-DD"));
-                      if (
-                        moment(e.format("YYYY-MM-DD")) >
-                        moment(receivedDateState)
-                      ) {
-                        message.error(
-                          "Ngày chuyển hàng không thể lớn hơn ngày nhận hàng"
-                        );
-                        formCreate.setFieldsValue({ receivedDate: null });
-                        setReceivedDateState(null);
-                      }
-                    } else {
-                      formCreate.setFieldsValue({ receivedDate: null });
-                      setReceivedDateState(null);
-                    }
-                  }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Ngày nhận hàng",
-                  name: "receivedDate",
-                })}
-              >
-                <DatePicker
-                  showToday={false}
-                  disabledDate={(current) => customDisabledDate(current, sendingDateState)}
-                  placeholder="dd-mm-yyyy"
-                  format={dateFormatList}
-                  onChange={(e) => {
-                    if (e) {
-                      setReceivedDateState(e.format("YYYY-MM-DD"));
-                      formCreate.setFieldsValue({ status: "COMPLETED" });
-                    } else {
-                      setReceivedDateState(null);
-                    }
-                  }}
-                />
-              </Form.Item> */}
-          </Fragment>
-
-          {/* Part 05- Adding a note for description of employee's action */}
-          {/* <Fragment>
-              <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Mô tả thao tác",
-                  name: "handlerAction",
-                })}
-              >
-                <TextArea rows={3} placeholder="Mô tả thao tác của bạn" />
-              </Form.Item>
-            </Fragment> */}
+                      <InputNumber
+                        min={0}
+                        placeholder="số lượng"
+                        addonAfter="sản phẩm"
+                      />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Thêm sản phẩm
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
           <Form.Item
             wrapperCol={{
               offset: 8,
@@ -749,13 +572,19 @@ function Orders() {
               <Button type="primary" danger onClick={handleCancelCreate}>
                 Hủy
               </Button>
+              <Button
+                type="primary"
+                style={{ backgroundColor: "#33cc33" }}
+                onClick={() => console.log("more detail create form")}
+              >
+                Chi tiết
+              </Button>
               <Button type="primary" htmlType="submit" loading={loadingBtn}>
                 Tạo mới
               </Button>
             </Space>
           </Form.Item>
         </Form>
-        {/* )} */}
       </Content>
     </Layout>
   );

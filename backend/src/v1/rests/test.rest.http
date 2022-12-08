@@ -43,3 +43,6 @@ DELETE http://localhost:9000/v1/categories/deleteOne/:id
 
 ###################################PRODUCTS################################################################
 GET http://localhost:9000/v1/products
+
+#### Update one image of the product
+POST http://localhost:9000/v1/products/productImage/:id
