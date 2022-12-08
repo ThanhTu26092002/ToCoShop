@@ -58,7 +58,7 @@ import {
 } from "../../config/props";
 import ChosenProducts from "./components/ChosenProducts";
 import { customDisabledDate } from "../../config/helperFuncs";
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 function Orders() {
   const paymentMethodList = ["CREDIT CARD", "COD"];
@@ -405,13 +405,13 @@ function Orders() {
   useEffect(() => {
     axiosClient.get(`${URLProduct}`).then((response) => {
       setProducts(response.data);
-     console.log('demo:',  response.data)
+      console.log("demo:", response.data);
     });
   }, []);
 
-  const prefixSelectorProduct = (name) =>{
+  const prefixSelectorProduct = (key) => {
     return (
-      <Form.Item name="productCode" noStyle style={{minWidth: 150}}>
+      <Form.Item name="productCode" noStyle style={{ minWidth: 150 }}>
         <Select
           loading={!products}
           placeholder="Mã số"
@@ -428,21 +428,21 @@ function Orders() {
               return tmp;
             })
           }
-      //     onChange={(value)=>{
-      //       // console.log(products.find((e) => e._id === value).name)
-      //       // formCreate.setFieldsValue({products: 'demo'})
-      //       const fields = formCreate.getFieldsValue()
-      //       console.log(fields)
-      //       console.log(key)
-      //       console.log(value)
-      // const { products } = fields
-      // Object.assign(products[key], { chosenProductName: 'after' })
-      // formCreate.setFieldsValue({ products })
-      //     }}
+          //     onChange={(value)=>{
+          //       // console.log(products.find((e) => e._id === value).name)
+          //       // formCreate.setFieldsValue({products: 'demo'})
+          //       const fields = formCreate.getFieldsValue()
+          //       console.log(fields)
+          //       console.log(key)
+          //       console.log(value)
+          // const { products } = fields
+          // Object.assign(products[key], { chosenProductName: 'after' })
+          // formCreate.setFieldsValue({ products })
+          //     }}
         />
       </Form.Item>
     );
-  }
+  };
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
@@ -475,7 +475,7 @@ function Orders() {
               <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
             </Form.Item>
             <Form.Item {...PropsFormItemEmail} name="emailContactInfo">
-              <Input placeholder="Email"/>
+              <Input placeholder="Email" />
             </Form.Item>
 
             <Form.Item
@@ -491,33 +491,85 @@ function Orders() {
             >
               <Input placeholder="Số điện thoại của người đặt hàng" />
             </Form.Item>
-            <Form.List name="products"
-                 
-           
-             >
+            <Form.List name="chosenProducts" initialValue={[{ quantity: "12" }]}>
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }, index) => (
-                    <Form.Item
-                     {...restField}
+                    <Space
                       key={key}
-                      name={[name, 'chosenProductName']}
-                      label={`Sản phẩm ${index}`}
+                      style={{
+                        display: "flex",
+                        marginBottom: 8,
+                      }}
+                      align="baseline"
                     >
-                      <Input
-                        addonBefore={prefixSelectorProduct(name)}
-                        placeholder="Số lượng"
-                        style={{
-                          width: "100%",
-                        }}
-                        addonAfter={
-                          <MinusCircleOutlined
-                            onClick={() => remove(name)}
-                            style={{ color: "#ff4d4f" }}
-                          />
-                        }
-                      />
-                    </Form.Item>
+                      <Form.Item
+                        label={`Mã sản phẩm ${key+1}`}
+                        {...restField}
+                        name={[name, "productCode"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Missing productCode",
+                          },
+                        ]}
+                      >
+                        <Select
+                          loading={!products}
+                          placeholder="Mã số"
+                          style={{ width: 100 }}
+                          showSearch
+                          optionFilterProp="children"
+                          filterOption={(input, option) =>
+                            (option?.label ?? "")
+                              .toLowerCase()
+                              .includes(input.toLowerCase())
+                          }
+                          options={
+                            products &&
+                            products.map((e) => {
+                              const tmp = {
+                                value: e._id,
+                                label: e.productCode,
+                              };
+                              return tmp;
+                            })
+                          }
+                          onChange={(value) => {
+                            let productName = products.find((e) => e._id === value).name
+                            const fields = formCreate.getFieldsValue();
+                            console.log(fields);
+                            console.log(`key: ${key} ; value: ${value}`);
+                            const { chosenProducts } = fields;
+                            Object.assign(chosenProducts[key], {
+                              productName: productName,
+                            });
+                            formCreate.setFieldsValue({ chosenProducts });
+                          }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        label="Ten san pham"
+                        name={[name, "productName"]}
+                      >
+                        <Input placeholder="productName"  disabled/>
+                      </Form.Item>
+                      <Form.Item
+                        label="Số lượng"
+                        {...restField}
+                        name={[name, "quantity"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Missing quantity",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="quantity" />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
                   ))}
                   <Form.Item>
                     <Button
