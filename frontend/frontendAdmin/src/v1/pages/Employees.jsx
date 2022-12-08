@@ -539,8 +539,8 @@ function Employees() {
             <Form.Item {...PropsFormItemAddress}>
               <TextArea rows={3} placeholder="Dia chi nhan vien" />
             </Form.Item>
-              {/* addImage---------------------------------- */}
-            <Form.Item
+
+            {/* <Form.Item
               {...PropsFormItemUpload}
               //Handling update fileList
               getValueFromEvent={normFile}
@@ -560,7 +560,7 @@ function Employees() {
                   Tải ảnh
                 </Button>
               </Upload>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item
               wrapperCol={{

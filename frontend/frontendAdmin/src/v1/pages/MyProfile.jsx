@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Typography } from 'antd';
 import "../css/CommonStyle.css";
 import axios from "axios";
 import moment from "moment";
@@ -16,6 +17,7 @@ import {
   Modal,
   Upload,
   DatePicker,
+  Descriptions,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
@@ -34,6 +36,7 @@ import LabelCustomization, {
 import ConfigProvider from "antd/es/config-provider";
 
 function Employees() {
+
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
@@ -49,11 +52,7 @@ function Employees() {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
-  //const myprofile = localStorage.getItem('auth-toCoShop');
-  // const payload = localStorage.getItem('auth-toCoShop');
-  
-  //console.log("ok true",myprofile);
-  // console.log("hi",payload);
+
   const payload = localStorage.getItem('auth-toCoShop'); 
   // payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
   // convert type of payload: from STRING to OBJECT
@@ -62,150 +61,31 @@ function Employees() {
   console.log("get type of employee:",typeof(convertedPayload));
   // Lấy ra từng phần nhỏ trong Object
   console.log('get',convertedPayload.state.auth.employeeInfo)
+  let fieldsValues = {};
+    for (let key in convertedPayload.state.auth.employeeInfo) {
+      fieldsValues[key] = convertedPayload.state.auth.employeeInfo[key];
+    }
+    formUpdate.setFieldsValue(fieldsValues);
+    
+    const { Text } = Typography;
+    const { Title } = Typography;
+    const firstName = convertedPayload.state.auth.employeeInfo.firstName;
+    const lastName = convertedPayload.state.auth.employeeInfo.lastName;
+    const email = convertedPayload.state.auth.employeeInfo.email;
+    const phoneNumber = convertedPayload.state.auth.employeeInfo.phoneNumber;
+    const address = convertedPayload.state.auth.employeeInfo.address;
+ 
+  
 
-
-  const columns = [
-    {
-      title: () => {
-        return <BoldText title={"Họ tên "} />;
-      },
-      key: "fullName",
-      dataIndex: "fullName",
-      width: "10%",
-      fixed: "left",
-      // defaultSortOrder: 'ascend',
-      sorter: (a, b) => a.fullName.length - b.fullName.length,
-      render: (text) => {
-        return <BoldText title={text} />;
-      },
-    },
-    {
-      title: () => {
-        return <BoldText title={"Hình ảnh"} />;
-      },
-      key: "imageUrl",
-      dataIndex: "imageUrl",
-      width: "100px",
-      render: (text) => {
-        return (
-          <div className="loadImg">
-            <img
-              src={text ? `${WEB_SERVER_URL}${text}` : "./images/noImage.jpg"}
-              style={{ width: "100%", height: "100%" }}
-              alt=""
-            ></img>
-          </div>
-        );
-      },
-    },
-
-    {
-      title: () => {
-        return <BoldText title={"Số điện thoại"} />;
-      },
-      key: "phoneNumber",
-      dataIndex: "phoneNumber",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Email"} />;
-      },
-      key: "email",
-      dataIndex: "email",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Năm sinh"} />;
-      },
-      key: "formattedBirthday",
-      dataIndex: "formattedBirthday",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Địa chỉ"} />;
-      },
-      key: "address",
-      dataIndex: "address",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Thao tác"} />;
-      },
-      key: "actions",
-      width: "9%",
-      fixed: "right",
-      render: (record) => {
-        return (
-          <div className="divActs">
-            <Upload
-              method="PATCH"
-              showUploadList={false}
-              name="file"
-              action={
-                "http://localhost:9000/employeesOnlineShopMongoose/updateOnlyImage/" +
-                record._id
-              }
-              headers={{ authorization: "authorization-text" }}
-              onChange={(info) => handleChange_UploadOnlyImage(info)}
-            >
-              <Button
-                title="Cập nhật ảnh"
-                icon={<ImgIcon />}
-                style={{ backgroundColor: "#1890ff" }}
-              ></Button>
-            </Upload>
-            <Button
-              icon={<EditOutlined />}
-              type="primary"
-              title="Chỉnh sửa"
-              onClick={() => handleClick_EditBtn(record)}
-            ></Button>
-            <Popconfirm
-              overlayInnerStyle={{ width: 300 }}
-              title="Bạn muốn xóa không ?"
-              okText="Đồng ý"
-              cancelText="Đóng"
-              onConfirm={() => handleConfirmDelete(record._id)}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="danger"
-                style={{ fontWeight: 600 }}
-                onClick={() => {}}
-                title="Xóa"
-                //asdasd
-              ></Button>
-            </Popconfirm>
-          </div>
-        );
-      },
-    },
-  ];
-  //
+ 
 
   const disabledDate = (current) => {
     // Can not select days after 18 years ago
     return current >= moment().add(-18, "year");
   };
   //Begin: Props for components
-  const PropsTable = {
-    style: { marginTop: 20 },
-    rowKey: "_id",
-    locale: {
-      triggerDesc: "Giảm dần",
-      triggerAsc: "Tăng dần",
-      cancelSort: "Hủy sắp xếp",
-    },
-    bordered: true,
-    size: "small",
-    scroll: { x: 1500, y: 400 },
-    title: () => {
-      return <TitleTable title="danh sách nhân viên" />;
-    },
-    footer: () =>
-      "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 002233442",
-  };
-
+  
+  
   const PropsForm = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -317,128 +197,6 @@ function Employees() {
       this.props.setValue(value);
     },
   };
-
-  const PropsFormItemUpload = { 
-    label: <LabelCustomization title={"Hình ảnh"} />,
-    name: "file",
-    valuePropName: "fileList",
-  };
-  //End: Props for components
-
-  const normFile = (e) => {
-    setIsChangeValueUpload(true);
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList.slice(-1);
-  };
-  //
-
-  const handleOk = () => {
-    formUpdate.submit();
-  };
-  //
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setFile(null);
-  };
-  //
-  const handleClick_EditBtn = (record) => {
-    const savedUrl = [
-      {
-        uid: "-1",
-        // name: 'IMG_0693.JPG',
-        status: "done",
-        url: `${WEB_SERVER_URL}${record.imageUrl}`,
-        thumbUrl: `${WEB_SERVER_URL}${record.imageUrl}`,
-      },
-    ];
-
-    setIsModalOpen(true);
-    setSelectedId(record._id);
-    setCurrentImageUrl(record.imageUrl ? record.imageUrl : null);
-    setIsChangedImage(false);
-    setIsChangeValueUpload(false);
-    let fieldsValues = { file: record.imageUrl ? savedUrl : [] };
-    for (let key in record) {
-        fieldsValues[key] = record[key];
-    }
-    if(record.birthday){
-      fieldsValues.birthday = moment(record.birthday )
-    }
-    else{
-       fieldsValues.birthday =undefined
-    }
-    
-    console.log(fieldsValues)
-    formUpdate.setFieldsValue(fieldsValues);
-  };
-  //
-  const handleChange_UploadOnlyImage = (info) => {
-    if (info.file.status !== "uploading") {
-    }
-    if (info.file.status === "done") {
-      setRefresh((e) => !e);
-      message.success(`${info.file.name} được cập nhật thành công!`);
-    } else if (info.file.status === "error") {
-      message.error(`${info.file.name} file cập nhật thất bại.`);
-    }
-  };
-  //
-  const handleFinishCreate = (values) => {
-    //SUBMIT
-    let formData = null;
-
-    if (values.birthday) {
-      values.birthday = values["birthday"].format("YYYY-MM-DD");
-    } else {
-      delete values.birthday;
-    }
-    let newData = { ...values };
-    delete newData.file;
-
-    let URL = URLEmployee + "/insert";
-    //If containing an image <=> file !== null
-    if (file) {
-      URL = URLEmployee + "/insert";
-      formData = new FormData();
-      for (let key in values) {
-        formData.append(key, values[key]);
-      }
-      formData.append("file", file);
-      newData = formData;
-    }
-
-    //POST
-    axios
-      .post(URL, newData)
-      .then((response) => {
-        if (response.status === 201) {
-          setRefresh((e) => !e);
-          if (file) {
-            setFile(null);
-          }
-          formCreate.resetFields();
-          notification.info({
-            message: "Thông báo",
-            description: "Thêm mới thành công",
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        message.error(
-          error.response.data.error.message
-            ? error.response.data.error.message
-            : error
-        );
-      })
-      .finally(() => {
-        setUploading(false);
-      });
-  };
-  //
   const handleFinishUpdate = (values) => {
     console.log('values', values)
     //SUBMIT
@@ -474,47 +232,20 @@ function Employees() {
         setUploading(false);
       });
   };
-  //
-  const handleConfirmDelete = (_id) => {
-    axios.delete(URLEmployee + "/deleteOne/" + _id).then((response) => {
-      if (response.status === 200) {
-        setRefresh((e) => !e);
-        message.info("Xóa thành công");
-      }
-    });
-  };
 
-  useEffect(() => {
-    axios.get(URLEmployee).then((response) => {
-      const employees = response.data;
 
-      //console.log("data",response.data)
-      let newEmployees = [];
-      employees.map((e) => {
-        // Formatting birthday before showing
-        let formattedBirthday = null;
-        if (e.birthday) {
-          let array1 = e.birthday.split("T");
-          let array2 = array1[0].split("-");
-          let array3 = array2.reverse();
-          formattedBirthday = array3.join("-");
-        }
-        newEmployees.push({
-          ...e,
-          formattedBirthday,
-          fullName: `${e.firstName} ${e.lastName}`,
-        });
-      });
-      setEmployees(newEmployees);
-      setTotalDocs(newEmployees.length);
-    });
-  }, [refresh]);
 
-  
 ///myinfo
   return (
     <Layout>    
-          <Form
+      <Descriptions title="Thông Tin Cá Nhân">
+    <Descriptions.Item label="Họ">{firstName}</Descriptions.Item>
+    <Descriptions.Item label="Tên">{lastName}</Descriptions.Item>
+    <Descriptions.Item label="Email">{email}</Descriptions.Item>
+    <Descriptions.Item label="Số điện thoại">{phoneNumber}</Descriptions.Item>
+    <Descriptions.Item label="Địa chỉ">{address}</Descriptions.Item>
+  </Descriptions>
+          {/* <Form
             {...PropsForm}
             form={formUpdate}
             name="formUpdate"
@@ -553,7 +284,7 @@ function Employees() {
             <Form.Item {...PropsFormItemAddress}>
               <TextArea rows={3} placeholder="Dia chi nhan vien" />
             </Form.Item>
-          </Form>
+          </Form> */}
     </Layout>
   );
 }
