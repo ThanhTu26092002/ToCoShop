@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState, useNavigate } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import "../../css/CommonStyle.css";
 import moment from "moment";
 import numeral from "numeral";
@@ -92,7 +92,7 @@ function Orders() {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
 
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
 
   const columns = [
     {
@@ -179,7 +179,7 @@ function Orders() {
               icon={<EllipsisOutlined />}
               type="primary"
               title="Chi tiết"
-              onClick={()=> navigate('/home')}
+              // onClick={()=> navigate('/home')}
             ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
@@ -205,10 +205,10 @@ function Orders() {
 
   //
 //Func redicrect page to orderDetail
-const  handleClick_DetailBtn = (id)=>{
-  // let path = `/orderDetail/${id}`;
-  navigate("/home")
-}
+// const  handleClick_DetailBtn = (id)=>{
+//   // let path = `/orderDetail/${id}`;
+//   navigate("/home")
+// }
   const handleOk = () => {
     formUpdate.submit();
   };
