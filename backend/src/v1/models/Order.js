@@ -66,7 +66,7 @@ const contactInfoSchema = new Schema(
     },
     address: {
       type: addressSchema,
-      required: true,
+      // required: true,
     },
   },
   { _id: false }
@@ -103,7 +103,7 @@ const shippingInfoSchema = new Schema(
     },
     address: {
       type: addressSchema,
-      required: true,
+      // required: true,
     },
     note: {
       type: String,
@@ -194,9 +194,14 @@ const orderDetailSchema = new Schema(
 
 const handlerSchema = new Schema(
   {
-    employeeId: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: true,
+    },
+    nameUser: {
+      type: String,
+      required: true,
+      maxLength: 50,
     },
     action: {
       type: String,
@@ -214,7 +219,10 @@ const orderSchema = new Schema(
       type: Date,
       default: Date.now,
     },
-    shippedDate: {
+    sendingDate: {
+      type: Date,
+    },
+    receivedDate: {
       type: Date,
     },
     status: {
@@ -230,7 +238,7 @@ const orderSchema = new Schema(
     },
     shippingInfo: {
       type: shippingInfoSchema,
-      required: true,
+      // required: true,
     },
     paymentInfo: {
       type: paymentInfoSchema,

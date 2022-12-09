@@ -135,14 +135,12 @@ function ToCoShopV1() {
                   : []
               }
               defaultSelectedKeys={[window.location.pathname]}
-              // selectedKeys={[currentPage]}
               items={itemsAfterLogin}
               onClick={({ key }) => {
                 if (key === "signOut") {
                   signOut();
                   navigate("/login");
                 } else {
-                  console.log("key:", key);
                   navigate(key);
                 }
               }}

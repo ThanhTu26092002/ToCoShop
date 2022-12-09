@@ -51,6 +51,8 @@ const aggregateLookup = [
     $group: {
       _id: "$_id",
       createdDate: { $first: "$createdDate" },
+      sendingDate: { $first: "$sendingDate" },
+      receivedDate: { $first: "$receivedDate" },
       status: { $first: "$status" },
       contactInfo: { $first: "$contactInfo" },
       shippingInfo: { $first: "$shippingInfo" },
