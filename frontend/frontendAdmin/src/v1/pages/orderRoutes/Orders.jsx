@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../css/CommonStyle.css";
 import moment from "moment";
 import numeral from "numeral";
@@ -37,6 +38,7 @@ import {
   URLOrder,
   URLTransportation,
   URLProduct,
+  sizeList,
 } from "../../config/constants";
 import LabelCustomization, {
   NumberFormatter,
@@ -60,8 +62,10 @@ import {
 import {
   customCreateAHandler,
   customDisabledDate,
+  handleOpenNewPage,
 } from "../../config/helperFuncs";
 const { Text } = Typography;
+const { Option } = Select;
 
 function Orders() {
   const paymentMethodList = ["CREDIT CARD", "COD"];
@@ -91,8 +95,6 @@ function Orders() {
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
-
-  // const navigate = useNavigate()
 
   const columns = [
     {
@@ -179,7 +181,9 @@ function Orders() {
               icon={<EllipsisOutlined />}
               type="primary"
               title="Chi tiết"
-              // onClick={()=> navigate('/home')}
+              onClick={() =>
+                handleOpenNewPage({ path: "/orderDetail", params: record._id })
+              }
             ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
@@ -204,11 +208,11 @@ function Orders() {
   ];
 
   //
-//Func redicrect page to orderDetail
-// const  handleClick_DetailBtn = (id)=>{
-//   // let path = `/orderDetail/${id}`;
-//   navigate("/home")
-// }
+  //Func redicrect page to orderDetail
+  // const  handleClick_DetailBtn = (id)=>{
+  //   // let path = `/orderDetail/${id}`;
+  //   navigate("/home")
+  // }
   const handleOk = () => {
     formUpdate.submit();
   };
@@ -225,12 +229,17 @@ function Orders() {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
-    setSendingDateState(record.sendingDate ? moment(record.sendingDate) : null);
+    setSendingDateState(
+      record.sendingDate
+        ? moment(record.sendingDate).format("YYYY-MM-DD")
+        : null
+    );
     setReceivedDateState(
-      record.receivedDate ? moment(record.receivedDate) : null
+      record.receivedDate
+        ? moment(record.receivedDate).format("YYYY-MM-DD")
+        : null
     );
     let fieldsValues = {};
-    console.log("moment:", record.sendingDate);
     fieldsValues._id = record._id;
     fieldsValues.createdDate = record.formattedCreatedDate;
     fieldsValues.status = record.status;
@@ -251,6 +260,7 @@ function Orders() {
       let tmpProduct = products.find((e) => (e._id = product.productId));
       configOrderDetails.push({
         productId: product.productId,
+        size: product.size,
         quantity: product.quantity,
         price: tmpProduct.price,
         discount: tmpProduct.discount,
@@ -351,7 +361,6 @@ function Orders() {
       orderDetails: configOrderDetails,
       handlers,
     };
-    console.log("new Data:", newData);
     setLoadingBtn(true);
     //SUBMIT
     //POST
@@ -535,7 +544,6 @@ function Orders() {
       setProducts(response.data);
     });
   }, []);
-
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
@@ -678,7 +686,6 @@ function Orders() {
                   name: "stateContactInfo",
                 })}
               >
-              
                 <Select
                   style={{ width: 150 }}
                   placeholder="Chọn..."
@@ -1127,7 +1134,43 @@ function Orders() {
                       ]}
                     >
                       <InputNumber
-                        style={{ minWidth: 120, maxWidth: 160 }}
+                        addonBefore={
+                          <Form.Item
+                            name={[name, "size"]}
+                            noStyle
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn Size",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Size"
+                              style={{
+                                width: 70,
+                              }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                sizeList &&
+                                sizeList.map((s) => {
+                                  const tmp = {
+                                    value: s,
+                                    label: s,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                            />
+                          </Form.Item>
+                        }
+                        style={{ minWidth: 120, maxWidth: 360 }}
                         min={0}
                         addonAfter="sản phẩm"
                       />
@@ -1258,7 +1301,6 @@ function Orders() {
                         setReceivedDateState(null);
                         break;
                       case "SHIPPING":
-                        console.log("show error:", sendingDateState);
                         if (sendingDateState) {
                           formUpdate.setFieldsValue({
                             receivedDate: null,
@@ -1332,7 +1374,10 @@ function Orders() {
                 <DatePicker
                   showToday={false}
                   disabledDate={(current) =>
-                    customDisabledDate(current, moment(new Date()).format("YYYY-MM-DD"))
+                    customDisabledDate(
+                      current,
+                      moment(new Date()).format("YYYY-MM-DD")
+                    )
                   }
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}

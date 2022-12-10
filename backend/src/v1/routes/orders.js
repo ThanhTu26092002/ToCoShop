@@ -95,7 +95,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/search/:id", validateId, async (req, res, next) => {
+router.get("/orderDetail/:id", validateId, async (req, res, next) => {
   try {
     const id = new ObjectId(req.params.id);
     const docs = await Order.aggregate([{ "$match": { "_id":  id }}, ...aggregateLookup ]);

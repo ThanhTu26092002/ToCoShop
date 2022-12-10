@@ -176,6 +176,11 @@ const orderDetailSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    size: {
+      type: String,
+      required: true,
+      enum: ['S', 'M', 'L', 'XL', 'XXL'],
+    },
     quantity: {
       type: Number,
       required: true,
@@ -214,7 +219,12 @@ const handlerSchema = new Schema(
 );
 
 const orderSchema = new Schema(
-  {
+  { orderCode: {
+    type: String,
+    required: true,
+    unique: true,
+    // default:
+  },
     createdDate: {
       type: Date,
       default: Date.now,

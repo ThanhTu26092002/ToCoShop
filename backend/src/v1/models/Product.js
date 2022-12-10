@@ -30,6 +30,7 @@ const productSchema = new Schema(
             Object,{
                 typeSize:{
                     type: String,
+                    enum: ['S', 'M', 'L', 'XL', 'XXL']
                 },
                 amount:Number
             }
