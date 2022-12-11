@@ -10,16 +10,16 @@ export const customDisabledDate = (current, checkingDate) => {
   return current < moment(checkingDate);
 };
 
-export const handleOpenNewPage = ({ path, params }) => {
+export const handleOpenNewPage = ({ path, params=null }) => {
   const url = `${path}/${params}`;
   window.open(url, "_blank");
 };
 
 export const customCreateAHandler = (actionContent) => {
   const userId = employeeInfo._id;
-  const nameUser = employeeInfo.firstName + " " + employeeInfo.lastName;
+  const userName = employeeInfo.firstName + " " + employeeInfo.lastName;
   const currentTime = moment().format("DD-MM-YYY- HH:mm");
   const action = `Thời gian: ${currentTime} : ${actionContent}`;
-  const handler = { userId, nameUser, action };
+  const handler = { userId, userName, action };
   return handler;
 };

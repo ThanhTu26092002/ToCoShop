@@ -143,6 +143,10 @@ function OrderDetail() {
   };
 
   const { id } = useParams();
+  console.log('hello:', id)
+  if(id === ":id"){
+handleOpenNewPage({path: "/orders", params: null})
+  }
   useEffect(() => {
     setLoading(true);
     axiosClient.get(`${URLOrder}/orderDetail/${id}`).then((response) => {
@@ -157,15 +161,7 @@ formUpdate.setFieldsValue(orderDetail)
 
     setLoading(false);
   }, []);
-  var now = new Date();
 
-let timestamp = now.getFullYear().toString(); // 2011
-timestamp += (now.getMonth < 9 ? '0' : '') + (now.getMonth()+1).toString(); // JS months are 0-based, so +1 and pad with 0's
-timestamp += ((now.getDate < 10) ? '0' : '') + now.getDate().toString()
-timestamp += ((now.getHours < 10) ? '0' : '') + now.getHours().toString()
-timestamp += ((now.getMinutes < 10) ? '0' : '') + now.getMinutes().toString()
-timestamp += ((now.getSeconds < 10) ? '0' : '') + now.getSeconds().toString()
-  console.log('show string time:', timestamp)
   return (
     <Layout>
       <Content style={{ padding: 24 }}>

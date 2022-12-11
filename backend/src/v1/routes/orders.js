@@ -50,6 +50,7 @@ const aggregateLookup = [
   {
     $group: {
       _id: "$_id",
+      orderCode: { $first: "$orderCode" },
       createdDate: { $first: "$createdDate" },
       sendingDate: { $first: "$sendingDate" },
       receivedDate: { $first: "$receivedDate" },
@@ -85,7 +86,6 @@ const aggregateLookup = [
 
 //Get all orders
 router.get("/", async (req, res, next) => {
- 
   try {
     const docs = await Order.aggregate(aggregateLookup);
     res.json({ ok: true, results: docs });
@@ -98,7 +98,10 @@ router.get("/", async (req, res, next) => {
 router.get("/orderDetail/:id", validateId, async (req, res, next) => {
   try {
     const id = new ObjectId(req.params.id);
-    const docs = await Order.aggregate([{ "$match": { "_id":  id }}, ...aggregateLookup ]);
+    const docs = await Order.aggregate([
+      { $match: { _id: id } },
+      ...aggregateLookup,
+    ]);
     res.json({ ok: true, results: docs });
   } catch (err) {
     res.status(400).json({ error: { name: err.name, message: err.message } });
@@ -125,7 +128,19 @@ router.post("/insertOne", async (req, res, next) => {
     }
     createdDate = new Date(createdDate);
 
-    data = { createdDate, ...data };
+    //Generating orderCode
+    //"TCS" // TSC: the name of shop - ToCoShop
+    var now = new Date();
+    let orderCode = "TCS" + now.getFullYear().toString();
+    orderCode +=
+      (now.getMonth < 9 ? "0" : "") + (now.getMonth() + 1).toString(); // JS months are 0-based, so +1 and pad with 0's
+    orderCode += (now.getDate < 10 ? "0" : "") + now.getDate().toString();
+    orderCode += (now.getHours < 10 ? "0" : "") + now.getHours().toString();
+    orderCode += (now.getMinutes < 10 ? "0" : "") + now.getMinutes().toString();
+    orderCode += (now.getSeconds < 10 ? "0" : "") + now.getSeconds().toString();
+    console.log("show string time:", orderCode);
+
+    data = { createdDate, ...data, orderCode };
     //Create a new blog post object
     const order = new Order(data);
     //Insert the product in our MongoDB database
@@ -179,7 +194,7 @@ router.post("/insertOne", async (req, res, next) => {
 // //
 
 //Update One with _Id
-router.patch("/updateOne/:id",validateId, async (req, res, next) => {
+router.patch("/updateOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -264,7 +279,7 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 // //
 
 //Just update array products
-router.patch("/updateOne/:id",validateId, async (req, res, next) => {
+router.patch("/updateOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -350,8 +365,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
     }
     res.json({
       ok: true,
-      message:
-        "Delete the document in MongoDB successfully",
+      message: "Delete the document in MongoDB successfully",
     });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);

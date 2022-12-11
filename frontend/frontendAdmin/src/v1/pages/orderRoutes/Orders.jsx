@@ -78,6 +78,7 @@ function Orders() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [orders, setOrders] = useState(null);
   const [products, setProducts] = useState(null);
+  const [changedStatus, setChangedStatus] = useState(null);
   const [transportationList, setTransportationList] = useState();
   const [totalDocs, setTotalDocs] = useState(0);
   const [countryList, setCountryList] = useState(null);
@@ -102,7 +103,7 @@ function Orders() {
         return <BoldText title={"Mã đơn hàng "} />;
       },
       key: "_id",
-      dataIndex: "_id",
+      dataIndex: "orderCode",
       width: "9%",
       fixed: "left",
       render: (text) => {
@@ -240,7 +241,7 @@ function Orders() {
         : null
     );
     let fieldsValues = {};
-    fieldsValues._id = record._id;
+    fieldsValues.orderCode = record.orderCode;
     fieldsValues.createdDate = record.formattedCreatedDate;
     fieldsValues.status = record.status;
     fieldsValues.sendingDate = record.sendingDate
@@ -253,6 +254,7 @@ function Orders() {
   };
 
   const handleFinishCreate = (values) => {
+    console.log("values:", values);
     //Config orderDetails before send to backend
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
@@ -354,6 +356,7 @@ function Orders() {
         },
       };
     }
+
     const newData = {
       contactInfo,
       shippingInfo,
@@ -392,6 +395,18 @@ function Orders() {
   };
   //
   const handleFinishUpdate = (values) => {
+    //if not change values
+    if (
+      values.status === selectedRecord.status &&
+      values.sendingDate === selectedRecord.sendingDate &&
+      values.receivedDate === selectedRecord.receivedDate
+    ) {
+      console.log("the same values");
+      setIsModalOpen(false);
+      formUpdate.resetFields();
+      setSelectedId(null);
+      return;
+    }
     //Show error the relative between status and sendingDate- receivedDate
     if (values.sendingDate === null) {
       if (values.status === "SHIPPING") {
@@ -417,11 +432,22 @@ function Orders() {
     const customReceivedDate = values.receivedDate
       ? values.receivedDate.format("YYYY-MM-DD")
       : null;
-    const updateData = {
+
+    let updateData = {
       status: values.status,
       sendingDate: customSendingDate,
       receivedDate: customReceivedDate,
     };
+    //Add a handler -update new status
+    if (changedStatus) {
+      const actionContent = `Cập nhật trạng thái đơn hàng - ${changedStatus}`;
+      const newHandler = customCreateAHandler(actionContent);
+      // const handlers = [newHandler];
+      let newHandlers = selectedRecord.handlers;
+      newHandlers.push(newHandler);
+      updateData = { ...updateData, handlers: newHandlers };
+    }
+
     setLoadingBtn(true);
     //POST
     axiosClient
@@ -495,21 +521,13 @@ function Orders() {
       let newOrders = [];
       orders.map((e) => {
         // Formatting dates before showing
-        let formattedCreatedDate = null;
-        let formattedSendingDate = null;
-        let formattedReceivedDate = null;
-
-        if (e.createdDate) {
-          formattedCreatedDate = formattedDate(e.createdDate);
-        }
-
-        if (e.sendingDate) {
-          formattedSendingDate = formattedDate(e.sendingDate);
-        }
-
-        if (e.receivedDate) {
-          formattedReceivedDate = formattedDate(e.receivedDate);
-        }
+        let formattedCreatedDate = formattedDate(e.createdDate);
+        let formattedSendingDate = e.sendingDate
+          ? formattedDate(e.sendingDate)
+          : "Chưa xác định";
+        let formattedReceivedDate = e.receivedDate
+          ? formattedDate(e.receivedDate)
+          : "Chưa xác định";
 
         newOrders.push({
           ...e,
@@ -1267,7 +1285,7 @@ function Orders() {
             <Fragment>
               <Form.Item
                 {...PropsFormItem_Label_Name({
-                  name: "_id",
+                  name: "orderCode",
                   label: "Mã đơn hàng",
                 })}
               >
@@ -1291,6 +1309,7 @@ function Orders() {
                 <Select
                   style={{ width: 150 }}
                   onChange={(e) => {
+                    setChangedStatus(e);
                     switch (e) {
                       case "WAITING":
                         formUpdate.setFieldsValue({

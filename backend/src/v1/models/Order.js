@@ -179,7 +179,7 @@ const orderDetailSchema = new Schema(
     size: {
       type: String,
       required: true,
-      enum: ['S', 'M', 'L', 'XL', 'XXL'],
+      enum: ["S", "M", "L", "XL", "XXL"],
     },
     quantity: {
       type: Number,
@@ -203,7 +203,7 @@ const handlerSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
-    nameUser: {
+    userName: {
       type: String,
       required: true,
       maxLength: 50,
@@ -219,12 +219,12 @@ const handlerSchema = new Schema(
 );
 
 const orderSchema = new Schema(
-  { orderCode: {
-    type: String,
-    required: true,
-    unique: true,
-    // default:
-  },
+  {
+    orderCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     createdDate: {
       type: Date,
       default: Date.now,
