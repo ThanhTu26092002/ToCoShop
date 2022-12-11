@@ -26,7 +26,7 @@ import Products from "./pages/Products";
 import Orders from "./pages/orderRoutes/Orders";
 import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
-import useAuth, { useCurrentPage } from "./hooks/useZustand";
+import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
 import { ICON_NoImage } from "./config/constants";
 const { Content, Sider } = Layout;
