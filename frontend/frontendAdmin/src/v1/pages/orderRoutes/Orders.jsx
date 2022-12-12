@@ -1289,7 +1289,7 @@ function Orders() {
                   label: "Mã đơn hàng",
                 })}
               >
-                <Input disabled />
+                <Input disabled bordered={false}/>
               </Form.Item>
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -1297,7 +1297,7 @@ function Orders() {
                   name: "createdDate",
                 })}
               >
-                <Input disabled />
+                <Input disabled bordered={false}/>
               </Form.Item>
 
               <Form.Item
