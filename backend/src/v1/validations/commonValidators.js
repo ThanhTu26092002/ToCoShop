@@ -4,6 +4,7 @@ const {
   COLLECTION_SUPPLIERS,
   COLLECTION_PRODUCTS,
   COLLECTION_EMPLOYEES,
+  COLLECTION_SLIDES
 } = require("../configs/constants");
 const { findDocument } = require("../utils/MongodbHelper");
 
@@ -120,7 +121,7 @@ function loadProduct(req, res, next) {
           ok: true,
           error: {
             name: "id",
-            message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
+            message: `the document with following id doesn't exist in the collection ${COLLECTION_PRODUCTS}`,
           },
         });
         return;
@@ -168,10 +169,46 @@ function loadEmployee(req, res, next) {
     });
 }
 //
+function loadSlides(req, res, next) {
+  const id = req.params.id;
+  if (!(id && ObjectID.isValid(id))) {
+    res.status(400).json({
+      ok: false,
+      error: {
+        name: "id",
+        message: "The parameter id is not a true formatting ObjectId",
+      },
+    });
+    return;
+  }
+
+  findDocument(id, COLLECTION_SLIDES)
+    .then((result) => {
+      //result !== false, is mean, finding a document with the id in the collection
+      if (result) {
+        req.document = result;
+        next();
+      } else {
+        res.status(404).json({
+          ok: true,
+          error: {
+            name: "id",
+            message: `the document with following id doesn't exist in the collection ${COLLECTION_SLIDES}`,
+          },
+        });
+        return;
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ ok: false, error });
+      return;
+    });
+}
 module.exports = {
   validateId,
   loadCategory,
   loadSupplier,
   loadProduct,
   loadEmployee,
+  loadSlides
 };
