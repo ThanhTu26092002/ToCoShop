@@ -101,7 +101,6 @@ function ToCoShopV1() {
     ]),
     getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
-
   return (
     <ConfigProvider>
       <Layout>
@@ -133,12 +132,17 @@ function ToCoShopV1() {
                   ? ["/orderList"]
                   : []
               }
-              defaultSelectedKeys={
-                // window.location.pathname.includes("/orderDetail")
-                //   ? ["/orderDetail:id"]
-                // :
-                [window.location.pathname]
-              }
+              // defaultSelectedKeys={
+              //   // window.location.pathname.includes("/orderDetail")
+              //   //   ? ["/orderDetail:id"]
+              //   // :
+              //   [window.location.pathname]
+              // }
+              selectedKeys={
+                 window.location.pathname.includes("/orderDetail")
+                ? ["/orderDetail/:id"]
+              :
+                 [window.location.pathname]}
               items={itemsAfterLogin}
               onClick={({ key }) => {
                 if (key === "signOut") {

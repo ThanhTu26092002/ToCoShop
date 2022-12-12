@@ -68,6 +68,15 @@ const { Text } = Typography;
 const { Option } = Select;
 
 function OrderDetail() {
+  //If params id = :id
+  const navigate = useNavigate();
+  const { id } = useParams();
+  console.log("hello:", id);
+  if (id === ":id") {
+    navigate("/orders");
+  }
+// 
+
   const paymentMethodList = ["CREDIT CARD", "COD"];
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 
@@ -86,6 +95,7 @@ function OrderDetail() {
   const [statesListShippingInfo, setStatesListShippingInfo] = useState(null);
   const [cityListShippingInfo, setCityListShippingInfo] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [changedStatus, setChangedStatus] = useState(null);
   const [detailCreatingStatus, setDetailCreatingStatus] = useState(false);
   const [sendingDateState, setSendingDateState] = useState(null);
   const [receivedDateState, setReceivedDateState] = useState(null);
@@ -142,19 +152,13 @@ function OrderDetail() {
       });
   };
 
-  const { id } = useParams();
-  console.log('hello:', id)
-  if(id === ":id"){
-handleOpenNewPage({path: "/orders", params: null})
-  }
   useEffect(() => {
     setLoading(true);
     axiosClient.get(`${URLOrder}/orderDetail/${id}`).then((response) => {
       const orderDetail = response.data.results[0];
-orderDetail.createdDate = formattedDate(orderDetail.createdDate);
+      orderDetail.createdDate = formattedDate(orderDetail.createdDate);
 
-
-formUpdate.setFieldsValue(orderDetail)
+      formUpdate.setFieldsValue(orderDetail);
       console.log(orderDetail);
       setOrder(orderDetail);
     });
@@ -190,11 +194,11 @@ formUpdate.setFieldsValue(orderDetail)
             >
               <Form.Item
                 {...PropsFormItem_Label_Name({
-                  name: "_id",
+                  name: "orderCode",
                   label: "Mã đơn hàng",
                 })}
               >
-                <Input disabled />
+                <Input disabled bordered={false}/>
               </Form.Item>
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -202,7 +206,7 @@ formUpdate.setFieldsValue(orderDetail)
                   name: "createdDate",
                 })}
               >
-                <Input disabled />
+                <Input disabled bordered={false}/>
               </Form.Item>
               <Fragment>
                 <Form.Item
@@ -211,7 +215,73 @@ formUpdate.setFieldsValue(orderDetail)
                     name: "status",
                   })}
                 >
-                  <Select style={{ width: 150 }} >
+                  <Select style={{ width: 150 }}
+                     onChange={(e) => {
+                    setChangedStatus(e);
+                    switch (e) {
+                      case "WAITING":
+                        formUpdate.setFieldsValue({
+                          receivedDate: null,
+                          sendingDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
+                        break;
+                      case "SHIPPING":
+                        if (sendingDateState) {
+                          formUpdate.setFieldsValue({
+                            receivedDate: null,
+                          });
+                          setReceivedDateState(null);
+                        } else {
+                          formUpdate.setFieldsValue({
+                            sendingDate: moment(new Date()),
+                            receivedDate: null,
+                          });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(null);
+                        }
+                        break;
+                      case "COMPLETED":
+                        //Existing sendingDate and sendingDate < Today
+                        if (
+                          sendingDateState &&
+                          sendingDateState <=
+                            moment(new Date()).format("YYYY-MM-DD")
+                        ) {
+                          formUpdate.setFieldsValue({
+                            receivedDate: moment(new Date()),
+                          });
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        } else if (!sendingDateState) {
+                          formUpdate.setFieldsValue({
+                            sendingDate: moment(new Date()),
+                            receivedDate: moment(new Date()),
+                          });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        }
+                        break;
+                      case "CANCELED":
+                        formUpdate.setFieldsValue({
+                          receivedDate: null,
+                          sendingDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
+                        break;
+                      default:
+                    }
+                  }}
+                  >
                     {statusList.map((s, index) => {
                       return (
                         <Select.Option key={index + 1} value={s}>
@@ -221,6 +291,68 @@ formUpdate.setFieldsValue(orderDetail)
                     })}
                   </Select>
                 </Form.Item>
+
+                <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Ngày chuyển hàng",
+                  name: "sendingDate",
+                })}
+              >
+                <DatePicker
+                  showToday={false}
+                  disabledDate={(current) =>
+                    customDisabledDate(
+                      current,
+                      moment(new Date()).format("YYYY-MM-DD")
+                    )
+                  }
+                  placeholder="dd-mm-yyyy"
+                  format={dateFormatList}
+                  value={moment(sendingDateState)}
+                  onChange={(e) => {
+                    if (e) {
+                      setSendingDateState(e.format("YYYY-MM-DD"));
+                      if (
+                        moment(e.format("YYYY-MM-DD")) >
+                        moment(receivedDateState)
+                      ) {
+                        message.error(
+                          "Ngày chuyển hàng không thể sau ngày nhận hàng"
+                        );
+                        formUpdate.setFieldsValue({ receivedDate: null });
+                        setReceivedDateState(null);
+                      }
+                    } else {
+                      formUpdate.setFieldsValue({ receivedDate: null });
+                      setReceivedDateState(null);
+                    }
+                  }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Ngày nhận hàng",
+                  name: "receivedDate",
+                })}
+              >
+                <DatePicker
+                  showToday={false}
+                  disabledDate={(current) =>
+                    customDisabledDate(current, sendingDateState)
+                  }
+                  placeholder="dd-mm-yyyy"
+                  format={dateFormatList}
+                  onChange={(e) => {
+                    if (e) {
+                      setReceivedDateState(e.format("YYYY-MM-DD"));
+                      formUpdate.setFieldsValue({ status: "COMPLETED" });
+                    } else {
+                      setReceivedDateState(null);
+                    }
+                  }}
+                />
+              </Form.Item>
                 <Divider style={{ backgroundColor: "#e3e6f2" }} />
                 <Text
                   strong
