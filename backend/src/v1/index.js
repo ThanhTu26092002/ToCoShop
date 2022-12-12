@@ -9,7 +9,6 @@ routes.use('/orders',require('./routes/orders'));
 routes.use('/employees',require('./routes/employees'));
 routes.use('/products',require('./routes/products'));
 // routes.use('/uploadDemo',require('./routes/uploadDemo'));
-
 // routes.use('/upload', require('./routes/upload'))
 
 
