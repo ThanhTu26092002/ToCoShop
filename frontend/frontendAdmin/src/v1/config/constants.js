@@ -23,7 +23,7 @@ module.exports= {
     WEB_SERVER_UPLOAD_URL,
     PATH_CATEGORIES,
     ICON_NoImage,
-    URLSlides
+    URLSlides,
     dateFormatList,
     sizeList
 }
