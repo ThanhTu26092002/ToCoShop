@@ -23,6 +23,7 @@ import Employees from "./pages/Employees";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Products from "./pages/Products";
+import Slides from "./pages/Slides";
 import Orders from "./pages/orderRoutes/Orders";
 import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
@@ -99,6 +100,7 @@ function ToCoShopV1() {
         <Statistics />
       ),
     ]),
+    getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
     getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
 

@@ -8,6 +8,7 @@ const COLLECTION_PRODUCTS = 'products';
 const COLLECTION_EMPLOYEES = 'employees';
 const COLLECTION_ORDERS = 'orders';
 const COLLECTION_LOGINS = "logins";
+const COLLECTION_SLIDES = "slides";
 const COLLECTION_TRANSPORTATIONS = "transportations";
 
 module.exports = {
@@ -21,5 +22,6 @@ module.exports = {
   COLLECTION_EMPLOYEES,
   COLLECTION_ORDERS,
   COLLECTION_LOGINS,
-  COLLECTION_TRANSPORTATIONS
+  COLLECTION_TRANSPORTATIONS,
+  COLLECTION_SLIDES
 };

@@ -8,6 +8,7 @@ const {
   COLLECTION_PRODUCTS,
   COLLECTION_SUPPLIERS,
   COLLECTION_EMPLOYEES,
+  COLLECTION_SLIDES
 } = require("../configs/constants");
 
 // const imageFilter = function (req, file, cb) {
@@ -35,6 +36,8 @@ const storage = multer.diskStorage({
       nameCollection = COLLECTION_SUPPLIERS;
     } else if (req.url.indexOf("/employeeImage/") === 0) {
       nameCollection = COLLECTION_EMPLOYEES;
+    } else if (req.url.indexOf("/slidesImage/") === 0) {
+      nameCollection = COLLECTION_SLIDES;  
     } else {
       req.directoryError = "Can not find the name Collection in the Url";
       return cb(new Error("Can not find the name Collection in the Url"), false);
