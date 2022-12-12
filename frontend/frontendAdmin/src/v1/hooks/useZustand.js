@@ -1,13 +1,7 @@
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-// const useAuth = create(
-//   devtools((set) => ({
-//     auth: null,
-//     signIn: (payload) => set(() => ({ auth: payload }), false, '@auth/signIn'),
-//     signOut: () => set({ auth: null }, false, '@auth/signOut'),
-//   })),
-// );
+
 const useAuth = create(
   devtools(
     persist(
@@ -25,14 +19,6 @@ const useAuth = create(
   )
 );
 
-//  export const useOthers = create(
-//   devtools((set) => ({
-//     loading: false,
-//     setLoading: (payload) =>
-//       set(() => ({ loading: payload }), false, "@Others/loading"),
-//     // signOut: () => set({ auth: null }, false, "@auth/signOut"),
-//   }))
-// );
 
 // export const useCurrentPage = create(
 //   devtools(

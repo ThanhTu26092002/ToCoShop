@@ -1,6 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../css/CommonStyle.css";
 import moment from "moment";
+import numeral from "numeral";
+
 import {
   Button,
   Layout,
@@ -15,20 +18,28 @@ import {
   Spin,
   Space,
   DatePicker,
-  LocaleProvider,
   Select,
   Divider,
   Typography,
+  InputNumber,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLOrder, WEB_SERVER_UPLOAD_URL } from "../../config/constants";
+import {
+  dateFormatList,
+  URLOrder,
+  URLTransportation,
+  URLProduct,
+  sizeList,
+} from "../../config/constants";
 import LabelCustomization, {
   NumberFormatter,
   BoldText,
@@ -48,20 +59,37 @@ import {
   PropsFormItem_Label_Name,
   PropsTable,
 } from "../../config/props";
-const { Title, Text } = Typography;
+import {
+  customCreateAHandler,
+  customDisabledDate,
+  handleOpenNewPage,
+} from "../../config/helperFuncs";
+const { Text } = Typography;
+const { Option } = Select;
 
 function Orders() {
-  const [isCreate, setIsCreate] = useState(false);
+  const paymentMethodList = ["CREDIT CARD", "COD"];
+  const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
+
+  // const [isCreate, setIsCreate] = useState(false);
+  const [selectedPaymentCreditCard, setSelectedPaymentCreditCard] =
+    useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(null);
+  const [products, setProducts] = useState(null);
+  const [changedStatus, setChangedStatus] = useState(null);
+  const [transportationList, setTransportationList] = useState();
   const [totalDocs, setTotalDocs] = useState(0);
   const [countryList, setCountryList] = useState(null);
-  const [statesList, setStatesList] = useState(null);
-  const [cityList, setCityList] = useState(null);
+  const [statesListContactInfo, setStatesListContactInfo] = useState(null);
+  const [cityListContactInfo, setCityListContactInfo] = useState(null);
+  const [statesListShippingInfo, setStatesListShippingInfo] = useState(null);
+  const [cityListShippingInfo, setCityListShippingInfo] = useState(null);
   const [refresh, setRefresh] = useState(false);
-  const [onChangeCountry, setOnChangeCountry] = useState(false);
-  const [onchangeState, setOnChangeState] = useState(false);
+  const [detailCreatingStatus, setDetailCreatingStatus] = useState(false);
+  const [sendingDateState, setSendingDateState] = useState(null);
+  const [receivedDateState, setReceivedDateState] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -69,20 +97,13 @@ function Orders() {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
 
-  const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
-  const savedCreatedDate = useRef(moment(new Date()));
-  const savedSendingDate = useRef(null);
-  const saveReceivedDate = useRef(null);
-  const savedSelectedCountry = useRef(null);
-  const savedSelectedState = useRef(null);
-
   const columns = [
     {
       title: () => {
         return <BoldText title={"Mã đơn hàng "} />;
       },
       key: "_id",
-      dataIndex: "_id",
+      dataIndex: "orderCode",
       width: "9%",
       fixed: "left",
       render: (text) => {
@@ -146,16 +167,24 @@ function Orders() {
         return <BoldText title={"Thao tác"} />;
       },
       key: "actions",
-      width: "3%",
+      width: "5%",
       fixed: "right",
       render: (record) => {
         return (
           <div className="divActs">
             <Button
+              icon={<EditOutlined />}
+              type="primary"
+              title="Đổi trạng thái"
+              onClick={() => handleClick_EditStatus(record)}
+            ></Button>
+            <Button
               icon={<EllipsisOutlined />}
               type="primary"
               title="Chi tiết"
-              onClick={() => handleClick_DetailBtn(record)}
+              onClick={() =>
+                handleOpenNewPage({ path: "/orderDetail", params: record._id })
+              }
             ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
@@ -178,23 +207,13 @@ function Orders() {
       },
     },
   ];
+
   //
-
-  //Begin: Props for components
-
-  //End: Props for components
-  const disabledDate = (current) => {
-    return current >= moment();
-  };
-
-  const disabledForSending = (current) => {
-    return current < moment(savedCreatedDate.current);
-  };
-
-  const disabledForReceived = (current) => {
-    return current < moment(savedSendingDate.current);
-  };
-
+  //Func redicrect page to orderDetail
+  // const  handleClick_DetailBtn = (id)=>{
+  //   // let path = `/orderDetail/${id}`;
+  //   navigate("/home")
+  // }
   const handleOk = () => {
     formUpdate.submit();
   };
@@ -202,32 +221,160 @@ function Orders() {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setSendingDateState(null);
+    setReceivedDateState(null);
   };
   //
-  const handleClick_DetailBtn = (record) => {
+  const handleClick_EditStatus = (record) => {
+    console.log("show record:", record);
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
+    setSendingDateState(
+      record.sendingDate
+        ? moment(record.sendingDate).format("YYYY-MM-DD")
+        : null
+    );
+    setReceivedDateState(
+      record.receivedDate
+        ? moment(record.receivedDate).format("YYYY-MM-DD")
+        : null
+    );
     let fieldsValues = {};
-    for (let key in record) {
-      fieldsValues[key] = record[key];
-    }
+    fieldsValues.orderCode = record.orderCode;
+    fieldsValues.createdDate = record.formattedCreatedDate;
+    fieldsValues.status = record.status;
+    fieldsValues.sendingDate = record.sendingDate
+      ? moment(record.sendingDate)
+      : null;
+    fieldsValues.receivedDate = record.receivedDate
+      ? moment(record.receivedDate)
+      : null;
     formUpdate.setFieldsValue(fieldsValues);
   };
 
   const handleFinishCreate = (values) => {
+    console.log("values:", values);
+    //Config orderDetails before send to backend
+    const getOrderDetails = values.orderDetails;
+    const configOrderDetails = [];
+    getOrderDetails.map((product) => {
+      let tmpProduct = products.find((e) => (e._id = product.productId));
+      configOrderDetails.push({
+        productId: product.productId,
+        size: product.size,
+        quantity: product.quantity,
+        price: tmpProduct.price,
+        discount: tmpProduct.discount,
+      });
+    });
+    //Add new handler
+    const actionContent = "Tạo nhanh đơn hàng mới";
+    const newHandler = customCreateAHandler(actionContent);
+    const handlers = [newHandler];
+    //Config contacInfo
+    // before that, we need to config address in contactInfo
+    let addressInfo = { detailAddress: values.detailAddressContactInfo };
+    if (values.countryContactInfo) {
+      addressInfo = { ...addressInfo, country: values.countryContactInfo };
+    }
+    if (values.stateContactInfo) {
+      addressInfo = { ...addressInfo, state: values.stateContactInfo };
+    }
+    if (values.cityContactInfo) {
+      addressInfo = { ...addressInfo, city: values.cityContactInfo };
+    }
+    //Now, let set up contactInfo
+    let contactInfo = { address: addressInfo };
+    if (values.email) {
+      contactInfo = { ...contactInfo, email: values.emailContactInfo };
+    }
+    contactInfo = {
+      ...contactInfo,
+      phoneNumber: values.phoneNumberContactInfo,
+      firstName: values.firstNameContactInfo,
+      lastName: values.lastNameContactInfo,
+    };
+
+    // Now, continue to create shippingInfo
+    let shippingInfo = undefined;
+    //set up addressShipping
+    if (values.detailAddressShippingInfo) {
+      let addressShipping = {
+        detailAddress: values.detailAddressShippingInfo,
+      };
+      if (values.countryShippingInfo) {
+        addressShipping = {
+          ...addressShipping,
+          country: values.countryShippingInfo,
+        };
+      }
+      if (values.stateShippingInfo) {
+        addressShipping = {
+          ...addressShipping,
+          state: values.stateShippingInfo,
+        };
+      }
+      if (values.cityShippingInfo) {
+        addressShipping = { ...addressShipping, city: values.cityShippingInfo };
+      }
+
+      //Now set shippingInfo
+      shippingInfo = {
+        address: addressShipping,
+        transportationId: values.transportationId,
+      };
+
+      if (values.emailShippingInfo) {
+        shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
+      }
+      if (values.note) {
+        shippingInfo = { ...shippingInfo, note: values.note };
+      }
+
+      shippingInfo = {
+        ...shippingInfo,
+        phoneNumber: values.phoneNumberShippingInfo,
+        firstName: values.firstNameShippingInfo,
+        lastName: values.lastNameShippingInfo,
+      };
+    }
+
+    //Continue to config paymentInfo
+    let paymentInfo = undefined;
+    if (values.paymentMethod) {
+      paymentInfo = { ...paymentInfo, paymentMethod: values.paymentMethod };
+    }
+    if (values.paymentMethod === "CREDIT CARD") {
+      paymentInfo = {
+        ...paymentInfo,
+        moreInfo: {
+          cardNumber: values.cardNumber,
+          cardHolder: values.cardHolder,
+          expDate: values.expDate,
+          cvv: values.cvv,
+        },
+      };
+    }
+
+    const newData = {
+      contactInfo,
+      shippingInfo,
+      paymentInfo,
+      orderDetails: configOrderDetails,
+      handlers,
+    };
     setLoadingBtn(true);
     //SUBMIT
-    let newData = { ...values };
-
     //POST
     axiosClient
       .post(`${URLOrder}/insertOne`, newData)
       .then((response) => {
         if (response.status === 201) {
           setLoading(true);
-          setIsCreate(false);
+          // setIsCreate(false);
           setRefresh((e) => !e);
+          setDetailCreatingStatus(false);
           formCreate.resetFields();
           notification.info({
             message: "Thông báo",
@@ -248,20 +395,63 @@ function Orders() {
   };
   //
   const handleFinishUpdate = (values) => {
-    //The same values so don't need to update
+    //if not change values
     if (
-      values.name === selectedRecord.name &&
-      values.description === selectedRecord.description
+      values.status === selectedRecord.status &&
+      values.sendingDate === selectedRecord.sendingDate &&
+      values.receivedDate === selectedRecord.receivedDate
     ) {
+      console.log("the same values");
       setIsModalOpen(false);
       formUpdate.resetFields();
       setSelectedId(null);
       return;
     }
+    //Show error the relative between status and sendingDate- receivedDate
+    if (values.sendingDate === null) {
+      if (values.status === "SHIPPING") {
+        message.error("Bạn chưa nhập ngày chuyển đơn hàng");
+        return;
+      }
+      if (values.status === "COMPLETED") {
+        message.error("Bạn chưa nhập ngày chuyển đơn hàng");
+        return;
+      }
+    }
+
+    if (values.receivedDate === null) {
+      if (values.status === "COMPLETED") {
+        message.error("Bạn chưa nhập ngày khách hàng nhận đơn hàng");
+        return;
+      }
+    }
+    //
+    const customSendingDate = values.sendingDate
+      ? values.sendingDate.format("YYYY-MM-DD")
+      : null;
+    const customReceivedDate = values.receivedDate
+      ? values.receivedDate.format("YYYY-MM-DD")
+      : null;
+
+    let updateData = {
+      status: values.status,
+      sendingDate: customSendingDate,
+      receivedDate: customReceivedDate,
+    };
+    //Add a handler -update new status
+    if (changedStatus) {
+      const actionContent = `Cập nhật trạng thái đơn hàng - ${changedStatus}`;
+      const newHandler = customCreateAHandler(actionContent);
+      // const handlers = [newHandler];
+      let newHandlers = selectedRecord.handlers;
+      newHandlers.push(newHandler);
+      updateData = { ...updateData, handlers: newHandlers };
+    }
+
     setLoadingBtn(true);
     //POST
     axiosClient
-      .patch(`${URLOrder}/updateOne/${selectedId}`, values)
+      .patch(`${URLOrder}/updateOne/${selectedId}`, updateData)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -269,6 +459,8 @@ function Orders() {
           setRefresh((e) => !e);
           formUpdate.resetFields();
           setSelectedId(null);
+          setSendingDateState(null);
+          setReceivedDateState(null);
           notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
@@ -313,16 +505,13 @@ function Orders() {
       .finally(() => {});
   };
 
-  const handleCreateBtn = () => {
-    setIsCreate(true);
-  };
   const handleCancelCreate = () => {
     formCreate.resetFields();
-    setIsCreate(false);
+    setDetailCreatingStatus(false);
   };
 
   const handleMouseLeaveCreate = () => {
-    setIsCreate(false);
+    setDetailCreatingStatus(false);
     formCreate.resetFields();
   };
   useEffect(() => {
@@ -332,21 +521,13 @@ function Orders() {
       let newOrders = [];
       orders.map((e) => {
         // Formatting dates before showing
-        let formattedCreatedDate = null;
-        let formattedSendingDate = null;
-        let formattedReceivedDate = null;
-
-        if (e.createdDate) {
-          formattedCreatedDate = formattedDate(e.createdDate);
-        }
-
-        if (e.sendingDate) {
-          formattedSendingDate = formattedDate(e.sendingDate);
-        }
-
-        if (e.receivedDate) {
-          formattedReceivedDate = formattedDate(e.receivedDate);
-        }
+        let formattedCreatedDate = formattedDate(e.createdDate);
+        let formattedSendingDate = e.sendingDate
+          ? formattedDate(e.sendingDate)
+          : "Chưa xác định";
+        let formattedReceivedDate = e.receivedDate
+          ? formattedDate(e.receivedDate)
+          : "Chưa xác định";
 
         newOrders.push({
           ...e,
@@ -369,322 +550,689 @@ function Orders() {
         console.error("Error:", error);
       });
   }, []);
-  
-  useEffect(() => {
-    console.log("country: ",savedSelectedCountry.current)
-    setStatesList(savedSelectedCountry.current);
-  }, [onChangeCountry]);
 
   useEffect(() => {
-    console.log("state: ",savedSelectedState.current)
+    axiosClient.get(`${URLTransportation}`).then((response) => {
+      setTransportationList(response.data.results);
+    });
+  }, []);
 
-    setCityList(savedSelectedState.current);
-  }, [onchangeState]);
-
-  const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
+  useEffect(() => {
+    axiosClient.get(`${URLProduct}`).then((response) => {
+      setProducts(response.data);
+    });
+  }, []);
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
-        {!isCreate && (
-          <Button type="primary" onClick={handleCreateBtn}>
-            Tạo mới
-          </Button>
-        )}
-        {isCreate && (
-          <Form
-            {...PropsForm}
-            form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-            initialValues={{
-              createdDate: moment(new Date()),
-              sendingDate: null,
-              receivedDate: null,
-              status: "WAITING",
-              country: null,
-              state: null,
-              city: null,
+        {/* Form create a new Order */}
+        <Form
+          {...PropsForm}
+          labelCol={{ span: 0 }}
+          form={formCreate}
+          name="formCreate"
+          onFinish={handleFinishCreate}
+          onFinishFailed={() => {
+            console.error("Error at onFinishFailed at formCreate");
+          }}
+          initialValues={{
+            sendingDate: null,
+            receivedDate: null,
+            status: "WAITING",
+            country: null,
+            state: null,
+            city: null,
+            cardNumber: "5105105105105100",
+            orderDetails: [{ quantity: 1 }],
+          }}
+        >
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Ngày đặt hàng",
+              name: "createdDate",
+            })}
+          >
+            <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
+          </Form.Item>
+
+          {/* When click more detail create form */}
+
+          {detailCreatingStatus && (
+            <Fragment>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Tình trạng",
+                  name: "status",
+                })}
+              >
+                <Select style={{ width: 150 }} disabled>
+                  {statusList.map((s, index) => {
+                    return (
+                      <Select.Option key={index + 1} value={s}>
+                        {s}
+                      </Select.Option>
+                    );
+                  })}
+                </Select>
+              </Form.Item>
+
+              <Divider style={{ backgroundColor: "#e3e6f2" }} />
+              {/* Part 2- Contact Information */}
+              <Text
+                strong
+                style={{
+                  color: "blue",
+                  display: "inline-block",
+                  marginBottom: 20,
+                }}
+              >
+                Thông tin người đặt hàng
+              </Text>
+              <Form.Item
+                {...PropsFormItemFirstName}
+                name="firstNameContactInfo"
+              >
+                <Input placeholder="Họ" />
+              </Form.Item>
+
+              <Form.Item {...PropsFormItemLastName} name="lastNameContactInfo">
+                <Input placeholder="Last name" />
+              </Form.Item>
+
+              <Form.Item {...PropsFormItemEmail} name="emailContactInfo">
+                <Input placeholder="Email" />
+              </Form.Item>
+            </Fragment>
+          )}
+
+          <Form.Item
+            {...PropsFormItemPhoneNumber}
+            name="phoneNumberContactInfo"
+            rules={[
+              ...PropsFormItemPhoneNumber.rules,
+              {
+                required: true,
+                message: "Trường dữ liệu không thể bỏ trống",
+              },
+            ]}
+          >
+            <Input placeholder="Số điện thoại của người đặt hàng" />
+          </Form.Item>
+
+          {/* When click more detail create form */}
+
+          {detailCreatingStatus && (
+            <Fragment>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Quốc gia",
+                  name: "countryContactInfo",
+                })}
+              >
+                <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  onChange={(value) => {
+                    setStatesListContactInfo(
+                      countryList.find((e) => e.name === value)
+                    );
+                    formCreate.setFieldsValue({
+                      stateContactInfo: null,
+                      cityContactInfo: null,
+                    });
+                  }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    countryList &&
+                    countryList.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Tỉnh",
+                  name: "stateContactInfo",
+                })}
+              >
+                <Select
+                  style={{ width: 150 }}
+                  placeholder="Chọn..."
+                  onChange={(value) => {
+                    setCityListContactInfo(
+                      statesListContactInfo.states.find((e) => e.name === value)
+                    );
+                    formCreate.setFieldsValue({ cityContactInfo: null });
+                  }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    statesListContactInfo &&
+                    statesListContactInfo.states.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Thành phố/ Huyện",
+                  name: "cityContactInfo",
+                })}
+              >
+                <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    cityListContactInfo &&
+                    cityListContactInfo.cities.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
+                />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItemDetailAddress}
+                name="detailAddressContactInfo"
+              >
+                <Input placeholder="Địa chỉ cụ thể" />
+              </Form.Item>
+
+              {/*  Shipping Information */}
+              <Fragment>
+                <Divider style={{ backgroundColor: "#e3e6f2" }} />
+                <Text
+                  strong
+                  style={{
+                    color: "blue",
+                    display: "inline-block",
+                    marginBottom: 20,
+                  }}
+                >
+                  Thông tin nhận hàng
+                </Text>
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Phương tiện vận chuyển",
+                    name: "transportationId",
+                  })}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Trường dữ liệu không thể bỏ trống",
+                    },
+                  ]}
+                >
+                  <Select
+                    style={{ width: 450 }}
+                    loading={!transportationList}
+                    placeholder="Chọn"
+                  >
+                    {transportationList &&
+                      transportationList.map((t) => {
+                        const customPrice = numeral(t.price).format("0,0");
+                        return (
+                          <Select.Option key={t._id} value={t._id}>
+                            {`${t.name}- giá: ${customPrice} VNĐ `}
+                          </Select.Option>
+                        );
+                      })}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItemFirstName}
+                  name="firstNameShippingInfo"
+                >
+                  <Input placeholder="Họ" />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItemLastName}
+                  name="lastNameShippingInfo"
+                >
+                  <Input placeholder="Last name" />
+                </Form.Item>
+
+                <Form.Item {...PropsFormItemEmail} name="emailShippingInfo">
+                  <Input placeholder="Email" />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItemPhoneNumber}
+                  name="phoneNumberShippingInfo"
+                  rules={[
+                    ...PropsFormItemPhoneNumber.rules,
+                    {
+                      required: true,
+                      message: "Trường dữ liệu không thể bỏ trống",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Số điện thoại người nhận" />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Quốc gia",
+                    name: "countryShippingInfo",
+                  })}
+                >
+                  <Select
+                    placeholder="Chọn..."
+                    style={{ width: 150 }}
+                    onChange={(value) => {
+                      setStatesListShippingInfo(
+                        countryList.find((e) => e.name === value)
+                      );
+                      formCreate.setFieldsValue({
+                        stateShippingInfo: null,
+                        cityShippingInfo: null,
+                      });
+                    }}
+                    showSearch
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={
+                      countryList &&
+                      countryList.map((e) => {
+                        const tmp = { value: e.name, label: e.name };
+                        return tmp;
+                      })
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Tỉnh",
+                    name: "stateShippingInfo",
+                  })}
+                >
+                  <Select
+                    style={{ width: 150 }}
+                    placeholder="Chọn..."
+                    onChange={(value) => {
+                      setCityListShippingInfo(
+                        statesListShippingInfo.states.find(
+                          (e) => e.name === value
+                        )
+                      );
+                      formCreate.setFieldsValue({ cityShippingInfo: null });
+                    }}
+                    showSearch
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={
+                      statesListShippingInfo &&
+                      statesListShippingInfo.states.map((e) => {
+                        const tmp = { value: e.name, label: e.name };
+                        return tmp;
+                      })
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Thành phố/ Huyện",
+                    name: "cityShippingInfo",
+                  })}
+                >
+                  <Select
+                    placeholder="Chọn..."
+                    style={{ width: 150 }}
+                    showSearch
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={
+                      cityListShippingInfo &&
+                      cityListShippingInfo.cities.map((e) => {
+                        const tmp = { value: e.name, label: e.name };
+                        return tmp;
+                      })
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItemDetailAddress}
+                  name="detailAddressShippingInfo"
+                >
+                  <Input placeholder="Địa chỉ cụ thể" />
+                </Form.Item>
+
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Ghi chú",
+                    name: "note",
+                  })}
+                >
+                  <TextArea rows={3} placeholder="Thời gian nhận hàng..." />
+                </Form.Item>
+
+                <Divider style={{ backgroundColor: "#e3e6f2" }} />
+              </Fragment>
+
+              {/* Part 04 - Payment Method */}
+              <Fragment>
+                <Form.Item
+                  {...PropsFormItem_Label_Name({
+                    label: "Phương thức thanh toán",
+                    name: "paymentMethod",
+                  })}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn phương thức thanh toán",
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Chọn"
+                    style={{ width: 200 }}
+                    onChange={(value) => {
+                      setSelectedPaymentCreditCard(value);
+                    }}
+                  >
+                    {paymentMethodList.map((m, index) => {
+                      return (
+                        <Select.Option key={index + 1} value={m}>
+                          {m}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+
+                {selectedPaymentCreditCard === "CREDIT CARD" && (
+                  <Fragment>
+                    <Form.Item
+                      {...PropsFormItem_Label_Name({
+                        name: "cardNumber",
+                        label: "CardNumber",
+                      })}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Trường dữ liệu không thể bỏ trống",
+                        },
+                        {
+                          pattern:
+                            /^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/,
+                          message: "Vui lòng nhập đúng định dạng CardNumber",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="CardNumber" />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...PropsFormItem_Label_Name({
+                        name: "cardHolder",
+                        label: "CardHolder",
+                      })}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Trường dữ liệu không thể bỏ trống",
+                        },
+                        {
+                          max: 50,
+                        },
+                        { type: String },
+                      ]}
+                    >
+                      <Input placeholder="Tên người chủ thẻ" />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...PropsFormItem_Label_Name({
+                        name: "expDate",
+                        label: "ExpDate",
+                      })}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Trường dữ liệu không thể bỏ trống",
+                        },
+                        {
+                          pattern: /^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/,
+                          message: "Vui lòng nhập đúng định dạng Exp Date",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="expiration date" />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...PropsFormItem_Label_Name({
+                        name: "cvv",
+                        label: "CVV",
+                      })}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Trường dữ liệu không thể bỏ trống",
+                        },
+                        {
+                          pattern: /^[0-9]{3,4}$/,
+                          message:
+                            "Vui lòng nhập đúng định dạng Card Verification Value",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="card verification  " />
+                    </Form.Item>
+                  </Fragment>
+                )}
+              </Fragment>
+              <Divider style={{ backgroundColor: "#e3e6f2" }} />
+            </Fragment>
+          )}
+
+          <Form.List name="orderDetails">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <Space
+                    key={key}
+                    style={{
+                      display: "flex",
+                      marginBottom: 8,
+                    }}
+                    align="baseline"
+                  >
+                    <Form.Item
+                      {...restField}
+                      label=<LabelCustomization title={`Tên sản phẩm`} />
+                      name={[name, "productName"]}
+                    >
+                      <Input
+                        placeholder="Tên sản phẩm"
+                        disabled
+                        addonBefore={
+                          <Form.Item
+                            // label=<LabelCustomization
+                            //   title={`Mã sản phẩm ${name + 1}`}
+                            // />
+                            // {...restField}
+                            name={[name, "productId"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn mã sản phẩm",
+                              },
+                            ]}
+                            noStyle
+                          >
+                            <Select
+                              loading={!products}
+                              placeholder="Mã số"
+                              style={{ width: 100 }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                products &&
+                                products.map((e) => {
+                                  const tmp = {
+                                    value: e._id,
+                                    label: e.productCode,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                              onChange={(value) => {
+                                let productName = products.find(
+                                  (e) => e._id === value
+                                ).name;
+                                const fields = formCreate.getFieldsValue();
+                                const { orderDetails } = fields;
+                                Object.assign(orderDetails[name], {
+                                  productName: productName,
+                                });
+                                formCreate.setFieldsValue({ orderDetails });
+                              }}
+                            />
+                          </Form.Item>
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label=<LabelCustomization title={`Số lượng`} />
+                      {...restField}
+                      name={[name, "quantity"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Chưa nhập số lượng",
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        addonBefore={
+                          <Form.Item
+                            name={[name, "size"]}
+                            noStyle
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn Size",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Size"
+                              style={{
+                                width: 70,
+                              }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                sizeList &&
+                                sizeList.map((s) => {
+                                  const tmp = {
+                                    value: s,
+                                    label: s,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                            />
+                          </Form.Item>
+                        }
+                        style={{ minWidth: 120, maxWidth: 360 }}
+                        min={0}
+                        addonAfter="sản phẩm"
+                      />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Thêm sản phẩm
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+          <Form.Item
+            wrapperCol={{
+              offset: 8,
+              span: 16,
             }}
           >
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Ngày đặt hàng",
-                name: "createdDate",
-              })}
-              rules={[
-                {
-                  required: true,
-                  message: "Ngày đặt hàng không thể để trống!",
-                },
-              ]}
-            >
-              <DatePicker
-                showToday={false}
-                disabledDate={disabledDate}
-                format={dateFormatList}
-                onChange={(e) => {
-                  if (e) {
-                    savedCreatedDate.current = e.format("YYYY-MM-DD");
-                    if (
-                      moment(savedCreatedDate.current) >
-                        moment(savedSendingDate.current) &&
-                      savedCreatedDate.current !== null
-                    ) {
-                      message.error(
-                        "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
-                      );
-                      formCreate.setFieldsValue({ sendingDate: null });
-                    }
-                  } else {
-                    savedCreatedDate.current = null;
-                  }
-                }}
-              />
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Tình trạng",
-                name: "status",
-              })}
-            >
-              <Select
-                style={{ width: 150 }}
-                onChange={(e) => {
-                  switch (e) {
-                    case "SHIPPING":
-                      formCreate.setFieldsValue({
-                        sendingDate: moment(new Date()),
-                      });
-                      formCreate.setFieldsValue({ receivedDate: null });
-                      break;
-                    case "COMPLETED":
-                      if (savedSendingDate.current === null) {
-                        formCreate.setFieldsValue({
-                          sendingDate: moment(new Date()),
-                        });
-                      }
-                      formCreate.setFieldsValue({
-                        receivedDate: moment(new Date()),
-                      });
-                      break;
-                    case "CANCELED":
-                      formCreate.setFieldsValue({ receivedDate: null });
-                      break;
-                    default:
-
-                    // formCreate.setFieldsValue({ sendingDate: null });
-                  }
-                }}
+            <Space wrap>
+              <Button type="primary" danger onClick={handleCancelCreate}>
+                Hủy
+              </Button>
+              <Button
+                type="primary"
+                style={{ backgroundColor: "#33cc33" }}
+                onClick={() => setDetailCreatingStatus((e) => !e)}
               >
-                {statusList.map((s, index) => {
-                  return (
-                    <Select.Option key={index + 1} value={s}>
-                      {s}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Ngày chuyển hàng",
-                name: "sendingDate",
-              })}
-            >
-              <DatePicker
-                showToday={false}
-                disabledDate={disabledForSending}
-                placeholder="dd-mm-yyyy"
-                format={dateFormatList}
-                onChange={(e) => {
-                  if (e) {
-                    savedSendingDate.current = e.format("YYYY-MM-DD");
-                    formCreate.setFieldsValue({ status: "SHIPPING" });
-
-                    if (savedCreatedDate.current === null) {
-                      message.error("Chưa nhập ngày đặt đơn hàng");
-                      formCreate.setFieldsValue({ sendingDate: null });
-                    }
-
-                    if (
-                      moment(savedSendingDate.current) >
-                        moment(saveReceivedDate.current) &&
-                      saveReceivedDate.current !== null
-                    ) {
-                      message.error(
-                        "Ngày đặt hàng không thể lớn hơn ngày chuyển hàng"
-                      );
-                      formCreate.setFieldsValue({ receivedDate: null });
-                    }
-                  } else {
-                    savedSendingDate.current = null;
-                  }
-                }}
-              />
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Ngày nhận hàng",
-                name: "receivedDate",
-              })}
-            >
-              <DatePicker
-                showToday={false}
-                disabledDate={disabledForReceived}
-                placeholder="dd-mm-yyyy"
-                format={dateFormatList}
-                onChange={(e) => {
-                  if (e) {
-                    saveReceivedDate.current = e.format("YYYY-MM-DD");
-                    formCreate.setFieldsValue({ status: "COMPLETED" });
-
-                    if (savedSendingDate.current === null) {
-                      message.error("Ngày nhận hàng phải sau ngày chuyển hàng");
-                      formCreate.setFieldsValue({ receivedDate: null });
-                    }
-                  } else {
-                    saveReceivedDate.current = null;
-                  }
-                }}
-              />
-            </Form.Item>
-
-            <Divider style={{ backgroundColor: "#e3e6f2" }} />
-
-            <Text strong style={{ color: "blue" }}>
-              Thông tin người đặt hàng
-            </Text>
-            <Form.Item {...PropsFormItemFirstName} name='firstNameContactInfo'>
-              <Input placeholder="Họ" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemLastName} name='lastNameContactInfo'>
-              <Input placeholder="Last name" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemEmail} name='emailContactInfo' >
-              <Input placeholder="Email" />
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItemPhoneNumber} name="phoneNumberContactInfo"
-              rules={[
-                ...PropsFormItemPhoneNumber.rules,
-                {
-                  required: true,
-                  message: "Trường dữ liệu không thể bỏ trống",
-                },
-              ]}
-            >
-              <Input placeholder="Số điện thoại của nhan vien" />
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Quốc gia",
-                name: "countryContactInfo",
-              })}
-            >
-              <Select
-                placeholder="Chọn..."
-                style={{ width: 150 }}
-                onChange={(value) => {
-                  savedSelectedCountry.current = countryList.find(
-                    (e) => e.name === value
-                  );
-                  setOnChangeCountry(e => !e)
-
-                }}
-              >
-                {countryList &&
-                  countryList.map((e) => {
-                    return (
-                      <Select.Option key={e.id} value={e.name}>
-                        {e.name}
-                      </Select.Option>
-                    );
-                  })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Tỉnh",
-                name: "stateContactInfo",
-              })}
-            >
-              <Select
-                style={{ width: 150 }}
-                placeholder="Chọn..."
-                onChange={(value) => {
-                  console.log('states: ', statesList)
-                  savedSelectedState.current = statesList.states.find(
-                    (e) => e.name === value
-                  );
-                  setOnChangeState(e => !e)
-                }}
-              >
-                {statesList &&
-                  statesList.states.map((state) => {
-                    return (
-                      <Select.Option key={state.id} value={state.name}>
-                        {state.name}
-                      </Select.Option>
-                    );
-                  })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Thành phố/ Huyện",
-                name: "cityContactInfo",
-              })}
-            >
-              <Select placeholder="Chọn..." style={{ width: 150 }}>
-                {cityList &&
-                  cityList?.cities?.map((city) => {
-                    return (
-                      <Select.Option key={city.id} value={city.name}>
-                        {city.name}
-                      </Select.Option>
-                    );
-                  })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemDetailAddress} name= 'detailAddressContactInfo'>
-              <Input placeholder="Địa chỉ cụ thể" />
-            </Form.Item>
-
-            <Divider style={{ backgroundColor: "#e3e6f2" }} />
-            
-            
-            <Divider style={{ backgroundColor: "#e3e6f2" }} />
-
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Space wrap>
-                <Button type="primary" danger onClick={handleCancelCreate}>
-                  Hủy
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loadingBtn}>
-                  Tạo mới
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        )}
+                {detailCreatingStatus ? `Thu gọn` : `Chi tiết`}
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loadingBtn}>
+                Tạo mới
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+        {/*  */}
         <Table
           {...PropsTable({
             title: "danh sách đơn đặt hàng",
@@ -704,46 +1252,202 @@ function Orders() {
             defaultCurrent: 1,
           }}
         />
-
-        {/* <Modal
-        title="Chỉnh sửa thông tin danh mục"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        width={800}
-        footer={[
-          <Button key="back" onClick={handleCancel}>
-            Hủy
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            loading={loadingBtn}
-            onClick={handleOk}
-          >
-            Sửa
-          </Button>,
-        ]}
-      >
-        <Form
-          {...PropsForm}
-          form={formUpdate}
-          name="formUpdate"
-          onFinish={handleFinishUpdate}
-          onFinishFailed={() => {
-            // message.info("Error at onFinishFailed at formUpdate");
-            console.error("Error at onFinishFailed at formUpdate");
-          }}
+        {/* Form update status of a Order */}
+        <Modal
+          title="Cập nhật trạng thái đơn hàng"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          width={800}
+          footer={[
+            <Button key="back" onClick={handleCancel}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={loadingBtn}
+              onClick={handleOk}
+            >
+              Cập nhật
+            </Button>,
+          ]}
         >
-          <Form.Item {...PropsFormItemName}>
-            <Input placeholder="Tên danh mục " />
-          </Form.Item>
+          <Form
+            {...PropsForm}
+            form={formUpdate}
+            name="formUpdate"
+            onFinish={handleFinishUpdate}
+            onFinishFailed={() => {
+              console.error("Error at onFinishFailed at formUpdate");
+            }}
+          >
+            <Fragment>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  name: "orderCode",
+                  label: "Mã đơn hàng",
+                })}
+              >
+                <Input disabled />
+              </Form.Item>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Ngày đặt hàng",
+                  name: "createdDate",
+                })}
+              >
+                <Input disabled />
+              </Form.Item>
 
-          <Form.Item {...PropsFormItemDescription}>
-            <TextArea rows={3} placeholder="Mô tả danh mục " />
-          </Form.Item>
-        </Form>
-      </Modal> */}
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Tình trạng",
+                  name: "status",
+                })}
+              >
+                <Select
+                  style={{ width: 150 }}
+                  onChange={(e) => {
+                    setChangedStatus(e);
+                    switch (e) {
+                      case "WAITING":
+                        formUpdate.setFieldsValue({
+                          receivedDate: null,
+                          sendingDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
+                        break;
+                      case "SHIPPING":
+                        if (sendingDateState) {
+                          formUpdate.setFieldsValue({
+                            receivedDate: null,
+                          });
+                          setReceivedDateState(null);
+                        } else {
+                          formUpdate.setFieldsValue({
+                            sendingDate: moment(new Date()),
+                            receivedDate: null,
+                          });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(null);
+                        }
+                        break;
+                      case "COMPLETED":
+                        //Existing sendingDate and sendingDate < Today
+                        if (
+                          sendingDateState &&
+                          sendingDateState <=
+                            moment(new Date()).format("YYYY-MM-DD")
+                        ) {
+                          formUpdate.setFieldsValue({
+                            receivedDate: moment(new Date()),
+                          });
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        } else if (!sendingDateState) {
+                          formUpdate.setFieldsValue({
+                            sendingDate: moment(new Date()),
+                            receivedDate: moment(new Date()),
+                          });
+                          setSendingDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                          setReceivedDateState(
+                            moment(new Date()).format("YYYY-MM-DD")
+                          );
+                        }
+                        break;
+                      case "CANCELED":
+                        formUpdate.setFieldsValue({
+                          receivedDate: null,
+                          sendingDate: null,
+                        });
+                        setSendingDateState(null);
+                        setReceivedDateState(null);
+                        break;
+                      default:
+                    }
+                  }}
+                >
+                  {statusList.map((s, index) => {
+                    return (
+                      <Select.Option key={index + 1} value={s}>
+                        {s}
+                      </Select.Option>
+                    );
+                  })}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Ngày chuyển hàng",
+                  name: "sendingDate",
+                })}
+              >
+                <DatePicker
+                  showToday={false}
+                  disabledDate={(current) =>
+                    customDisabledDate(
+                      current,
+                      moment(new Date()).format("YYYY-MM-DD")
+                    )
+                  }
+                  placeholder="dd-mm-yyyy"
+                  format={dateFormatList}
+                  value={moment(sendingDateState)}
+                  onChange={(e) => {
+                    if (e) {
+                      setSendingDateState(e.format("YYYY-MM-DD"));
+                      if (
+                        moment(e.format("YYYY-MM-DD")) >
+                        moment(receivedDateState)
+                      ) {
+                        message.error(
+                          "Ngày chuyển hàng không thể sau ngày nhận hàng"
+                        );
+                        formUpdate.setFieldsValue({ receivedDate: null });
+                        setReceivedDateState(null);
+                      }
+                    } else {
+                      formUpdate.setFieldsValue({ receivedDate: null });
+                      setReceivedDateState(null);
+                    }
+                  }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Ngày nhận hàng",
+                  name: "receivedDate",
+                })}
+              >
+                <DatePicker
+                  showToday={false}
+                  disabledDate={(current) =>
+                    customDisabledDate(current, sendingDateState)
+                  }
+                  placeholder="dd-mm-yyyy"
+                  format={dateFormatList}
+                  onChange={(e) => {
+                    if (e) {
+                      setReceivedDateState(e.format("YYYY-MM-DD"));
+                      formUpdate.setFieldsValue({ status: "COMPLETED" });
+                    } else {
+                      setReceivedDateState(null);
+                    }
+                  }}
+                />
+              </Form.Item>
+            </Fragment>
+          </Form>
+        </Modal>
       </Content>
     </Layout>
   );

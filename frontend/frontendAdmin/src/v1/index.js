@@ -27,7 +27,7 @@ import Slides from "./pages/Slides";
 import Orders from "./pages/orderRoutes/Orders";
 import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
-import useAuth, { useCurrentPage } from "./hooks/useZustand";
+import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
 import { ICON_NoImage } from "./config/constants";
 const { Content, Sider } = Layout;
@@ -35,7 +35,7 @@ const { Content, Sider } = Layout;
 function ToCoShopV1() {
   const navigate = useNavigate();
   const { signOut, auth } = useAuth((state) => state);
-
+  console.log("show route:", window.location.pathname);
   function getItem(label, key, icon, content, children, type) {
     if (key === "signOut") {
       return {
@@ -89,7 +89,7 @@ function ToCoShopV1() {
       ),
       getItem(
         "Chi tiết đơn hàng",
-        "/orderDetail",
+        "/orderDetail/:id",
         <UnorderedListOutlined />,
         <OrderDetail />
       ),
@@ -130,21 +130,23 @@ function ToCoShopV1() {
               mode="inline"
               // defaultOpenKeys={["/orderList"]}
               defaultOpenKeys={
-                ["/orders", "/orderDetail", "/statistics"].includes(
-                  window.location.pathname
-                )
+                ["/orders", "/statistics"].includes(window.location.pathname) ||
+                window.location.pathname.includes("/orderDetail")
                   ? ["/orderList"]
                   : []
               }
-              defaultSelectedKeys={[window.location.pathname]}
-              // selectedKeys={[currentPage]}
+              defaultSelectedKeys={
+                // window.location.pathname.includes("/orderDetail")
+                //   ? ["/orderDetail:id"]
+                // :
+                [window.location.pathname]
+              }
               items={itemsAfterLogin}
               onClick={({ key }) => {
                 if (key === "signOut") {
                   signOut();
                   navigate("/login");
                 } else {
-                  console.log("key:", key);
                   navigate(key);
                 }
               }}

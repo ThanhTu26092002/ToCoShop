@@ -7,26 +7,23 @@ const addressSchema = new Schema(
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     state: {
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     city: {
       type: String,
       trim: true,
       maxLength: 50,
-      required: true,
     },
     detailAddress: {
       type: String,
       trim: true,
-      required: true,
+      default: "unknown",
       maxLength: 500,
-
+      required: true,
     },
   },
   { _id: false }
@@ -39,12 +36,14 @@ const contactInfoSchema = new Schema(
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     lastName: {
       type: String,
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     phoneNumber: {
       type: String,
@@ -67,7 +66,7 @@ const contactInfoSchema = new Schema(
     },
     address: {
       type: addressSchema,
-      required: true,
+      // required: true,
     },
   },
   { _id: false }
@@ -85,12 +84,14 @@ const shippingInfoSchema = new Schema(
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     lastName: {
       type: String,
       trim: true,
       maxLength: 50,
       required: true,
+      default: "unknown",
     },
     phoneNumber: {
       type: String,
@@ -102,12 +103,7 @@ const shippingInfoSchema = new Schema(
     },
     address: {
       type: addressSchema,
-      required: true,
-    },
-    shippingDuration: {
-      type: String,
-      trim: true,
-      maxLength: 200,
+      // required: true,
     },
     note: {
       type: String,
@@ -180,6 +176,11 @@ const orderDetailSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    size: {
+      type: String,
+      required: true,
+      enum: ["S", "M", "L", "XL", "XXL"],
+    },
     quantity: {
       type: Number,
       required: true,
@@ -198,9 +199,14 @@ const orderDetailSchema = new Schema(
 
 const handlerSchema = new Schema(
   {
-    employeeId: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: true,
+    },
+    userName: {
+      type: String,
+      required: true,
+      maxLength: 50,
     },
     action: {
       type: String,
@@ -214,11 +220,19 @@ const handlerSchema = new Schema(
 
 const orderSchema = new Schema(
   {
+    orderCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     createdDate: {
       type: Date,
       default: Date.now,
     },
-    shippedDate: {
+    sendingDate: {
+      type: Date,
+    },
+    receivedDate: {
       type: Date,
     },
     status: {
@@ -234,11 +248,11 @@ const orderSchema = new Schema(
     },
     shippingInfo: {
       type: shippingInfoSchema,
-      required: true,
+      // required: true,
     },
     paymentInfo: {
       type: paymentInfoSchema,
-      required: true,
+      // required: true,
     },
     orderDetails: {
       type: [orderDetailSchema],

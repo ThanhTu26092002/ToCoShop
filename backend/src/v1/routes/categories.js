@@ -222,7 +222,6 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const deleteDoc = await Category.findByIdAndDelete(id);
-    console.log("result delete: ", deleteDoc);
     //deleteDoc !== false, is mean, finding a document with the id in the collection
     if (!deleteDoc) {
       res.status(200).json({

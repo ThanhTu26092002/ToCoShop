@@ -50,7 +50,10 @@ const aggregateLookup = [
   {
     $group: {
       _id: "$_id",
+      orderCode: { $first: "$orderCode" },
       createdDate: { $first: "$createdDate" },
+      sendingDate: { $first: "$sendingDate" },
+      receivedDate: { $first: "$receivedDate" },
       status: { $first: "$status" },
       contactInfo: { $first: "$contactInfo" },
       shippingInfo: { $first: "$shippingInfo" },
@@ -83,7 +86,6 @@ const aggregateLookup = [
 
 //Get all orders
 router.get("/", async (req, res, next) => {
- 
   try {
     const docs = await Order.aggregate(aggregateLookup);
     res.json({ ok: true, results: docs });
@@ -93,10 +95,13 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/search/:id", validateId, async (req, res, next) => {
+router.get("/orderDetail/:id", validateId, async (req, res, next) => {
   try {
     const id = new ObjectId(req.params.id);
-    const docs = await Order.aggregate([{ "$match": { "_id":  id }}, ...aggregateLookup ]);
+    const docs = await Order.aggregate([
+      { $match: { _id: id } },
+      ...aggregateLookup,
+    ]);
     res.json({ ok: true, results: docs });
   } catch (err) {
     res.status(400).json({ error: { name: err.name, message: err.message } });
@@ -123,7 +128,19 @@ router.post("/insertOne", async (req, res, next) => {
     }
     createdDate = new Date(createdDate);
 
-    data = { createdDate, ...data };
+    //Generating orderCode
+    //"TCS" // TSC: the name of shop - ToCoShop
+    var now = new Date();
+    let orderCode = "TCS" + now.getFullYear().toString();
+    orderCode +=
+      (now.getMonth < 9 ? "0" : "") + (now.getMonth() + 1).toString(); // JS months are 0-based, so +1 and pad with 0's
+    orderCode += (now.getDate < 10 ? "0" : "") + now.getDate().toString();
+    orderCode += (now.getHours < 10 ? "0" : "") + now.getHours().toString();
+    orderCode += (now.getMinutes < 10 ? "0" : "") + now.getMinutes().toString();
+    orderCode += (now.getSeconds < 10 ? "0" : "") + now.getSeconds().toString();
+    console.log("show string time:", orderCode);
+
+    data = { createdDate, ...data, orderCode };
     //Create a new blog post object
     const order = new Order(data);
     //Insert the product in our MongoDB database
@@ -177,7 +194,7 @@ router.post("/insertOne", async (req, res, next) => {
 // //
 
 //Update One with _Id
-router.patch("/updateOne/:id",validateId, async (req, res, next) => {
+router.patch("/updateOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -196,8 +213,108 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 
     const opts = { runValidators: true };
 
-    const order = await Supplier.findByIdAndUpdate(id, updateData, opts);
-    res.json(Supplier);
+    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
+    if (!updatedDoc) {
+      res.status(404).json({
+        ok: true,
+        error: {
+          name: "id",
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+        },
+      });
+      return;
+    }
+
+    res.json({
+      ok: true,
+      message: "Update the Id successfully",
+      result: updatedDoc,
+    });
+  } catch (err) {
+    const errMsg = formatterErrorFunc(err);
+    res.status(400).json({ error: errMsg });
+  }
+});
+//
+
+//
+// router.get(
+//   "/search-many",
+//   validateSchema(search_deleteManyOrdersSchema),
+//   function (req, res, next) {
+//     const query = req.query;
+//     findDocuments({ query: query }, COLLECTION_ORDERS)
+//       .then((result) => res.status(200).json(result))
+//       .catch((err) =>
+//         res.status(500).json({ findFunction: "failed", err: err })
+//       );
+//   }
+// );
+// //
+
+// //Insert Many  -- haven't validation yet
+// router.post(
+//   "/insert-many",
+//   validateSchema(insertManyOrdersSchema),
+//   function (req, res, next) {
+//     const listData = req.body;
+
+//     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
+//     listData.map((order) => {
+//       order.shippedDate = new Date(
+//         moment(order.shippedDate).utc().local().format("YYYY-MM-DD")
+//       );
+//       order.createdDate = new Date(moment().utc().local().format("YYYY-MM-DD"));
+//     });
+
+//     insertDocuments(listData, COLLECTION_ORDERS)
+//       .then((result) => {
+//         res.status(200).json({ ok: true, result: result });
+//       })
+//       .catch((err) => {
+//         res.json(500).json({ ok: false });
+//       });
+//   }
+// );
+// //
+
+//Just update array products
+router.patch("/updateOne/:id", validateId, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    //if updating [createdDate, shippedDate]
+    //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
+    if (updateData.shippedDate) {
+      updateData.shippedDate = new Date(
+        moment(updateData.shippedDate).utc().local().format("YYYY-MM-DD")
+      );
+    }
+    if (updateData.createdDate) {
+      updateData.createdDate = new Date(
+        moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
+      );
+    }
+
+    const opts = { runValidators: true };
+
+    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
+    if (!updatedDoc) {
+      res.status(404).json({
+        ok: true,
+        error: {
+          name: "id",
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+        },
+      });
+      return;
+    }
+
+    res.json({
+      ok: true,
+      message: "Update the Id successfully",
+      result: updatedDoc,
+    });
   } catch (err) {
     const errMsg = formatterErrorFunc(err);
     res.status(400).json({ error: errMsg });
@@ -234,14 +351,29 @@ router.patch("/updateOne/:id",validateId, async (req, res, next) => {
 // //
 
 //Delete ONE with ID
-router.delete("/delete-id/:id", validateId, async (req, res, next) => {
+router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const deleteOrder = await Order.findByIdAndDelete(id);
-    res.status(200).json(deleteOrder);
+    const deleteDoc = await Order.findByIdAndDelete(id);
+    if (!deleteDoc) {
+      res.status(200).json({
+        ok: true,
+        noneExist: `the document doesn't exist in the collection ${COLLECTION_ORDERS}`,
+      });
+      return;
+    }
+    res.json({
+      ok: true,
+      message: "Delete the document in MongoDB successfully",
+    });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+    res.status(400).json({
+      ok: false,
+      message: "Failed to delete the document with ID",
+      error: errMsgMongoDB,
+    });
   }
 });
 // //
