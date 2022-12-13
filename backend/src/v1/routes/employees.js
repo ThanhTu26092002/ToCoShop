@@ -55,9 +55,14 @@ router.get('/', function(req, res, next) {
 router.get('/search/:id', validateSchema(search_deleteWithId), function(req, res, next) {
   const {id}= req.params;
   const query={_id: ObjectId(id)}
-  findOne({query: query}, COLLECTION_NAME)
-    .then(result => res.status(200).json(result))
-    .catch(err => res.status(500).json({findFunction: "failed", err: err}))
+  // find({query: query}, COLLECTION_NAME)
+  //   .then(result => res.status(200).json(result))
+  //   .catch(err => res.status(500).json({findFunction: "failed", err: err}))
+  Employee.findById(id).then(demo => console.log(demo) )
+  
+  
+  
+
 })
 
 router.post("/employeeImage/:id", loadEmployee, function (req, res) {
@@ -211,6 +216,10 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
     res.status(400).json({ ok: true, error: errMsgMongoDB });
   }
 });
+
+
+
+
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -222,8 +231,8 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
         noneExist: `the document doesn't exist in the collection ${COLLECTION_EMPLOYEES}`,
       });
       return;
-    }
-    
+    };
+  ;
     //
     //--Delete the folder containing image of the account
     try {

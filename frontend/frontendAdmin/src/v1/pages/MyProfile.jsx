@@ -68,14 +68,14 @@ function Employees() {
     }
     formUpdate.setFieldsValue(fieldsValues);
     
-
-    const firstName = convertedPayload.state.auth.employeeInfo.firstName;
-    const lastName = convertedPayload.state.auth.employeeInfo.lastName;
-    const email = convertedPayload.state.auth.employeeInfo.email;
-    const phoneNumber = convertedPayload.state.auth.employeeInfo.phoneNumber;
-    const address = convertedPayload.state.auth.employeeInfo.address;
-    const avatar = convertedPayload.state.auth.employeeInfo.imageUrl;
-    console.log('avt:', avatar)
+    const info = convertedPayload.state.auth.employeeInfo;
+    const firstName = info.firstName;
+    const lastName = info.lastName;
+    const email = info.email;
+    const phoneNumber = info.phoneNumber;
+    const address = info.address;
+    const avatar = info.imageUrl;
+    console.log('if', info)
   
 
  
@@ -235,7 +235,44 @@ function Employees() {
   };
 
 
+  const handleClick_EditBtn = (record) => {
+    const savedUrl = [
+      {
+        uid: "-1",
+        // name: 'IMG_0693.JPG',
+        status: "done",
+        url: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
+        thumbUrl: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
+      },
+    ];
 
+    setIsModalOpen(true);
+    // return;
+    setSelectedId(record._id);
+    setCurrentImageUrl(record.imageUrl ? record.imageUrl : null);
+    setIsChangedImage(false);
+    setIsChangeValueUpload(false);
+    let fieldsValues = { file: record.imageUrl ? savedUrl : [] };
+    for (let key in record) {
+        fieldsValues[key] = record[key];
+    }
+    if(record.birthday){
+      fieldsValues.birthday = moment(record.birthday )
+    }
+    else{
+       fieldsValues.birthday =undefined
+    }
+    
+    console.log(fieldsValues)
+    formUpdate.setFieldsValue(fieldsValues);
+  };
+  const handleOk = () => {
+    formUpdate.submit();
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setFile(null);
+  };
 ///myinfo
   return (
     
@@ -249,7 +286,61 @@ function Employees() {
     <Descriptions.Item label="Email">{email}</Descriptions.Item>
     <Descriptions.Item label="Số điện thoại">{phoneNumber}</Descriptions.Item>
     <Descriptions.Item label="Địa chỉ">{address}</Descriptions.Item>
-      </Descriptions>       
+      </Descriptions> 
+      <Button
+              icon={<EditOutlined />}
+              type="primary"
+              title="Chỉnh sửa"
+              onClick={() => handleClick_EditBtn(info)}
+            ></Button>     
+            <Modal
+          title="Chỉnh sửa thông tin danh mục"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          width={800}
+        >
+          <Form
+            {...PropsForm}
+            form={formUpdate}
+            name="formUpdate"
+            onFinish={handleFinishUpdate}
+            onFinishFailed={() => {
+              // message.info("Error at onFinishFailed at formUpdate");
+              console.error("Error at onFinishFailed at formUpdate");
+            }}
+          >
+            <Form.Item {...PropsFormItemFirstName}>
+              <Input placeholder="First name" />
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemLastName}>
+              <Input placeholder="Last name" />
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemEmail}>
+              <Input placeholder="Email" />
+            </Form.Item>
+
+            <Form.Item {...PropsFormItemPhoneNumber}>
+              <Input placeholder="Số điện thoại của nhan vien" />
+            </Form.Item>
+            {/* <Form.Item {...PropsFormItemBirthday}>
+              <DatePicker
+                allowClear={false}
+                showToday={false}
+                disabledDate={disabledDate}
+                placeholder="dd/mm/yyyy"
+                format={dateFormatList}
+                locale={locale}
+                renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
+              />
+            </Form.Item> */}
+            <Form.Item {...PropsFormItemAddress}>
+              <TextArea rows={3} placeholder="Dia chi nhan vien" />
+            </Form.Item>
+          </Form>
+        </Modal> 
     </Layout>
   );
 }
