@@ -313,14 +313,14 @@ function Slides() {
           >
             <Form.Item rules={[{
               required: true,
-              message: "nhập tiêu đề"
-            }]} name={"title"} label="tiêu đề" >
-              <Input placeholder='tiêu đề' />
+              message: "Nhập tiêu đề"
+            }]} name={"title"} label="Tiêu đề" >
+              <Input placeholder='Tiêu đề' />
             </Form.Item>
             <Form.Item name={"description"} label="Mô tả" >
               <TextArea rows={3} placeholder="Mô tả" />
             </Form.Item>
-            <Form.Item name={"sortOrder"} label="thứ tự" >
+            <Form.Item name={"sortOrder"} label="Thứ tự" >
               <Select
                 style={{ width: 120 }}
                 allowClear
@@ -329,18 +329,18 @@ function Slides() {
 
               />
             </Form.Item>
-            <Form.Item name={"status"} label="trạng thái">
+            <Form.Item name={"status"} label="Trạng thái">
               <Radio.Group onChange={onChange}>
                 <Radio value={"ACTIVE"}>hiển thị</Radio>
                 <Radio value={"INACTIVE"}>không hiển thị</Radio>
               </Radio.Group>
             </Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="Submit">
               Lưu thông tin
             </Button>
           </Form>
           <Table rowKey='_id' columns={columns} dataSource={slides} pagination={false} />
-          <Modal title="chinh sua thong tin slides" open={isModalOpen}
+          <Modal title="chỉnh sửa thông tin slides" open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
             footer={
@@ -365,24 +365,24 @@ function Slides() {
             >
               <Form.Item rules={[{
                 required: true,
-                message: "nhập tiêu đề"
-              }]} name={"title"} label="tiêu đề" >
-                <Input placeholder='tiêu đề' />
+                message: "Nhập tiêu đề"
+              }]} name={"title"} label="Tiêu đề" >
+                <Input placeholder='Tiêu đề' />
               </Form.Item>
               <Form.Item name={"description"} label="Mô tả" >
                 <TextArea rows={3} placeholder="Mô tả" />
               </Form.Item>
-              <Form.Item name={"sortOrder"} label="thứ tự">
+              <Form.Item name={"sortOrder"} label="Thứ tự">
                 <Select
                   style={{ width: 120 }}
                   allowClear
                   options={list}
                 />
               </Form.Item>
-              <Form.Item name={"status"} label="trạng thái">
+              <Form.Item name={"status"} label="Trạng thái">
                 <Radio.Group onChange={onChange}>
-                  <Radio value={"ACTIVE"}>hiển thị</Radio>
-                  <Radio value={"INACTIVE"}>không hiển thị</Radio>
+                  <Radio value={"ACTIVE"}>Hiển thị</Radio>
+                  <Radio value={"INACTIVE"}>Không hiển thị</Radio>
 
                 </Radio.Group>
               </Form.Item>
