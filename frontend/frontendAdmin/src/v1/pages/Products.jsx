@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm , Upload} from 'antd'
+import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm, Upload } from 'antd'
 import Operation from 'antd/lib/transfer/operation'
-import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined,UploadOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
 import { Content } from "antd/lib/layout/layout";
 import TextArea from "antd/lib/input/TextArea";
 import axios from "axios";
-import { URLProduct,WEB_SERVER_UPLOAD_URL } from "../config/constants";
+import { URLProduct, WEB_SERVER_UPLOAD_URL } from "../config/constants";
 import axiosClient from "../config/axios";
 function Products() {
 
@@ -16,6 +16,11 @@ function Products() {
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [visible, setVisible] = React.useState(false);
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState({});
+  const [selectedId, setSelectedId] = useState(null);
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [compare, setCompare] = useState({});
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm();
 
@@ -32,7 +37,7 @@ function Products() {
       return true;
     }
   };
-  
+
   const handleUploadImage = (options, record) => {
     setLoading(true);
     const { file } = options;
@@ -43,7 +48,7 @@ function Products() {
       console.log(record.coverImage)
       formData.append("currentImgUrl", null);
     } else {
-      
+
       formData.append("currentImgUrl", record.coverImage);
     }
     formData.append("file", file);
@@ -94,7 +99,7 @@ function Products() {
       title: "Mã sản phẩm ",
       key: "productCode",
       dataIndex: "productCode",
-      
+
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
         return <span style={{ fontWeight: '600' }}>{Text}</span>
@@ -104,7 +109,7 @@ function Products() {
       title: "Tên sản phẩm ",
       key: "name",
       dataIndex: "name",
-      
+
       // defaultSortOrder: 'ascend',
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
@@ -161,8 +166,8 @@ function Products() {
       render: (record) => {
         return (
           <Space>
-             
-        <Upload
+
+            <Upload
               beforeUpload={(file) => beforeUpload(file)}
               showUploadList={false}
               name="file"
@@ -182,10 +187,18 @@ function Products() {
               const valuesize = record.size
               valuesize.map((e) => {
                 formEdit.setFieldValue(`size${e.typeSize}`, e.amount)
+                setCompare((compare)=>{
+                  const key = `size${e.typeSize}`;
+                  const value = e.amount
+                  const tmp = {...compare}
+                  tmp.key = value
+                   console.log('demo:', key )
+                  return tmp;
+                })
               })
-
+              // {sizeM: 10, sizeS: }
               console.log("record", record)
-
+              handleClick_EditBtn(record)
               formEdit.setFieldValue('productCode', record.productCode)
               formEdit.setFieldValue('name', record.name)
               formEdit.setFieldValue('price', record.price)
@@ -235,10 +248,112 @@ function Products() {
     },
 
   );
+  const handleClick_EditBtn = (record) => {
+    const valuesize = record.size
+    valuesize.map((e) => {
+      formEdit.setFieldValue(`size${e.typeSize}`, e.amount)
+    })
+    
+    setSelectedRecord(record);
+    setIsModalOpen(true);
+    setSelectedId(record._id);
+
+    let fieldsValues = {};
+    for (let key in record) {
+      fieldsValues[key] = record[key];
+    }
+    formEdit.setFieldsValue(fieldsValues);
+  };
+  const handleFinishUpdate = (values) => {
+    console.log(selectedRecord.sizeL)
+    if (
+      values.productCode === selectedRecord.productCode &&
+      values.description === selectedRecord.description &&
+      values.name === selectedRecord.name &&
+      values.price === selectedRecord.price &&
+      values.discount === selectedRecord.discount &&
+      // values.categoryId === selectedRecord.categoryId
+      // values.supplierId === selectedRecord.supplierId
+      values.promotionPosition === selectedRecord.promotionPosition
+      // values.sizeS === selectedRecord.sizeS&&
+      // values.sizeM === selectedRecord.sizeM&&
+      // values.sizeL === selectedRecord.sizeL&&
+      // values.sizeXL === selectedRecord.sizeXL&&
+      // values.sizeXXL === selectedRecord.sizeXXL
+    ) {
+      setIsModalOpen(false);
+      formEdit.resetFields();
+      setSelectedId(null);
+      console.log("test")
+      return;
+    }
+    const SizeS = [
+      {
+        typeSize: "S",
+        amount: values.sizeS
+      },
+      {
+        typeSize: "M",
+        amount: values.sizeM
+      },
+      {
+        typeSize: "L",
+        amount: values.sizeL
+      },
+      {
+        typeSize: "XL",
+        amount: values.sizeXL
+      },
+      {
+        typeSize: "XXL",
+        amount: values.sizeXXL
+      }
+    ]
+    delete values.sizeM
+    delete values.sizeL
+    delete values.sizeS
+    delete values.sizeXL
+    delete values.sizeXXL
+    values.size = SizeS
+    setLoadingBtn(true);
+    axiosClient
+      .patch(
+        `${URLProduct}/${selectedId}`,
+        values
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          setIsModalOpen(false);
+          setLoading(true);
+          setRefresh((e) => !e);
+          formEdit.resetFields();
+          setSelectedId(null);
+          notification.info({
+            message: "Thông báo",
+            description: "Cập nhật thành công",
+          });
+        }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
+      });
+  }
   const handleChange = (value) => {
     console.log(`selected ${value}`);
   };
-
+  const handleOk = () => {
+    formEdit.submit();
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
   React.useEffect(() => {
     axios.get("http://localhost:9000/v1/products/").then((response) => {
       setProducts(response.data);
@@ -246,17 +361,17 @@ function Products() {
     })
   }, [refresh])
 
-   useEffect(() => {
-     axios.get("http://localhost:9000/v1/categories").then((response) => {
-       setCategories(response.data.results);
-     })
-   })
-   useEffect(() => {
-     axios.get("http://localhost:9000/v1/suppliers").then((response) => {
-       setSuppliers(response.data.results);
+  useEffect(() => {
+    axios.get("http://localhost:9000/v1/categories").then((response) => {
+      setCategories(response.data.results);
+    })
+  })
+  useEffect(() => {
+    axios.get("http://localhost:9000/v1/suppliers").then((response) => {
+      setSuppliers(response.data.results);
 
-     })
-   })
+    })
+  })
   const handleConfirmDelete = (_id) => {
     axios.delete("http://localhost:9000/v1/products/" + _id).then((response) => {
       if (response.status === 200) {
@@ -284,45 +399,46 @@ function Products() {
             style={{ marginLeft: 400 }}
             form={form}
             initialValues={initialValues}
-            onFinish={(values) => {
+            onFinish={
+              (values) => {
 
-              const SizeS = [
-                {
-                  typeSize: "S",
-                  amount: values.sizeS
-                },
-                {
-                  typeSize: "M",
-                  amount: values.sizeM
-                },
-                {
-                  typeSize: "L",
-                  amount: values.sizeL
-                },
-                {
-                  typeSize: "XL",
-                  amount: values.sizeXL
-                },
-                {
-                  typeSize: "XXL",
-                  amount: values.sizeXXL
-                }
-              ]
-              delete values.sizeM
-              delete values.sizeL
-              delete values.sizeS
-              delete values.sizeXL
-              delete values.sizeXXL
-              values.size = SizeS
-              axios.post('http://localhost:9000/v1/products/', values).then(response => {
-                if (response.status === 200) {
-                  setRefresh((f) => f + 1);
-                  form.resetFields();
-                  notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
-                }
-              })
-              console.log(values);
-            }}
+                const SizeS = [
+                  {
+                    typeSize: "S",
+                    amount: values.sizeS
+                  },
+                  {
+                    typeSize: "M",
+                    amount: values.sizeM
+                  },
+                  {
+                    typeSize: "L",
+                    amount: values.sizeL
+                  },
+                  {
+                    typeSize: "XL",
+                    amount: values.sizeXL
+                  },
+                  {
+                    typeSize: "XXL",
+                    amount: values.sizeXXL
+                  }
+                ]
+                delete values.sizeM
+                delete values.sizeL
+                delete values.sizeS
+                delete values.sizeXL
+                delete values.sizeXXL
+                values.size = SizeS
+                axios.post('http://localhost:9000/v1/products/', values).then(response => {
+                  if (response.status === 200) {
+                    setRefresh((f) => f + 1);
+                    form.resetFields();
+                    notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
+                  }
+                })
+                console.log(values);
+              }}
           >
             <Form.Item rules={[{
               required: true,
@@ -414,12 +530,24 @@ function Products() {
             </Button>
           </Form>
           <Table rowKey='_id' columns={columns} dataSource={products} pagination={false} />
-          <Modal title="chinh sua thon tin danh muc" open={visible} onOk={() => {
-            formEdit.submit()
-            setVisible(false)
-          }} onCancel={() => {
-            setVisible(false)
-          }}>
+          <Modal title="chinh sua thon tin danh muc" open={isModalOpen}
+            onOk={handleOk}
+            onCancel={handleCancel}
+            footer={
+              [
+                <Button key="back" onClick={handleCancel}>
+                  Hủy
+                </Button>,
+                <Button
+                  key="submit"
+                  type="primary"
+                  loading={loadingBtn}
+                  onClick={handleOk}
+                >
+                  Sửa
+                </Button>
+              ]
+            }>
             <Form
               style={{}}
               form={formEdit}
@@ -434,49 +562,9 @@ function Products() {
                 promotionPosition: ''
 
               }}
-              onFinish={(values) => {
-
-                const SizeS = [
-                  {
-                    typeSize: "S",
-                    amount: values.sizeS
-                  },
-                  {
-                    typeSize: "M",
-                    amount: values.sizeM
-                  },
-                  {
-                    typeSize: "L",
-                    amount: values.sizeL
-                  },
-                  {
-                    typeSize: "XL",
-                    amount: values.sizeXL
-                  },
-                  {
-                    typeSize: "XXL",
-                    amount: values.sizeXXL
-                  }
-                ]
-                delete values.sizeM
-                delete values.sizeL
-                delete values.sizeS
-                delete values.sizeXL
-                delete values.sizeXXL
-                values.size = SizeS
-
- 
-
-
-                axios.patch('http://localhost:9000/v1/products/' + selectedRow._id, values).then(response => {
-                  if (response.status === 200) {
-                    setRefresh((f) => f + 1);
-                    form.resetFields();
-                    notification.info({ message: 'Thông báo', description: 'cập nhật thành công' })
-                  }
-                })
-                console.log(values);
-              }}
+              onFinish={
+                handleFinishUpdate
+              }
             >
               <Form.Item rules={[{
                 required: true,
@@ -563,9 +651,6 @@ function Products() {
               <Form.Item name={"description"} label="Mô tả sản phẩm" >
                 <TextArea rows={3} placeholder="Mô tả sản phẩm mới" />
               </Form.Item>
-              <Button type="primary" htmlType="submit">
-                Lưu thông tin
-              </Button>
             </Form>
           </Modal>
         </Content>
