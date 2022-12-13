@@ -139,6 +139,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
         const currentImgUrl = req.body.currentImgUrl
           ? req.body.currentImgUrl
           : null;
+          console.log(currentImgUrl)
         const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
         console.log("test speed update");
         const opts = { runValidators: true };
