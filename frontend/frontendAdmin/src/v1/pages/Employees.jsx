@@ -4,6 +4,9 @@ import axios from "axios";
 import moment from "moment";
 import "moment/locale/vi";
 import locale from "antd/es/locale/vi_VN";
+import axiosClient from "../config/axios";
+import { URLEmployee, WEB_SERVER_UPLOAD_URL } from "../config/constants";
+
 import {
   Button,
   Layout,
@@ -25,7 +28,7 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLEmployee, WEB_SERVER_URL } from "../config/constants";
+
 import LabelCustomization, {
   ImgIcon,
   BoldText,
@@ -38,6 +41,7 @@ function Employees() {
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -48,6 +52,53 @@ function Employees() {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
+
+  const beforeUpload = (file) => {
+    const isImage =
+      file.type === "image/jpg" ||
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/gif";
+    if (!isImage) {
+      message.error("You can only upload jpg-jpeg-png-gif file!");
+      return false;
+    } else {
+      return true;
+    }
+  };
+  const handleUploadImage = (options, record) => {
+    setLoading(true);
+    const { file } = options;
+    let formData = new FormData();
+    let URL = URLEmployee + "/employeeImage/" + record._id;
+    //If containing an image <=> file !== null
+    if (!record.imageUrl) {
+      formData.append("currentImgUrl", null);
+    } else {
+      formData.append("currentImgUrl", record.imageUrl);
+    }
+    formData.append("file", file);
+
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+
+    //POST
+    axiosClient
+      .post(URL, formData, config)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("ok upload image");
+          setRefresh((e) => !e);
+          message.success(`Cập nhật hình ảnh thành công!`);
+        }
+      })
+      .catch((error) => {
+        message.error(`Cập nhật hình ảnh thất bại.`);
+        setLoading(false);
+      })
+      .finally(() => {});
+  };
 
   const columns = [
     {
@@ -75,7 +126,11 @@ function Employees() {
         return (
           <div className="loadImg">
             <img
-              src={text ? `${WEB_SERVER_URL}${text}` : "./images/noImage.jpg"}
+              src={
+                text && text !== "null"
+                  ? `${WEB_SERVER_UPLOAD_URL}${text}`
+                  : "./images/noImage.jpg"
+              }
               style={{ width: "100%", height: "100%" }}
               alt=""
             ></img>
@@ -123,15 +178,12 @@ function Employees() {
         return (
           <div className="divActs">
             <Upload
-              method="PATCH"
+              beforeUpload={(file) => beforeUpload(file)}
               showUploadList={false}
               name="file"
-              action={
-                "http://localhost:9000/employeesOnlineShopMongoose/updateOnlyImage/" +
-                record._id
-              }
-              headers={{ authorization: "authorization-text" }}
-              onChange={(info) => handleChange_UploadOnlyImage(info)}
+              customRequest={(options) => {
+                handleUploadImage(options, record);
+              }}
             >
               <Button
                 title="Cập nhật ảnh"
@@ -334,8 +386,8 @@ function Employees() {
         uid: "-1",
         // name: 'IMG_0693.JPG',
         status: "done",
-        url: `${WEB_SERVER_URL}${record.imageUrl}`,
-        thumbUrl: `${WEB_SERVER_URL}${record.imageUrl}`,
+        url: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
+        thumbUrl: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
       },
     ];
 

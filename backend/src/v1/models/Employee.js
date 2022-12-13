@@ -50,6 +50,7 @@ const employeeSchema = new Schema(
                 message: 'nhân viên phải lớn hơn hoặc bằng 18 tuổi'
             }
         },
+        // imageUrl: {
         imageUrl: {
             type: String,
             trim: true,

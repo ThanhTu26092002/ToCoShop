@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Image } from 'antd';
 import { Typography } from 'antd';
 import "../css/CommonStyle.css";
 import axios from "axios";
@@ -27,7 +28,7 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLEmployee, WEB_SERVER_URL } from "../config/constants";
+import { URLEmployee, WEB_SERVER_UPLOAD_URL } from "../config/constants";
 import LabelCustomization, {
   ImgIcon,
   BoldText,
@@ -73,7 +74,8 @@ function Employees() {
     const email = convertedPayload.state.auth.employeeInfo.email;
     const phoneNumber = convertedPayload.state.auth.employeeInfo.phoneNumber;
     const address = convertedPayload.state.auth.employeeInfo.address;
- 
+    const avatar = convertedPayload.state.auth.employeeInfo.imageUrl;
+    console.log('avt:', avatar)
   
 
  
@@ -236,8 +238,12 @@ function Employees() {
 
 ///myinfo
   return (
+    
     <Layout>    
-      <Descriptions title="Thông Tin Cá Nhân">
+      <a>Thông Tin Cá Nhân</a>
+      <Image src={`${WEB_SERVER_UPLOAD_URL}${avatar}`} width={100} height={100}/>
+    <Descriptions>
+      
     <Descriptions.Item label="Họ">{firstName}</Descriptions.Item>
     <Descriptions.Item label="Tên">{lastName}</Descriptions.Item>
     <Descriptions.Item label="Email">{email}</Descriptions.Item>
