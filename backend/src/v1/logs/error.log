@@ -1371,3 +1371,15 @@ error: Dec-13-2022 14:38:39: 	12d9b43e-ffba-4646-a36f-42d52b192187----/uploads/i
 error: Dec-13-2022 15:01:01: 	d2912629-6643-4173-a113-6b32efc1cb3d----/uploadsundefined-----GET-----Not found test!
 error: Dec-13-2022 15:01:06: 	79750c3e-194d-4f39-81a1-8af2c456d426----/uploadsundefined-----GET-----Not found test!
 error: Dec-13-2022 15:01:08: 	1f90dea2-e025-4e39-8470-8ea0ba1f2a1b----/uploadsundefined-----GET-----Not found test!
+error: Dec-13-2022 15:50:45: 	68d363ba-7e0f-473d-9c81-c956ecffe308----/uploadsundefined-----GET-----Not found test!
+error: Dec-13-2022 15:50:50: 	3a451d54-2242-4237-9dda-61e2b931dcc1----/uploadsundefined-----GET-----Not found test!
+error: Dec-13-2022 16:19:32: 	b6db6776-f8e6-4938-953d-2b3aaae8f7cd----/v1/employees/search/63919963940bfe4d84b3a76c-----GET-----findOne is not defined
+error: Dec-13-2022 16:19:55: 	dbb417a9-5f19-4616-9a2b-f39a23a22b24----/v1/employees/search/63919963940bfe4d84b3a76c-----GET-----findOne is not defined
+error: Dec-13-2022 16:32:07: 	d6bff55d-0267-40a2-88ed-ffa424f93952----/uploads/images/suppliers/632c5e631bd2dcb57d9772c7/file-1667321986741.jpeg-----GET-----Not found test!
+error: Dec-13-2022 16:32:08: 	d9d9c265-c057-4fba-ab7a-d77c2e1aea17----/uploads/images/categories/633552fd610fd99f560431b8/file-1670485159491.png-----GET-----Not found test!
+error: Dec-13-2022 16:32:08: 	e2626d3e-9c27-4c9c-9dda-cd52ec24f427----/uploads/images/categories/632c5c372c717789c1e4926f/file-1669773494070.jpeg-----GET-----Not found test!
+error: Dec-13-2022 16:32:08: 	15068115-bb89-4bae-be3a-34c0d99c6f68----/uploads/images/categories/632c5b9820b1aa1ad2791c2b/file-1669731594600.jpeg-----GET-----Not found test!
+error: Dec-13-2022 16:32:08: 	cdcbc495-f14c-437f-b1f5-ed5f459f425a----/uploads/images/categories/632c5b7820b1aa1ad2791c2a/file-1669731600811.jpeg-----GET-----Not found test!
+error: Dec-13-2022 16:32:10: 	35e4ee77-4de2-4cce-92fa-f822eaa29a76----/uploads//images/products/63982c528556fd5e4e44035b/file-1670919829480.png-----GET-----Not found test!
+error: Dec-13-2022 16:32:15: 	2dad1927-65b4-424b-ac59-5175b3bafa9f----/uploads//images/products/63982c528556fd5e4e44035b/file-1670919829480.png-----GET-----Not found test!
+error: Dec-13-2022 16:32:15: 	6390392c-a144-4dc4-91a0-6ef55978caef----/uploads//images/slides/63941cf3ef38d0a095510d34/file-1670812381352.png-----GET-----Not found test!
