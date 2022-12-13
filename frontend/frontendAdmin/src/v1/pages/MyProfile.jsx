@@ -67,8 +67,7 @@ function Employees() {
     }
     formUpdate.setFieldsValue(fieldsValues);
     
-    const { Text } = Typography;
-    const { Title } = Typography;
+
     const firstName = convertedPayload.state.auth.employeeInfo.firstName;
     const lastName = convertedPayload.state.auth.employeeInfo.lastName;
     const email = convertedPayload.state.auth.employeeInfo.email;
@@ -244,47 +243,7 @@ function Employees() {
     <Descriptions.Item label="Email">{email}</Descriptions.Item>
     <Descriptions.Item label="Số điện thoại">{phoneNumber}</Descriptions.Item>
     <Descriptions.Item label="Địa chỉ">{address}</Descriptions.Item>
-  </Descriptions>
-          {/* <Form
-            {...PropsForm}
-            form={formUpdate}
-            name="formUpdate"
-            onFinish={handleFinishUpdate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formUpdate");
-              console.error("Error at onFinishFailed at formUpdate");
-            }}
-          >
-            <Form.Item {...PropsFormItemFirstName}>
-              <Input placeholder="First name" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemLastName}>
-              <Input placeholder="Last name" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemEmail}>
-              <Input placeholder="Email" />
-            </Form.Item>
-
-            <Form.Item {...PropsFormItemPhoneNumber}>
-              <Input placeholder="Số điện thoại của nhan vien" />
-            </Form.Item>
-            <Form.Item {...PropsFormItemBirthday}>
-              <DatePicker
-                allowClear={false}
-                showToday={false}
-                disabledDate={disabledDate}
-                placeholder="dd/mm/yyyy"
-                format={dateFormatList}
-                locale={locale}
-                renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
-              />
-            </Form.Item>
-            <Form.Item {...PropsFormItemAddress}>
-              <TextArea rows={3} placeholder="Dia chi nhan vien" />
-            </Form.Item>
-          </Form> */}
+      </Descriptions>       
     </Layout>
   );
 }

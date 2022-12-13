@@ -121,7 +121,7 @@ function ToCoShopV1() {
               <img
                 src={ICON_NoImage}
                 alt="logo"
-                style={{ height: 32, width: "100%" }}
+                style={{ height: 35, width: "100%" }}
               />
             </div>
             <Menu
