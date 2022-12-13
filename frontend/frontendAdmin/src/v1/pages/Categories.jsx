@@ -16,10 +16,7 @@ import {
   Space,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
-import {
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
 import { URLCategory, WEB_SERVER_UPLOAD_URL } from "../config/constants";
@@ -303,10 +300,11 @@ function Categories() {
   //
   const handleFinishUpdate = (values) => {
     //The same values so don't need to update
-    if (
-      values.name === selectedRecord.name &&
-      values.description === selectedRecord.description
-    ) {
+    const beforeChangedData = {
+      name: selectedRecord.name,
+      description: selectedRecord.description,
+    };
+    if (JSON.stringify(values) === JSON.stringify(beforeChangedData)) {
       setIsModalOpen(false);
       formUpdate.resetFields();
       setSelectedId(null);
@@ -315,10 +313,7 @@ function Categories() {
     setLoadingBtn(true);
     //POST
     axiosClient
-      .patch(
-        `${URLCategory}/updateOne/${selectedId}`,
-        values
-      )
+      .patch(`${URLCategory}/updateOne/${selectedId}`, values)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -437,8 +432,8 @@ function Categories() {
         )}
         <Table
           {...PropsTable}
-          onRow={() =>{
-            return {onClick: handleMouseLeaveCreate}
+          onRow={() => {
+            return { onClick: handleMouseLeaveCreate };
           }}
           columns={columns}
           dataSource={categories}
@@ -474,6 +469,7 @@ function Categories() {
             {...PropsForm}
             form={formUpdate}
             name="formUpdate"
+            onValuesChange={() => console.log("change data")}
             onFinish={handleFinishUpdate}
             onFinishFailed={() => {
               // message.info("Error at onFinishFailed at formUpdate");

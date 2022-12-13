@@ -1,4 +1,10 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/CommonStyle.css";
 import moment from "moment";
@@ -64,10 +70,23 @@ import {
   customDisabledDate,
   handleOpenNewPage,
 } from "../../config/helperFuncs";
+import {
+  useTransportations,
+  useProducts,
+  useOrderDetail,
+} from "../../hooks/useZustand";
+
 const { Text } = Typography;
 const { Option } = Select;
 
 function Orders() {
+  const { hookSetOrderDetail, hookOrderDetailData } = useOrderDetail(
+    (state) => state
+  );
+  const { hookSetTransportation, hookTransportationData } = useTransportations(
+    (state) => state
+  );
+  const { hookSetProduct, hookProductData } = useProducts((state) => state);
   const paymentMethodList = ["CREDIT CARD", "COD"];
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 
@@ -77,9 +96,7 @@ function Orders() {
   const [loading, setLoading] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [orders, setOrders] = useState(null);
-  const [products, setProducts] = useState(null);
   const [changedStatus, setChangedStatus] = useState(null);
-  const [transportationList, setTransportationList] = useState();
   const [totalDocs, setTotalDocs] = useState(0);
   const [countryList, setCountryList] = useState(null);
   const [statesListContactInfo, setStatesListContactInfo] = useState(null);
@@ -182,9 +199,10 @@ function Orders() {
               icon={<EllipsisOutlined />}
               type="primary"
               title="Chi tiết"
-              onClick={() =>
-                handleOpenNewPage({ path: "/orderDetail", params: record._id })
-              }
+              onClick={() => {
+                hookSetOrderDetail(record);
+                handleOpenNewPage({ path: "/orderDetail", params: record._id });
+              }}
             ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
@@ -226,7 +244,7 @@ function Orders() {
   };
   //
   const handleClick_EditStatus = (record) => {
-    console.log("show record:", record);
+    // console.log("show record:", record);
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
@@ -259,7 +277,7 @@ function Orders() {
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
     getOrderDetails.map((product) => {
-      let tmpProduct = products.find((e) => (e._id = product.productId));
+      let tmpProduct = hookProductData.find((e) => (e._id = product.productId));
       configOrderDetails.push({
         productId: product.productId,
         size: product.size,
@@ -395,18 +413,25 @@ function Orders() {
   };
   //
   const handleFinishUpdate = (values) => {
+    console.log(values);
     //if not change values
-    if (
-      values.status === selectedRecord.status &&
-      values.sendingDate === selectedRecord.sendingDate &&
-      values.receivedDate === selectedRecord.receivedDate
-    ) {
-      console.log("the same values");
+    const tmp1 = {
+      status: selectedRecord.status,
+      sendingDate: selectedRecord.sendingDate,
+      receivedDate: selectedRecord.receivedDate,
+    };
+    const tmp2 = {
+      status: values.status,
+      sendingDate: values.sendingDate,
+      receivedDate: values.receivedDate,
+    };
+    if (JSON.stringify(tmp1) === JSON.stringify(tmp2)) {
       setIsModalOpen(false);
       formUpdate.resetFields();
       setSelectedId(null);
       return;
     }
+    //
     //Show error the relative between status and sendingDate- receivedDate
     if (values.sendingDate === null) {
       if (values.status === "SHIPPING") {
@@ -553,13 +578,13 @@ function Orders() {
 
   useEffect(() => {
     axiosClient.get(`${URLTransportation}`).then((response) => {
-      setTransportationList(response.data.results);
+      hookSetTransportation(response.data.results);
     });
   }, []);
 
   useEffect(() => {
     axiosClient.get(`${URLProduct}`).then((response) => {
-      setProducts(response.data);
+      hookSetProduct(response.data);
     });
   }, []);
   return (
@@ -790,11 +815,11 @@ function Orders() {
                 >
                   <Select
                     style={{ width: 450 }}
-                    loading={!transportationList}
+                    loading={!hookTransportationData}
                     placeholder="Chọn"
                   >
-                    {transportationList &&
-                      transportationList.map((t) => {
+                    {hookTransportationData &&
+                      hookTransportationData.map((t) => {
                         const customPrice = numeral(t.price).format("0,0");
                         return (
                           <Select.Option key={t._id} value={t._id}>
@@ -1072,129 +1097,192 @@ function Orders() {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }, index) => (
-                  <Space
-                    key={key}
-                    style={{
-                      display: "flex",
-                      marginBottom: 8,
-                    }}
-                    align="baseline"
-                  >
-                    <Form.Item
-                      {...restField}
-                      label=<LabelCustomization title={`Tên sản phẩm`} />
-                      name={[name, "productName"]}
+                  <Fragment key={key}>
+                    <Space
+                      // key={key}
+                      style={{
+                        display: "flex",
+                        marginBottom: 8,
+                      }}
+                      align="baseline"
                     >
-                      <Input
-                        placeholder="Tên sản phẩm"
-                        disabled
-                        addonBefore={
+                      <div style={{ display: "flex", gap: 24 }}>
+                        <div>
                           <Form.Item
-                            // label=<LabelCustomization
-                            //   title={`Mã sản phẩm ${name + 1}`}
-                            // />
-                            // {...restField}
-                            name={[name, "productId"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa chọn mã sản phẩm",
-                              },
-                            ]}
-                            noStyle
-                          >
-                            <Select
-                              loading={!products}
-                              placeholder="Mã số"
-                              style={{ width: 100 }}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                (option?.label ?? "")
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                              options={
-                                products &&
-                                products.map((e) => {
-                                  const tmp = {
-                                    value: e._id,
-                                    label: e.productCode,
-                                  };
-                                  return tmp;
-                                })
-                              }
-                              onChange={(value) => {
-                                let productName = products.find(
-                                  (e) => e._id === value
-                                ).name;
-                                const fields = formCreate.getFieldsValue();
-                                const { orderDetails } = fields;
-                                Object.assign(orderDetails[name], {
-                                  productName: productName,
-                                });
-                                formCreate.setFieldsValue({ orderDetails });
-                              }}
+                            {...restField}
+                            label=<LabelCustomization
+                              title={`Tên sản phẩm ${name + 1}`}
                             />
-                          </Form.Item>
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label=<LabelCustomization title={`Số lượng`} />
-                      {...restField}
-                      name={[name, "quantity"]}
-                      rules={[
-                        {
-                          required: true,
-                          message: "Chưa nhập số lượng",
-                        },
-                      ]}
-                    >
-                      <InputNumber
-                        addonBefore={
-                          <Form.Item
-                            name={[name, "size"]}
-                            noStyle
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa chọn Size",
-                              },
-                            ]}
+                            name={[name, "productName"]}
                           >
-                            <Select
-                              placeholder="Size"
-                              style={{
-                                width: 70,
-                              }}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                (option?.label ?? "")
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                              options={
-                                sizeList &&
-                                sizeList.map((s) => {
-                                  const tmp = {
-                                    value: s,
-                                    label: s,
-                                  };
-                                  return tmp;
-                                })
+                            <Input
+                              placeholder="Tên sản phẩm"
+                              disabled
+                              addonBefore={
+                                <Form.Item
+                                  name={[name, "productId"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn mã sản phẩm",
+                                    },
+                                  ]}
+                                  noStyle
+                                >
+                                  <Select
+                                    loading={!hookProductData}
+                                    placeholder="Mã số"
+                                    style={{ width: 100 }}
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                      (option?.label ?? "")
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
+                                    }
+                                    options={
+                                      hookProductData &&
+                                      hookProductData.map((e) => {
+                                        const tmp = {
+                                          value: e._id,
+                                          label: e.productCode,
+                                        };
+                                        return tmp;
+                                      })
+                                    }
+                                    onChange={(value) => {
+                                      const found = hookProductData.find(
+                                        (e) => e._id === value
+                                      );
+                                      const fields =
+                                        formCreate.getFieldsValue();
+                                      const { orderDetails } = fields;
+                                      Object.assign(orderDetails[name], {
+                                        productName: found.name,
+                                        price: found.price,
+                                        discount: found.discount,
+                                      });
+                                      formCreate.setFieldsValue({
+                                        orderDetails,
+                                      });
+                                    }}
+                                  />
+                                </Form.Item>
                               }
                             />
                           </Form.Item>
-                        }
-                        style={{ minWidth: 120, maxWidth: 360 }}
-                        min={0}
-                        addonAfter="sản phẩm"
-                      />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
+                          <Form.Item
+                            label=<LabelCustomization title={`Số lượng`} />
+                            {...restField}
+                            name={[name, "quantity"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa nhập số lượng",
+                              },
+                            ]}
+                          >
+                            <InputNumber
+                              addonBefore={
+                                <Form.Item
+                                  name={[name, "size"]}
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn Size",
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    placeholder="Size"
+                                    style={{
+                                      width: 70,
+                                    }}
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                      (option?.label ?? "")
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
+                                    }
+                                    options={
+                                      sizeList &&
+                                      sizeList.map((s) => {
+                                        const tmp = {
+                                          value: s,
+                                          label: s,
+                                        };
+                                        return tmp;
+                                      })
+                                    }
+                                  />
+                                </Form.Item>
+                              }
+                              style={{ minWidth: 120, maxWidth: 360 }}
+                              min={0}
+                              addonAfter="sản phẩm"
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            label=<LabelCustomization title={`Giá tiền`} />
+                            {...restField}
+                            name={[name, "price"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa nhập giá tiền",
+                              },
+                            ]}
+                          >
+                            <InputNumber
+                              defaultValue={0}
+                              formatter={(value) =>
+                                ` ${value}`.replace(
+                                  /\B(?=(\d{3})+(?!\d))/g,
+                                  ","
+                                )
+                              }
+                              style={{ minWidth: 120, maxWidth: 360 }}
+                              min={0}
+                              addonAfter="VNĐ"
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            label=<LabelCustomization title={`Giảm giá`} />
+                            {...restField}
+                            name={[name, "discount"]}
+                            defaultValue={0}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa nhập mức giảm giá",
+                              },
+                            ]}
+                          >
+                            <InputNumber
+                              style={{ minWidth: 120, maxWidth: 150 }}
+                              min={0}
+                              max={100}
+                              addonAfter="%"
+                            />
+                          </Form.Item>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <MinusCircleOutlined
+                            style={{ fontSize: 24, color: "red" }}
+                            onClick={() => remove(name)}
+                          />
+                        </div>
+                      </div>
+                    </Space>
+                    <Divider style={{ backgroundColor: "#e3e6f2" }} />
+                  </Fragment>
                 ))}
                 <Form.Item>
                   <Button
@@ -1289,7 +1377,7 @@ function Orders() {
                   label: "Mã đơn hàng",
                 })}
               >
-                <Input disabled bordered={false}/>
+                <Input disabled bordered={false} />
               </Form.Item>
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -1297,7 +1385,7 @@ function Orders() {
                   name: "createdDate",
                 })}
               >
-                <Input disabled bordered={false}/>
+                <Input disabled bordered={false} />
               </Form.Item>
 
               <Form.Item
@@ -1395,7 +1483,9 @@ function Orders() {
                   disabledDate={(current) =>
                     customDisabledDate(
                       current,
-                      moment(new Date()).format("YYYY-MM-DD")
+                      moment(
+                        formUpdate.getFieldsValue(["createdDate"]).createdDate
+                      ).format("YYYY-MM-DD")
                     )
                   }
                   placeholder="dd-mm-yyyy"

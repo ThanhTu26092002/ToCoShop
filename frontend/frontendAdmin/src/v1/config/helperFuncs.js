@@ -1,10 +1,4 @@
 import moment from "moment";
-const payload = localStorage.getItem("auth-toCoShop");
-// payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
-// convert type of payload: from STRING to OBJECT
-const convertedPayload = JSON.parse(payload);
-// Lấy ra từng phần nhỏ trong Object
-const employeeInfo = convertedPayload.state.auth.employeeInfo;
 
 export const customDisabledDate = (current, checkingDate) => {
   return current < moment(checkingDate);
@@ -16,6 +10,13 @@ export const handleOpenNewPage = ({ path, params=null }) => {
 };
 
 export const customCreateAHandler = (actionContent) => {
+  const payload = localStorage.getItem("auth-toCoShop");
+// payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
+// convert type of payload: from STRING to OBJECT
+const convertedPayload = JSON.parse(payload);
+// Lấy ra từng phần nhỏ trong Object
+const employeeInfo = convertedPayload.state.auth.employeeInfo;
+
   const userId = employeeInfo._id;
   const userName = employeeInfo.firstName + " " + employeeInfo.lastName;
   const currentTime = moment().format("DD-MM-YYY- HH:mm");
