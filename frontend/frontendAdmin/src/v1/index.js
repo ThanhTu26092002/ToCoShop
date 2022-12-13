@@ -35,7 +35,7 @@ const { Content, Sider } = Layout;
 function ToCoShopV1() {
   const navigate = useNavigate();
   const { signOut, auth } = useAuth((state) => state);
-  console.log("show route:", window.location.pathname);
+  // console.log("show route:", window.location.pathname);
   function getItem(label, key, icon, content, children, type) {
     if (key === "signOut") {
       return {
@@ -127,29 +127,25 @@ function ToCoShopV1() {
             <Menu
               theme="dark"
               mode="inline"
-              // defaultOpenKeys={["/orderList"]}
               defaultOpenKeys={
                 ["/orders", "/statistics"].includes(window.location.pathname) ||
                 window.location.pathname.includes("/orderDetail")
                   ? ["/orderList"]
                   : []
               }
-              // defaultSelectedKeys={
-              //   // window.location.pathname.includes("/orderDetail")
-              //   //   ? ["/orderDetail:id"]
-              //   // :
-              //   [window.location.pathname]
-              // }
               selectedKeys={
-                 window.location.pathname.includes("/orderDetail")
-                ? ["/orderDetail/:id"]
-              :
-                 [window.location.pathname]}
+                window.location.pathname.includes("/orderDetail")
+                  ? ["/orderDetail/:id"]
+                  : [window.location.pathname]
+              }
               items={itemsAfterLogin}
               onClick={({ key }) => {
+                console.log('key', key)
                 if (key === "signOut") {
                   signOut();
                   navigate("/login");
+                } else if (key === "/orderDetail/:id") {
+                  navigate("/orders");
                 } else {
                   navigate(key);
                 }

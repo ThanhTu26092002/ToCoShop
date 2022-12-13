@@ -102,9 +102,20 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
       { $match: { _id: id } },
       ...aggregateLookup,
     ]);
+    if (docs.length==0) {
+      res.status(404).json({
+        ok: true,
+        error: {
+          name: "id",
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_ORDERS}`,
+        },
+      });
+      return;
+    }
     res.json({ ok: true, results: docs });
-  } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+  } catch (errMongoDB) {
+    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_ORDERS);
+    res.status(400).json({ ok: true, error: errMsgMongoDB });
   }
 });
 //
