@@ -22,36 +22,36 @@ function Slides() {
   const [selectedId, setSelectedId] = useState(null);
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm()
+  
+  var detall=[1,2,3,4,5]
+ 
 
-  var detall = [1, 2, 3, 4, 5]
-
-
-  Array.prototype.except = function (val) {
-    return this.filter(function (x) { return x !== val; });
-  };
+  Array.prototype.except = function(val) {
+    return this.filter(function(x) { return x !== val; });        
+}; 
   slides &&
     slides.map((c) => {
-
+      
       return (
 
-        detall = detall.except(c.sortOrder)
+        detall=detall.except(c.sortOrder)
       );
     })
-  var list = detall.map(item => {
-    return {
-      label: item,
-      value: item,
-    }
-  })
+    var list= detall.map(item=>{
+      return {
+        label: item,
+        value: item,
+      }
+    })
   const onChange = (e) => {
-    if (e.target.value === "INACTIVE") {
+    if(e.target.value==="INACTIVE"){
       setCheck(true)
-      form.setFieldsValue({ sortOrder: 0 })
-      formEdit.setFieldsValue({ sortOrder: 0 })
-    } else {
+      form.setFieldsValue({sortOrder:0})
+      formEdit.setFieldsValue({sortOrder:0})
+    }else{
       setCheck(false)
-      form.setFieldsValue({ sortOrder: [] })
-      formEdit.setFieldsValue({ sortOrder: [] })
+      form.setFieldsValue({sortOrder:[]})
+      formEdit.setFieldsValue({sortOrder:[]})
     }
   };
 
@@ -204,7 +204,7 @@ function Slides() {
       key: "sortOrder",
       dataIndex: "sortOrder",
       render: (text) => {
-
+        
         return <span style={{ fontWeight: '600' }}>{text}</span>
       },
     },
@@ -326,11 +326,11 @@ function Slides() {
                 allowClear
                 options={list}
                 disabled={check}
-
+                
               />
             </Form.Item>
             <Form.Item name={"status"} label="trạng thái">
-              <Radio.Group onChange={onChange}>
+              <Radio.Group  onChange={onChange}>
                 <Radio value={"ACTIVE"}>hiển thị</Radio>
                 <Radio value={"INACTIVE"}>không hiển thị</Radio>
               </Radio.Group>
@@ -380,10 +380,10 @@ function Slides() {
                 />
               </Form.Item>
               <Form.Item name={"status"} label="trạng thái">
-                <Radio.Group onChange={onChange}>
+                <Radio.Group  onChange={onChange}>
                   <Radio value={"ACTIVE"}>hiển thị</Radio>
                   <Radio value={"INACTIVE"}>không hiển thị</Radio>
-
+                 
                 </Radio.Group>
               </Form.Item>
 
