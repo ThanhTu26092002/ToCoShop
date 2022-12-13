@@ -95,7 +95,7 @@ function Slides() {
           setRefresh((e) => !e);
           formEdit.resetFields();
           setSelectedId(null);
-          notification.info({
+notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
           });
@@ -213,7 +213,7 @@ function Slides() {
         return "trạng thái";
       },
       key: "status",
-      dataIndex: "status",
+dataIndex: "status",
       render: (text) => {
         return <span style={{ fontWeight: '600' }}>{text}</span>
       },
@@ -306,21 +306,21 @@ function Slides() {
                   setRefresh((f) => f + 1);
                   form.resetFields();
                   notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
-                }
+}
               })
               console.log(values);
             }}
           >
             <Form.Item rules={[{
               required: true,
-              message: "Nhập tiêu đề"
-            }]} name={"title"} label="Tiêu đề" >
-              <Input placeholder='Tiêu đề' />
+              message: "nhập tiêu đề"
+            }]} name={"title"} label="tiêu đề" >
+              <Input placeholder='tiêu đề' />
             </Form.Item>
             <Form.Item name={"description"} label="Mô tả" >
               <TextArea rows={3} placeholder="Mô tả" />
             </Form.Item>
-            <Form.Item name={"sortOrder"} label="Thứ tự" >
+            <Form.Item name={"sortOrder"} label="thứ tự" >
               <Select
                 style={{ width: 120 }}
                 allowClear
@@ -329,23 +329,18 @@ function Slides() {
                 
               />
             </Form.Item>
-<<<<<<< HEAD
-            <Form.Item name={"status"} label="Trạng thái">
-              <Radio.Group onChange={onChange}>
-=======
             <Form.Item name={"status"} label="trạng thái">
               <Radio.Group  onChange={onChange}>
->>>>>>> d76a41e2a15e3210bc5d3ab92d14bb08c87f38ac
                 <Radio value={"ACTIVE"}>hiển thị</Radio>
                 <Radio value={"INACTIVE"}>không hiển thị</Radio>
               </Radio.Group>
             </Form.Item>
-            <Button type="primary" htmlType="Submit">
+            <Button type="primary" htmlType="submit">
               Lưu thông tin
             </Button>
           </Form>
           <Table rowKey='_id' columns={columns} dataSource={slides} pagination={false} />
-          <Modal title="chỉnh sửa thông tin slides" open={isModalOpen}
+          <Modal title="chinh sua thong tin slides" open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
             footer={
@@ -370,33 +365,25 @@ function Slides() {
             >
               <Form.Item rules={[{
                 required: true,
-                message: "Nhập tiêu đề"
-              }]} name={"title"} label="Tiêu đề" >
-                <Input placeholder='Tiêu đề' />
+                message: "nhập tiêu đề"
+              }]} name={"title"} label="tiêu đề" >
+                <Input placeholder='tiêu đề' />
               </Form.Item>
               <Form.Item name={"description"} label="Mô tả" >
                 <TextArea rows={3} placeholder="Mô tả" />
               </Form.Item>
-              <Form.Item name={"sortOrder"} label="Thứ tự">
+              <Form.Item name={"sortOrder"} label="thứ tự">
                 <Select
                   style={{ width: 120 }}
                   allowClear
                   options={list}
                 />
               </Form.Item>
-<<<<<<< HEAD
-              <Form.Item name={"status"} label="Trạng thái">
-                <Radio.Group onChange={onChange}>
-                  <Radio value={"ACTIVE"}>Hiển thị</Radio>
-                  <Radio value={"INACTIVE"}>Không hiển thị</Radio>
-
-=======
               <Form.Item name={"status"} label="trạng thái">
                 <Radio.Group  onChange={onChange}>
                   <Radio value={"ACTIVE"}>hiển thị</Radio>
                   <Radio value={"INACTIVE"}>không hiển thị</Radio>
                  
->>>>>>> d76a41e2a15e3210bc5d3ab92d14bb08c87f38ac
                 </Radio.Group>
               </Form.Item>
 
