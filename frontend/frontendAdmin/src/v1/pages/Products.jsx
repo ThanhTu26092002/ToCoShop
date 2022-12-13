@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm } from 'antd'
+import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm , Upload} from 'antd'
 import Operation from 'antd/lib/transfer/operation'
-import { MinusCircleOutlined, PlusOutlined, Upload, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined,UploadOutlined } from '@ant-design/icons';
 import { Content } from "antd/lib/layout/layout";
 import TextArea from "antd/lib/input/TextArea";
 import axios from "axios";
+import { URLProduct,WEB_SERVER_UPLOAD_URL } from "../config/constants";
+import axiosClient from "../config/axios";
 function Products() {
 
   const [categories, setCategories] = useState(null);
@@ -13,16 +15,86 @@ function Products() {
   const [refresh, setRefresh] = useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [visible, setVisible] = React.useState(false);
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm();
 
+  const beforeUpload = (file) => {
+    const isImage =
+      file.type === "image/jpg" ||
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/gif";
+    if (!isImage) {
+      message.error("You can only upload jpg-jpeg-png-gif file!");
+      return false;
+    } else {
+      return true;
+    }
+  };
+  
+  const handleUploadImage = (options, record) => {
+    setLoading(true);
+    const { file } = options;
+    let formData = new FormData();
+    let URL = URLProduct + "/productImage/" + record._id;
+    //If containing an image <=> file !== null
+    if (!record.coverImage) {
+      console.log(record.coverImage)
+      formData.append("currentImgUrl", null);
+    } else {
+      
+      formData.append("currentImgUrl", record.coverImage);
+    }
+    formData.append("file", file);
 
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+
+    //POST
+    axiosClient
+      .post(URL, formData, config)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("ok upload image");
+          setRefresh((f) => f + 1);
+          message.success(`Cập nhật hình ảnh thành công!`);
+        }
+      })
+      .catch((error) => {
+        message.error(`Cập nhật hình ảnh thất bại.`);
+        setLoading(false);
+      })
+      .finally(() => { });
+  };
   const columns = [
+    {
+      title: "hình ảnh",
+      key: "coverImage",
+      dataIndex: "coverImage",
+      width: "100px",
+      render: (text) => {
+        return (
+          <div className="loadImg">
+            <img
+              src={
+                text && text !== "null"
+                  ? `${WEB_SERVER_UPLOAD_URL}/${text}`
+                  : "./images/noImage.jpg"
+              }
+              style={{ width: "100%", height: "100%" }}
+              alt=""
+            ></img>
+          </div>
+        );
+      },
+    },
     {
       title: "Mã sản phẩm ",
       key: "productCode",
       dataIndex: "productCode",
-      fixed: "left",
+      
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
         return <span style={{ fontWeight: '600' }}>{Text}</span>
@@ -32,7 +104,7 @@ function Products() {
       title: "Tên sản phẩm ",
       key: "name",
       dataIndex: "name",
-      fixed: "left",
+      
       // defaultSortOrder: 'ascend',
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
@@ -89,6 +161,21 @@ function Products() {
       render: (record) => {
         return (
           <Space>
+             
+        <Upload
+              beforeUpload={(file) => beforeUpload(file)}
+              showUploadList={false}
+              name="file"
+              customRequest={(options) => {
+                handleUploadImage(options, record);
+              }}
+            >
+              <Button
+                title="Cập nhật ảnh"
+                icon={<UploadOutlined />}
+                style={{ backgroundColor: "#1890ff" }}
+              ></Button>
+            </Upload>
             <Button type='dashed' icon={<EditOutlined />} style={{ fontWeight: '600' }} onClick={() => {
               setVisible(true)
               setSelectedRow(record)
@@ -159,17 +246,17 @@ function Products() {
     })
   }, [refresh])
 
-  useEffect(() => {
-    axios.get("http://localhost:9000/v1/categories").then((response) => {
-      setCategories(response.data.results);
-    })
-  })
-  useEffect(() => {
-    axios.get("http://localhost:9000/v1/suppliers").then((response) => {
-      setSuppliers(response.data.results);
+   useEffect(() => {
+     axios.get("http://localhost:9000/v1/categories").then((response) => {
+       setCategories(response.data.results);
+     })
+   })
+   useEffect(() => {
+     axios.get("http://localhost:9000/v1/suppliers").then((response) => {
+       setSuppliers(response.data.results);
 
-    })
-  })
+     })
+   })
   const handleConfirmDelete = (_id) => {
     axios.delete("http://localhost:9000/v1/products/" + _id).then((response) => {
       if (response.status === 200) {
@@ -227,9 +314,6 @@ function Products() {
               delete values.sizeXL
               delete values.sizeXXL
               values.size = SizeS
-
-
-
               axios.post('http://localhost:9000/v1/products/', values).then(response => {
                 if (response.status === 200) {
                   setRefresh((f) => f + 1);
@@ -381,7 +465,7 @@ function Products() {
                 delete values.sizeXXL
                 values.size = SizeS
 
-
+ 
 
 
                 axios.patch('http://localhost:9000/v1/products/' + selectedRow._id, values).then(response => {
