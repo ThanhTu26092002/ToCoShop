@@ -3,6 +3,10 @@ const { json } = require('express');
 var express = require('express');
 var moment = require('moment')
 const { join } = require('lodash');
+const upload = require("../middleware/multerUpload");
+const multer = require("multer");
+const fs = require("fs");
+
 const { ObjectId } = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var router = express.Router();
@@ -34,9 +38,9 @@ const {
 const { date } = require('yup');
 const Employee = require('../models/Employee');
 const { formatterErrorFunc } = require("../utils/formatterError");
-const { COLLECTION_EMPLOYEES } = require('../configs/constants');
+const { COLLECTION_EMPLOYEES, PATH_FOLDER_IMAGES, PATH_FOLDER_PUBLIC_UPLOAD} = require('../configs/constants');
 const { validate } = require('../models/Employee');
-const { validateId } = require('../validations/commonValidators');
+const { validateId, loadEmployee } = require('../validations/commonValidators');
 
 
 //Get all categories
@@ -51,22 +55,120 @@ router.get('/', function(req, res, next) {
 router.get('/search/:id', validateSchema(search_deleteWithId), function(req, res, next) {
   const {id}= req.params;
   const query={_id: ObjectId(id)}
-  findOne({query: query}, COLLECTION_NAME)
-    .then(result => res.status(200).json(result))
-    .catch(err => res.status(500).json({findFunction: "failed", err: err}))
+  // find({query: query}, COLLECTION_NAME)
+  //   .then(result => res.status(200).json(result))
+  //   .catch(err => res.status(500).json({findFunction: "failed", err: err}))
+  Employee.findById(id).then(demo => console.log(demo) )
+  
+  
+  
+
 })
-//
 
-// router.get('/search-many', validateSchema(search_deleteManyEmployeesSchema), function(req, res, next) {
-//   const query= req.query;
-//   findDocuments({query: query}, COLLECTION_NAME)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({findFunction: "failed", err: err}))
-// })
-// //
+router.post("/employeeImage/:id", loadEmployee, function (req, res) {
+  upload.single("file")(req, res, async function (err) {
+    if (err instanceof multer.MulterError) {
+      res.status(500).json({ type: "MulterError", err: err });
+    } else if (err) {
+      let errMsg = { type: "UnknownError", error: err };
+      if (req.fileValidationError) {
+        errMsg.type = "fileValidationError";
+        errMsg.error = req.fileValidationError;
+      } else if (req.directoryError) {
+        errMsg.type = "directoryError";
+        errMsg.error = req.directoryError;
+      }
+      res.status(500).json(errMsg);
+    } else {
+      try {
+        // if doesn't exist file in form-data then res... and return
+        if (!req.file) {
+          res.status(400).json({
+            ok: false,
+            error: {
+              name: "file",
+              message: `doesn't have any files in form-data from client`,
+            },
+          });
+          return;
+        }
 
-// Insert One
-// router.post('/insert', validateSchema(addSchema), function (req, res, next){
+        const employeeId = req.params.id;
+        const newImgUrl = req.file.filename
+          ? `${PATH_FOLDER_IMAGES}/${COLLECTION_EMPLOYEES}/${employeeId}/${req.file.filename}`
+          : null;
+          const currentImgUrl = req.body.currentImgUrl
+          ? req.body.currentImgUrl
+          : null;
+          console.log('img', currentImgUrl)
+        const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
+        console.log("test speed update:", currentDirPath);
+        const opts = { runValidators: true };
+        const updatedDoc = await Employee.findByIdAndUpdate(
+          employeeId,
+          { imageUrl: newImgUrl },
+          opts
+        );
+        //if currentImgUrl =null
+        if (!currentImgUrl) {
+          res.json({
+            ok: true,
+            more_detail: "Client have the new image",
+            message: "Update imageUrl and other data successfully",
+            result: updatedDoc,
+          });
+          return;
+        }
+
+        //else, then...
+        try {
+          if (fs.existsSync(currentDirPath)) {
+            //If existing, removing the former uploaded image from DiskStorage
+            try {
+              //delete file image Synchronously
+              fs.unlinkSync(currentDirPath);
+              res.json({
+                ok: true,
+                message: "Update imageUrl and other data successfully",
+                result: updatedDoc,
+              });
+            } catch (errRmvFile) {
+              res.json({
+                ok: true,
+                warning: "The old uploaded file cannot delete",
+                message: "Update imageUrl and other data successfully",
+                result: updatedDoc,
+              });
+            }
+          } else {
+            res.json({
+              ok: true,
+              warning: "Not existing the old uploaded image in DiskStorage",
+              message: "Update imageUrl and other data successfully",
+              result: updatedDoc,
+            });
+          }
+        } catch (errCheckFile) {
+          res.json({
+            ok: true,
+            warning:
+              "Check the former uploaded image existing unsuccessfully, can not delete it",
+            message: "Update imageUrl and other data successfully.",
+            errCheckFile,
+            result: updatedDoc,
+          });
+        }
+      } catch (errMongoDB) {
+        console.log("having error");
+        res.status(400).json({
+          status: false,
+          message: "Failed in upload file",
+        });
+      }
+    }
+  });
+});
+
   router.post('/insert',async function (req, res, next){
     try{
     const data = req.body;
@@ -114,6 +216,10 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
     res.status(400).json({ ok: true, error: errMsgMongoDB });
   }
 });
+
+
+
+
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -125,7 +231,8 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
         noneExist: `the document doesn't exist in the collection ${COLLECTION_EMPLOYEES}`,
       });
       return;
-    }
+    };
+  ;
     //
     //--Delete the folder containing image of the account
     try {

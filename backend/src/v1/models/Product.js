@@ -19,20 +19,20 @@ const productSchema = new Schema(
             unique: true,
             required: true
         },
-        price: Number,
-        discount: {
-            type: Number,
-            min: [0,"phai lon hon hoac bang 0 va nho hon hoac bang 100"],
-            max: [100,"phai lon hon hoac bang 0 va nho hon hoac bang 100"]
-        },
-        
-        size:[
+        sizes:[
             Object,{
-                typeSize:{
+                size:{
                     type: String,
                     enum: ['S', 'M', 'L', 'XL', 'XXL']
                 },
-                amount:Number
+                price:Number,
+                stock:Number,
+                discount:{
+                    type: Number,
+                    min: [0,"phai lon hon hoac bang 0 va nho hon hoac bang 100"],
+                    max: [100,"phai lon hon hoac bang 0 va nho hon hoac bang 100"]
+                }
+                
             }
         ],
         categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },

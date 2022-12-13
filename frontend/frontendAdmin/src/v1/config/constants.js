@@ -9,7 +9,7 @@ const URLTransportation = 'http://localhost:9000/v1/transportations';
 const URLLogin = 'http://localhost:9000/v1/auth'
 const WEB_SERVER_UPLOAD_URL = 'http://localhost:9000/uploads'
 const PATH_CATEGORIES = '/categories'
-
+const URLQLLogin = 'http://localhost:9000/v1/login'
 const ICON_NoImage = "./images/logo_toCoShop.png";
 const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 const sizeList =['S', 'M', 'L', 'XL', 'XXL']
@@ -25,5 +25,6 @@ module.exports= {
     ICON_NoImage,
     URLSlides,
     dateFormatList,
-    sizeList
+    sizeList,
+    URLQLLogin
 }

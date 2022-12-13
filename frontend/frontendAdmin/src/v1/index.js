@@ -29,6 +29,7 @@ import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
 import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
+import Qllogin from "./pages/Qllogin";
 import { ICON_NoImage } from "./config/constants";
 const { Content, Sider } = Layout;
 
@@ -101,6 +102,7 @@ function ToCoShopV1() {
       ),
     ]),
     getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
+    getItem("Tài khoản đăng nhập", "/Qllogin", <UnorderedListOutlined />, <Qllogin />),
     getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
   return (
