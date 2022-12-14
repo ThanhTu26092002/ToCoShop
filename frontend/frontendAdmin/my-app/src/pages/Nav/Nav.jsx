@@ -14,7 +14,7 @@ function Nav() {
         <div className='sidebar'>
           <div className='sidebar_logo'>
             <div className='container_sldebar_logo'>
-              <img src='logo.png' alt=''></img>
+              <img src='logo.png' alt='' style = {{ width: 365, height: 125}}></img>
             </div>
 
           </div>
@@ -35,25 +35,26 @@ function Nav() {
             </div>
 
           </div>
+
           <nav>
             <ul>
               <li className='menu_item'><Link to='/'>N E W   F A S H I O N </Link></li>
               <li className='menu_item'><Link to='/Menclothes'>M E N C L O T H E S</Link></li>
               <li className='menu_item'><Link to='/'>W O M E N   C L O T H E S  </Link></li>
               <li className='menu_item'><Link to='/'>U N I S E X </Link></li>
-              <li className='menu_item'><Link to='/'>P R O M O T I O N </Link></li>
+              <li className='menu_item'><Link to='/'>O U T F I T W I N T E R </Link></li>
+              <li className='menu_item'><Link to='/'>O U T F I T S U M M E R </Link></li>
+              {/* <li className='menu_item'><Link to='/'>P R O M O T I O N </Link></li> */}
+              {/* <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
               <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
+              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li> */}
             </ul>
           </nav>
           <div className='sidebar_footer'>
             <div className='box_hotline'>
-              <div className='container_hotline'>
+              <div className='container_hotline' >
                 <a href='#'>
-                  <img src='image11.png' alt=''></img>
+                  <img src='image11.png' alt='' style={{paddingLeft: 35}}></img>
                   <span>0 9 6 7 1 1 6 8 0 1</span>
                 </a>
               </div>
@@ -79,8 +80,6 @@ function Nav() {
       </div>
       
     </BrowserRouter>
-
-
   )
 }
 
