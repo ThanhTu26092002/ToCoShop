@@ -8,7 +8,10 @@ const Employee = require("../models/Employee");
 var { validateSchema, loginSchema } = require("../validations/schemas.yup");
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { validateId } = require("../validations/commonValidators");
-const { COLLECTION_LOGINS } = require("../configs/constants");
+const {
+  COLLECTION_LOGINS,
+  COLLECTION_EMPLOYEES,
+} = require("../configs/constants");
 
 //Login with email and password
 router.post("/", validateSchema(loginSchema), async (req, res) => {
@@ -62,11 +65,22 @@ router.get("/all", async (req, res, next) => {
 });
 //
 // Find One Document Following ID
-
 router.get("/findById/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const doc = await Login.findById(id);
+    res.json({ ok: true, result: doc });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
+
+// Find folowing email
+router.get("/findByEmail/:email", async (req, res, next) => {
+  try {
+    const { email } = req.params;
+    const doc = await Login.findOne({ email });
     res.json({ ok: true, result: doc });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
@@ -78,11 +92,53 @@ router.get("/findById/:id", validateId, async (req, res, next) => {
 router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
-    const {email} = req.body
-    const newDoc = new Login(data);
-    await newDoc.save();
-    // add new employee with the same email
-    res.status(201).json({ ok: true, result: newDoc });
+    const { email } = req.body;
+    const newLogin = new Login(data);
+    await newLogin.save();
+    // If existing the email in collection Employees ,then do not thing
+    try {
+      const employeeDoc = await Employee.findOne({ email });
+      if (employeeDoc) {
+        res.status(201).json({
+          ok: true,
+          result: newLogin,
+          other:
+            "Existing an employee having the email, then, do not need to create a new Employee",
+        });
+        return;
+      }
+      // Create a new employee with the email
+      try {
+        const newEmployee = new Employee({ email });
+        //Insert the newDocument in our Mongodb database
+        await newEmployee.save();
+        res
+          .status(201)
+          .json({ ok: true, result: newLogin, result2: newEmployee });
+      } catch (errMongoDB) {
+        const errMsgMongoDB = formatterErrorFunc(
+          errMongoDB,
+          COLLECTION_EMPLOYEES
+        );
+        res.status(201).json({
+          ok: true,
+          result: newLogin,
+          errorNewEmployee: errMsgMongoDB,
+          warning:
+            "Add new login successfully, but having error when add new employee with the relative email",
+        });
+      }
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_EMPLOYEES);
+      res.status(201).json({
+        ok: true,
+        result: newLogin,
+        errorFindOne: errMsgMongoDB,
+        warning:
+          "Create a new login successfully, but having error when check existing of the new email in the collection Employees",
+      });
+      return;
+    }
   } catch (err) {
     const errMsg = formatterErrorFunc(err, COLLECTION_LOGINS);
     res.status(400).json({ error: errMsg });
@@ -135,28 +191,41 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
       });
       return;
     }
-    Employee.findOneAndDelete({ email: email }, function (err, doc) {
-      if (err) {
-        const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
-        res.status(400).json({ ok: true, error: errMsgMongoDB });
+    //Find and delete the relative email in collection Employees
+    try {
+      const deleteEmployee = await Employee.findOneAndDelete({ email });
+      if (deleteEmployee) {
+        res.json({
+          ok: true,
+          message: "Delete the document in collection Logins successfully",
+          other: "Delete the relative email in collection Employees completely",
+        });
         return;
       } else {
-        if (doc) {
-          console.log("Delete the Id in collection Employees completely");
-        } else {
-          console.log("Not existing the Id in collection Employees completely");
-        }
+        res.json({
+          ok: true,
+          message: "Delete the document in collection Logins successfully",
+          other: "Not existing the relative email in collection Employees completely",
+        });
+        return;
       }
-    });
-    res.json({
-      ok: true,
-      message: "Delete the document in MongoDB successfully",
-    });
+
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+      res.json({
+        ok: true,
+        message: "Delete the document in collection Logins successfully",
+        error: errMsgMongoDB,
+        warning:
+          "Delete the id in collection Logins successfully, but having error when delete the relative email in collection Employees",
+      });
+      return;
+    }
   } catch (errMongoDB) {
     const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_LOGINS);
     res.status(400).json({
       ok: false,
-      message: "Failed to delete the document with ID",
+      message: "Failed to delete the document with ID in collection Logins",
       error: errMsgMongoDB,
     });
   }
