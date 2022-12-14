@@ -383,7 +383,6 @@ dataIndex: "status",
                 <Radio.Group  onChange={onChange}>
                   <Radio value={"ACTIVE"}>hiển thị</Radio>
                   <Radio value={"INACTIVE"}>không hiển thị</Radio>
-                 
                 </Radio.Group>
               </Form.Item>
 
