@@ -157,7 +157,7 @@ function loadEmployee(req, res, next) {
           ok: true,
           error: {
             name: "id",
-            message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
+            message: `the document with following id doesn't exist in the collection ${COLLECTION_EMPLOYEES}`,
           },
         });
         return;
