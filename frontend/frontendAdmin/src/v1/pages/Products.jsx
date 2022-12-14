@@ -116,28 +116,9 @@ function Products() {
         return <span style={{ fontWeight: '600' }}>{Text}</span>
       }
     },
-    {
-      title: () => {
-        return "Giá bán";
-      },
-      key: "price",
-      dataIndex: "price",
-      render: (text) => {
-        return <span style={{ fontWeight: '600' }}>{text}</span>
-      },
-    },
 
-    {
-      title: () => {
-        return "Giảm";
-      },
-      key: "discount",
-      dataIndex: "discount",
-      width: "4%",
-      render: (text) => {
-        return <span style={{ fontWeight: '600' }}>{text}</span>
-      },
-    },
+
+
     {
       title: "Nhóm sản phẩm",
       key: "categoryId",
@@ -184,30 +165,12 @@ function Products() {
             <Button type='dashed' icon={<EditOutlined />} style={{ fontWeight: '600' }} onClick={() => {
               setVisible(true)
               setSelectedRow(record)
-              const valuesize = record.size
-              valuesize.map((e) => {
-                formEdit.setFieldValue(`size${e.typeSize}`, e.amount)
-                setCompare((compare)=>{
-                  const key = `size${e.typeSize}`;
-                  const value = e.amount
-                  const tmp = {...compare}
-                  tmp.key = value
-                   console.log('demo:', key )
-                  return tmp;
-                })
-              })
+
               // {sizeM: 10, sizeS: }
               console.log("record", record)
               handleClick_EditBtn(record)
-              formEdit.setFieldValue('productCode', record.productCode)
-              formEdit.setFieldValue('name', record.name)
-              formEdit.setFieldValue('price', record.price)
-              formEdit.setFieldValue('discount', record.discount)
               formEdit.setFieldValue('categoryId', record.categoryId._id)
               formEdit.setFieldValue('supplierId', record.supplierId._id)
-              formEdit.setFieldValue('description', record.description)
-              formEdit.setFieldValue('promotionPosition', record.promotionPosition)
-
             }}></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
@@ -235,25 +198,35 @@ function Products() {
   const optionspromotion = [];
   optionspromotion.push(
     {
-      label: "đồ nử",
-      value: "donu",
+      label: "Mẫu hot nhất năm 2022",
+      value: "hot2022",
     },
     {
-      label: "đồ nam",
-      value: "donam",
+      label: "Outfit Mùa Hè",
+      value: "muahe",
     },
     {
-      label: "áo khoác",
-      value: "aokhoac",
+      label: "Outfit Mùa thu",
+      value: "muathu",
     },
+    {
+      label: "Outfit Mùa xuân",
+      value: "muaxuan",
+    },
+    {
+      label: "Outfit Mùa đông",
+      value: "muadong",
+    },
+    {
+      label: "Couple",
+      value: "couple",
+    },
+    
 
   );
   const handleClick_EditBtn = (record) => {
-    const valuesize = record.size
-    valuesize.map((e) => {
-      formEdit.setFieldValue(`size${e.typeSize}`, e.amount)
-    })
-    
+
+
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
@@ -265,56 +238,31 @@ function Products() {
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
-    console.log(selectedRecord.sizeL)
-    if (
-      values.productCode === selectedRecord.productCode &&
-      values.description === selectedRecord.description &&
-      values.name === selectedRecord.name &&
-      values.price === selectedRecord.price &&
-      values.discount === selectedRecord.discount &&
-      // values.categoryId === selectedRecord.categoryId
-      // values.supplierId === selectedRecord.supplierId
-      values.promotionPosition === selectedRecord.promotionPosition
-      // values.sizeS === selectedRecord.sizeS&&
-      // values.sizeM === selectedRecord.sizeM&&
-      // values.sizeL === selectedRecord.sizeL&&
-      // values.sizeXL === selectedRecord.sizeXL&&
-      // values.sizeXXL === selectedRecord.sizeXXL
-    ) {
-      setIsModalOpen(false);
-      formEdit.resetFields();
-      setSelectedId(null);
-      console.log("test")
-      return;
-    }
-    const SizeS = [
-      {
-        typeSize: "S",
-        amount: values.sizeS
-      },
-      {
-        typeSize: "M",
-        amount: values.sizeM
-      },
-      {
-        typeSize: "L",
-        amount: values.sizeL
-      },
-      {
-        typeSize: "XL",
-        amount: values.sizeXL
-      },
-      {
-        typeSize: "XXL",
-        amount: values.sizeXXL
-      }
-    ]
-    delete values.sizeM
-    delete values.sizeL
-    delete values.sizeS
-    delete values.sizeXL
-    delete values.sizeXXL
-    values.size = SizeS
+// chưa hoàng thiện
+    // const tmp = {
+    //   productCode: selectedRecord.productCode, description: selectedRecord.description, name: selectedRecord.name, categoryId: selectedRecord.categoryId._id, supplierId: selectedRecord.supplierId._id, promotionPosition: selectedRecord.promotionPosition, sizes: selectedRecord.sizes
+    // }
+    // // console.log('show tmp:', tmp);
+    // // console.log('show values:', values);
+
+    // if (
+
+    //   // values.productCode === selectedRecord.productCode &&
+    //   // values.description === selectedRecord.description &&
+    //   // values.name === selectedRecord.name &&
+    //   // values.sizes === selectedRecord.sizes &&
+    //   // values.categoryId === selectedRecord.categoryId &&
+    //   // values.supplierId === selectedRecord.supplierId &&
+    //   // values.promotionPosition === selectedRecord.promotionPosition
+    //   JSON.stringify(values) === JSON.stringify(tmp)
+    // ) {
+    //   setIsModalOpen(false);
+    //   formEdit.resetFields();
+    //   setSelectedId(null);
+    //   console.log("test")
+    //   return;
+    // }
+
     setLoadingBtn(true);
     axiosClient
       .patch(
@@ -380,17 +328,8 @@ function Products() {
       }
     });
   };
+  const sizeList = ['S', 'M', 'L', 'XL', 'XXL']
 
-  const initialValues = {
-    sizeM: 0,
-    sizeL: 0,
-    sizeS: 0,
-    sizeXL: 0,
-    sizeXXL: 0,
-    discount: 0,
-    price: 0,
-
-  }
   return (
     <div>
       <Layout>
@@ -398,38 +337,12 @@ function Products() {
           <Form
             style={{ marginLeft: 400 }}
             form={form}
-            initialValues={initialValues}
+
             onFinish={
               (values) => {
 
-                const SizeS = [
-                  {
-                    typeSize: "S",
-                    amount: values.sizeS
-                  },
-                  {
-                    typeSize: "M",
-                    amount: values.sizeM
-                  },
-                  {
-                    typeSize: "L",
-                    amount: values.sizeL
-                  },
-                  {
-                    typeSize: "XL",
-                    amount: values.sizeXL
-                  },
-                  {
-                    typeSize: "XXL",
-                    amount: values.sizeXXL
-                  }
-                ]
-                delete values.sizeM
-                delete values.sizeL
-                delete values.sizeS
-                delete values.sizeXL
-                delete values.sizeXXL
-                values.size = SizeS
+
+
                 axios.post('http://localhost:9000/v1/products/', values).then(response => {
                   if (response.status === 200) {
                     setRefresh((f) => f + 1);
@@ -453,32 +366,100 @@ function Products() {
             }]} name={"name"} label="tên sản phẩm" >
               <Input placeholder='name product' />
             </Form.Item>
-            <Form.Item rules={[{
-              required: true,
-              message: "nhập giá bán"
-            }]} name={"price"} label="giá bán" >
-              <InputNumber style={{ marginLeft: 40 }} min={0} placeholder="0" addonAfter='VND' />
-            </Form.Item>
-            <Form.Item name={"discount"} label="giảm giá" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='%' />
-            </Form.Item>
+            <Form.List name={"sizes"}>
+              {(field, { add, remove }) => (
+                <>
+                  {field.map((field, index) => {
+                    return (
+                      <Space direction='horizontal' key={field.key}>
+                        <Form.Item name={[field.name, "stock"]} label={`${index + 1}-Size`} rules={[{ required: true, message: "size required." }]} >
+                          <InputNumber
+                            placeholder='số lượng'
+                            addonBefore={
+                              <Form.Item
+                                name={[field.name, "size"]}
+                                noStyle
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Chưa chọn Size",
+                                  },
+                                ]}
+                              >
+                                <Select
+                                  placeholder="Size"
+                                  style={{
+                                    width: 70,
+                                  }}
+                                  showSearch
+                                  optionFilterProp="children"
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                  options={
+                                    sizeList &&
+                                    sizeList.map((s) => {
+                                      const tmp = {
+                                        value: s,
+                                        label: s,
+                                      };
+                                      return tmp;
+                                    })
+                                  }
+                                />
+                              </Form.Item>
+                            }
+                          >
 
-            <Form.Item name={"sizeM"} label="sizeM" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-            </Form.Item>
-            <Form.Item name={"sizeS"} label="sizeS" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-            </Form.Item>
-            <Form.Item name={"sizeL"} label="sizeL" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-            </Form.Item>
-            <Form.Item name={"sizeXL"} label="sizeXL" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-            </Form.Item>
-            <Form.Item name={"sizeXXL"} label="sizeXXL" >
-              <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-            </Form.Item>
+                          </InputNumber>
+                        </Form.Item>
+                        <Form.Item name={[field.name, "price"]} rules={[
+                          {
+                            required: true,
+                            message: "Chưa nhập giá tiền",
+                          },
+                        ]} >
+                          <InputNumber
+                            defaultValue={0}
+                            formatter={(value) =>
+                              ` ${value}`.replace(
+                                /\B(?=(\d{3})+(?!\d))/g,
+                                ","
+                              )
+                            }
+                            style={{ minWidth: 120, maxWidth: 360 }}
+                            min={0}
+                            addonAfter="VNĐ"
+                            placeholder='giá bán'
+                          />
+                        </Form.Item>
+                        <Form.Item name={[field.name, "discount"]}  >
+                          <InputNumber
+                            defaultValue={0}
+                            style={{ minWidth: 120, maxWidth: 150 }}
+                            min={0}
+                            max={100}
+                            placeholder="giảm giá"
+                            addonAfter="%"
+                          />
 
+                        </Form.Item>
+                        <MinusCircleOutlined style={{ height: 40, color: "red" }} onClick={() => {
+                          remove(field.name)
+                        }} />
+                      </Space>
+                    );
+                  })}
+                  <Form.Item>
+                    <Button icon={<PlusOutlined />} type='dashed' block onClick={() => {
+                      add();
+                    }}>Thêm size</Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
             <Form.Item name={"promotionPosition"} label="promotionPosition">
               <Select
                 mode="multiple"
@@ -579,31 +560,100 @@ function Products() {
               }]} name={"name"} label="tên sản phẩm" >
                 <Input placeholder='name product' />
               </Form.Item>
-              <Form.Item rules={[{
-                required: true,
-                message: "nhập giá bán"
-              }]} name={"price"} label="giá bán" >
-                <InputNumber style={{ marginLeft: 40 }} min={0} placeholder="0" addonAfter='VND' />
-              </Form.Item>
-              <Form.Item name={"discount"} label="giảm giá" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='%' />
-              </Form.Item>
+              <Form.List name={"sizes"}>
+                {(field, { add, remove }) => (
+                  <>
+                    {field.map((field, index) => {
+                      return (
+                        <Space direction='horizontal' key={field.key}>
+                          <Form.Item name={[field.name, "stock"]} label={`${index + 1}-Size`} rules={[{ required: true, message: "size required." }]} >
+                            <InputNumber
+                              placeholder='số lượng'
+                              addonBefore={
+                                <Form.Item
+                                  name={[field.name, "size"]}
+                                  noStyle
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn Size",
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    placeholder="Size"
+                                    style={{
+                                      width: 70,
+                                    }}
+                                    showSearch
+                                    optionFilterProp="children"
+                                    filterOption={(input, option) =>
+                                      (option?.label ?? "")
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
+                                    }
+                                    options={
+                                      sizeList &&
+                                      sizeList.map((s) => {
+                                        const tmp = {
+                                          value: s,
+                                          label: s,
+                                        };
+                                        return tmp;
+                                      })
+                                    }
+                                  />
+                                </Form.Item>
+                              }
+                            >
 
-              <Form.Item name={"sizeM"} label="sizeM" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-              </Form.Item>
-              <Form.Item name={"sizeS"} label="sizeS" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-              </Form.Item>
-              <Form.Item name={"sizeL"} label="sizeL" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-              </Form.Item>
-              <Form.Item name={"sizeXL"} label="sizeXL" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-              </Form.Item>
-              <Form.Item name={"sizeXXL"} label="sizeXXL" >
-                <InputNumber style={{ marginLeft: 45 }} min={0} placeholder="0" addonAfter='so luong' />
-              </Form.Item>
+                            </InputNumber>
+                          </Form.Item>
+                          <Form.Item name={[field.name, "price"]} rules={[
+                            {
+                              required: true,
+                              message: "Chưa nhập giá tiền",
+                            },
+                          ]} >
+                            <InputNumber
+                              defaultValue={0}
+                              formatter={(value) =>
+                                ` ${value}`.replace(
+                                  /\B(?=(\d{3})+(?!\d))/g,
+                                  ","
+                                )
+                              }
+                              style={{ minWidth: 120, maxWidth: 360 }}
+                              min={0}
+                              addonAfter="VNĐ"
+                              placeholder='giá bán'
+                            />
+                          </Form.Item>
+                          <Form.Item name={[field.name, "discount"]}  >
+                            <InputNumber
+                              defaultValue={0}
+                              style={{ minWidth: 120, maxWidth: 150 }}
+                              min={0}
+                              max={100}
+                              placeholder="giảm giá"
+                              addonAfter="%"
+                            />
+
+                          </Form.Item>
+                          <MinusCircleOutlined style={{ height: 40, color: "red" }} onClick={() => {
+                            remove(field.name)
+                          }} />
+                        </Space>
+                      );
+                    })}
+                    <Form.Item>
+                      <Button icon={<PlusOutlined />} type='dashed' block onClick={() => {
+                        add();
+                      }}>Thêm size</Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
 
               <Form.Item name={"promotionPosition"} label="promotionPosition">
                 <Select

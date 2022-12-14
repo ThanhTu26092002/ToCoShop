@@ -1,69 +1,68 @@
 "use strict";
-const { json } = require('express');
-var express = require('express');
-var moment = require('moment')
-const { join } = require('lodash');
+const { json } = require("express");
+var express = require("express");
+var moment = require("moment");
+const { join } = require("lodash");
 const upload = require("../middleware/multerUpload");
 const multer = require("multer");
 const fs = require("fs");
 
-const { ObjectId } = require('mongodb');
-var MongoClient = require('mongodb').MongoClient;
 var router = express.Router();
-
-const COLLECTION_NAME= "employees"
 
 const {
   insertDocument,
-  insertDocuments, 
+  insertDocuments,
   updateDocument,
   updateDocuments,
   findDocuments,
   deleteOneWithId,
   deleteMany,
-  
-  } = require("../utils/MongodbHelper");
-const { 
-  validateSchema,
-  search_deleteWithId,
-  search_deleteManyEmployeesSchema,
-  insertOneEmployeeSchema,
-  insertManyEmployeesSchema,
-  updateOneEmployeeSchema,
-  updateManyEmployeesSchema,
+} = require("../utils/MongodbHelper");
+// const {
+//   validateSchema,
+//   search_deleteWithId,
+//   search_deleteManyEmployeesSchema,
+//   insertOneEmployeeSchema,
+//   insertManyEmployeesSchema,
+//   updateOneEmployeeSchema,
+//   updateManyEmployeesSchema,
+// } = require("../models/schemas/schemasEmployeesOnlineShop.yup");
+const Employee = require("../models/Employee");
+const Login = require("../models/Login");
 
-} 
-
-= require('../models/schemas/schemasEmployeesOnlineShop.yup');
-const { date } = require('yup');
-const Employee = require('../models/Employee');
 const { formatterErrorFunc } = require("../utils/formatterError");
-const { COLLECTION_EMPLOYEES, PATH_FOLDER_IMAGES, PATH_FOLDER_PUBLIC_UPLOAD} = require('../configs/constants');
-const { validate } = require('../models/Employee');
-const { validateId, loadEmployee } = require('../validations/commonValidators');
+const {
+  COLLECTION_EMPLOYEES,
+  COLLECTION_LOGINS,
+  PATH_FOLDER_IMAGES,
+  PATH_FOLDER_PUBLIC_UPLOAD,
+} = require("../configs/constants");
+const { validate } = require("../models/Employee");
+const { validateId, loadEmployee } = require("../validations/commonValidators");
 
+//Get all employees
+router.get("/", async function (req, res, next) {
+  try {
+    const docs = await Employee.find().sort({ _id: -1 });
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_EMPLOYEES);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
 
-//Get all categories
-router.get('/', function(req, res, next) {
-  findDocuments({query: {}}, COLLECTION_NAME)
-    .then(result => res.status(200).json(result))
-    .catch(err => res.status(500).json({findFunction: "failed", err: err}))
-})
-//
-// Find One Document Following ID   
+// Find One Document Following ID
 // http://localhost:9000/categoriesOnlineShop/search/ how to response a message error
-router.get('/search/:id', validateSchema(search_deleteWithId), function(req, res, next) {
-  const {id}= req.params;
-  const query={_id: ObjectId(id)}
-  // find({query: query}, COLLECTION_NAME)
-  //   .then(result => res.status(200).json(result))
-  //   .catch(err => res.status(500).json({findFunction: "failed", err: err}))
-  Employee.findById(id).then(demo => console.log(demo) )
-  
-  
-  
-
-})
+router.get("/findById/:id", validateId, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const doc = await Employee.findById(id);
+    res.json({ ok: true, result: doc });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_EMPLOYEES);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
 
 router.post("/employeeImage/:id", loadEmployee, function (req, res) {
   upload.single("file")(req, res, async function (err) {
@@ -97,10 +96,10 @@ router.post("/employeeImage/:id", loadEmployee, function (req, res) {
         const newImgUrl = req.file.filename
           ? `${PATH_FOLDER_IMAGES}/${COLLECTION_EMPLOYEES}/${employeeId}/${req.file.filename}`
           : null;
-          const currentImgUrl = req.body.currentImgUrl
+        const currentImgUrl = req.body.currentImgUrl
           ? req.body.currentImgUrl
           : null;
-          console.log('img', currentImgUrl)
+        console.log("img", currentImgUrl);
         const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
         console.log("test speed update:", currentDirPath);
         const opts = { runValidators: true };
@@ -169,16 +168,16 @@ router.post("/employeeImage/:id", loadEmployee, function (req, res) {
   });
 });
 
-  router.post('/insert',async function (req, res, next){
-    try{
+router.post("/insertOne", async function (req, res, next) {
+  try {
     const data = req.body;
-    if(data.birthday) {
+    if (data.birthday) {
       //format date: YYYY-MM-Đ => type of Date: string
-      data.birthday= moment(data.birthday).utc().local().format('YYYY-MM-DD')
+      data.birthday = moment(data.birthday).utc().local().format("YYYY-MM-DD");
       //converting type of date from String to Date
-      data.birthday= new Date(data.birthday)
+      data.birthday = new Date(data.birthday);
     }
-  
+
     const newDoc = new Employee(data);
     //Insert the newDocument in our Mongodb database
     await newDoc.save();
@@ -192,7 +191,7 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
-    const opts = { runValidators: true };
+    const opts = { runValidators: true, new: true };
     //--Update in Mongodb
     const updatedDoc = await Employee.findByIdAndUpdate(id, updateData, opts);
     if (!updatedDoc) {
@@ -205,24 +204,73 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       });
       return;
     }
-
-    res.json({
-      ok: true,
-      message: "Update the Id successfully",
-      result: updatedDoc,
-    });
+    //Check having email in updateData, and update into collection Logins
+    if (updateData.email) {
+      const newEmail = updateData.email;
+      //Find the login have the email
+      try {
+        const findDoc = await Login.findOne({ email: newEmail });
+        if (!findDoc) {
+          res.json({
+            ok: true,
+            message: "Update the Id successfully",
+            result: updatedDoc,
+            other:
+              "Don't have the document having the email in the collection Logins",
+          });
+          return;
+        }
+        //Update new email for the login
+        try {
+          const idLogin = findDoc._id;
+          const updatedDocLogin = await Login.findByIdAndUpdate(
+            idLogin,
+            { email: newEmail },
+            opts
+          );
+          res.json({
+            ok: true,
+            message:
+              "Update the Id successfully in collection Employees and Logins",
+            result: updatedDoc,
+            result2: updatedDoc,
+          });
+          return;
+        } catch (err) {
+          const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+          res.json({
+            ok: true,
+            message: "Update the Id successfully in collection Employees",
+            result: updatedDoc,
+            errFindByIdAndUpdate: errMsgMongoDB,
+            warning:
+              "having error when update email for the login having the same email",
+          });
+          return;
+        }
+      } catch (err) {
+        const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+        res.json({
+          ok: true,
+          message: "Update the Id successfully",
+          result: updatedDoc,
+          errorFindOne: errMsgMongoDB,
+          other:
+            "Update the Id successfully, but, having error when check existing of the relative email of the employee in collection Logins",
+        });
+        return;
+      }
+    }
   } catch (errMongoDB) {
     const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_EMPLOYEES);
     res.status(400).json({ ok: true, error: errMsgMongoDB });
   }
 });
 
-
-
-
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { email } = req.body;
     const deleteDoc = await Employee.findByIdAndDelete(id);
     //deleteDoc !== false, is mean, finding a document with the id in the collection
     if (!deleteDoc) {
@@ -231,8 +279,32 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
         noneExist: `the document doesn't exist in the collection ${COLLECTION_EMPLOYEES}`,
       });
       return;
-    };
-  ;
+    }
+    //
+    //Find following email in collection Logins and delete it
+    try {
+      const deleteLogin = await Login.findOneAndDelete({ email });
+      if (deleteLogin) {
+        console.log({
+          ok: true,
+          message: "Delete the relative email in collection Logins completely",
+        });
+      } else {
+        console.log({
+          ok: true,
+          message:
+            "Not existing the relative email in collection Logins completely",
+        });
+      }
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+      console.log({
+        ok: true,
+        errorFindOneAndDelete: errMsgMongoDB,
+        warning:
+          "Delete a login successfully, but having error when finding and deleting of the relative email in the collection Logins",
+      });
+    }
     //
     //--Delete the folder containing image of the account
     try {
@@ -312,7 +384,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //   const paramId = {_id : ObjectId(id)}
 //   const data = req.body
 
-//   if(data.birthday) 
+//   if(data.birthday)
 //    {
 //      //format date: YYYY-MM-Đ => type of Date: string
 //     data.birthday= moment(data.birthday).utc().local().format('YYYY-MM-DD')
@@ -328,12 +400,12 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //  })
 // //
 
-//  //Update MANY 
+//  //Update MANY
 //  router.patch('/update-many',validateSchema(updateManyEmployeesSchema), function(req, res, next){
 //   const query = req.query;
 //   const newValues = req.body;
 
-//   if(newValues.birthday) 
+//   if(newValues.birthday)
 //    {
 //      //format date: YYYY-MM-Đ => type of Date: string
 //     newValues.birthday= moment(newValues.birthday).utc().local().format('YYYY-MM-DD')
@@ -368,11 +440,10 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //     .catch(err => res.status(500).json({deleteFunction: "failed", err: err}))
 // })
 
-
 // //TASK 24
 // //Get all employees with total Price they have sold
 // router.get('/revenue', function(req, res, next) {
-  
+
 //  const aggregate = [
 //     {
 //       $lookup: {
@@ -394,7 +465,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //           // { $group: {
 //           //   _id: "$employeeId", //to show totalPrice or all Orders that this employee sold
 //           //  ordersId: {$push: "$_id"},
-//           //   totalPrice: {$sum: { $multiply: [ 
+//           //   totalPrice: {$sum: { $multiply: [
 //           //     "$orderDetails.price", "$orderDetails.quantity",
 //           //     {$divide : [{$subtract: [100, "$orderDetails.discount"]}, 100]}
 //           //   ]}},
@@ -405,7 +476,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //           { $group: {
 //             _id: "$_id", //to show totalPrice or all Orders that this employee sold
 //            productsId: {$push: "$orderDetails.productId"},
-//             totalPriceEachOrder: {$sum: { $multiply: [ 
+//             totalPriceEachOrder: {$sum: { $multiply: [
 //               "$orderDetails.price", "$orderDetails.quantity",
 //               {$divide : [{$subtract: [100, "$orderDetails.discount"]}, 100]}
 //             ]}},
@@ -460,10 +531,10 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //           },
 
 //           { $group: {
-//             _id: "$_id", 
+//             _id: "$_id",
 //             createdDate: {$first: "$createdDate"},
 //            productsId: {$push: "$orderDetails.productId"},
-//             totalPriceEachOrder: {$sum: { $multiply: [ 
+//             totalPriceEachOrder: {$sum: { $multiply: [
 //               "$orderDetails.price", "$orderDetails.quantity",
 //               {$divide : [{$subtract: [100, "$orderDetails.discount"]}, 100]}
 //             ]}},
@@ -497,7 +568,7 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 // })
 // //
 
-// //Get employees 14  
+// //Get employees 14
 // router.get('/search', function(req, res, next) {
 //   const {key,value} = req.query
 //  const query={}
@@ -508,23 +579,23 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //     case 'birthday':
 //       query = {$and: [
 //         {'birthday': {$exists: true}},
-//         { "$expr": {  
-//           "$eq": [ { "$year": "$birthday" }, { "$year": new Date() } ] 
+//         { "$expr": {
+//           "$eq": [ { "$year": "$birthday" }, { "$year": new Date() } ]
 //         }}
 //       ]}
-      
+
 //       break;
 //     case 'birthday-today':
 //      query = {
 //       "birthday": {"$exists": true} ,
-//       "$expr": { 
+//       "$expr": {
 //             "$and": [
 //                  { "$eq": [ { "$dayOfMonth": "$birthday" }, { "$dayOfMonth": new Date() } ] },
 //                  { "$eq": [ { "$month"     : "$birthday" }, { "$month"     : new Date() } ] }
 //             ]
 //          }
 //      }
-    
+
 //       break;
 //     default:
 //       res.status(404).json({message: 'Something wrong, please check your formatting request'})
@@ -536,13 +607,6 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 //   })
 //   //
 
-
-
-
-
-
 // //------------------------------------------------------------------------------------------------
 
 module.exports = router;
-
-

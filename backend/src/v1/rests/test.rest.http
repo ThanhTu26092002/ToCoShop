@@ -37,12 +37,43 @@ PATCH http://localhost:9000/v1/suppliers/updateOne/:id
 DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
 ###################################EMPLOYEES################################################################
-
+GET http://localhost:9000/v1/employees
+### Get one employee following Id
+GET http://localhost:9000/v1/employees/findById/63989ea171b18b684332143c
 
 
 
 ###################################PRODUCTS################################################################
 GET http://localhost:9000/v1/products
 
-#### Update one image of the product
+###Find one employee following Id
+GET http://localhost:9000/v1/employees/findById/63989ea171b18b684332143c
+#### Update one product
 POST http://localhost:9000/v1/products/productImage/:id
+
+### insert one employee
+POST http://localhost:9000/v1/employees/insertOne
+
+## update image of one employee
+POST http://localhost:9000/v1/employees//employeeImage/:id
+
+###delete one employee
+DELETE http://localhost:9000/v1/employees/deleteOne/63989ea171b18b684332143c
+
+###################################LOGINS################################################################
+###Check for login with email and password
+POST http://localhost:9000/v1/login
+### get all
+GET http://localhost:9000/v1/login/all
+
+###Find one employee following Id
+GET http://localhost:9000/v1/employees/findById/:id
+#### Update one 
+PATCH  http://localhost:9000/v1/login/updateOne/:id
+### insert one employee
+POST http://localhost:9000/v1/login/insertOne
+###delete one employee
+DELETE http://localhost:9000/v1/login/deleteOne/:id
+
+
+
