@@ -2,7 +2,7 @@
 require("dotenv").config();
 var express = require("express");
 var router = express.Router();
-var jwt = require('jsonwebtoken');
+var jwt = require("jsonwebtoken");
 const Login = require("../models/Login");
 const Employee = require("../models/Employee");
 var { validateSchema, loginSchema } = require("../validations/schemas.yup");
@@ -10,6 +10,7 @@ const { formatterErrorFunc } = require("../utils/formatterError");
 const { validateId } = require("../validations/commonValidators");
 const { COLLECTION_LOGINS } = require("../configs/constants");
 
+//Login with email and password
 router.post("/", validateSchema(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -19,9 +20,9 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
       res.status(401).json({ message: "UnAuthorized" });
       return;
     }
-  // Get info of the employee who has just login 
-    const employeeInfo = await Employee.findOne({email});
-    if(!employeeInfo){
+    // Get info of the employee who has just login
+    const employeeInfo = await Employee.findOne({ email });
+    if (!employeeInfo) {
       res.status(400).json({ message: "Not found!" });
       return;
     }
@@ -35,7 +36,7 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
       audience: process.env.JWT_SETTING_AUDIENCE,
       algorithm: "HS512",
     });
-    
+
     res.json({
       ok: true,
       login: true,
@@ -44,7 +45,7 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
       token,
     });
   } catch (err) {
-    res.status(500).json({message: err});
+    res.status(500).json({ message: err });
   }
 });
 //
@@ -53,21 +54,35 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
 router.get("/all", async (req, res, next) => {
   try {
     const docs = await Login.find();
-    res.json(docs);
+    res.json({ ok: true, results: docs });
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, message: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 //
+// Find One Document Following ID
 
+router.get("/findById/:id", validateId, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const doc = await Login.findById(id);
+    res.json({ ok: true, result: doc });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
 // Insert One
 // router.post('/insert', validateSchema(addSchema), function (req, res, next){
 router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
-    const doc = new Login(data);
-    await doc.save();
-    res.status(201).json(doc);
+    const {email} = req.body
+    const newDoc = new Login(data);
+    await newDoc.save();
+    // add new employee with the same email
+    res.status(201).json({ ok: true, result: newDoc });
   } catch (err) {
     const errMsg = formatterErrorFunc(err, COLLECTION_LOGINS);
     res.status(400).json({ error: errMsg });
@@ -91,7 +106,6 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       });
       return;
     }
-
     res.json({
       ok: true,
       message: "Update the Id successfully",
@@ -108,8 +122,8 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { email } = req.body;
     const deleteDoc = await Login.findByIdAndDelete(id);
-    console.log("result delete: ", deleteDoc);
     //deleteDoc !== false, is mean, finding a document with the id in the collection
     if (!deleteDoc) {
       res.status(404).json({
@@ -121,6 +135,19 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
       });
       return;
     }
+    Employee.findOneAndDelete({ email: email }, function (err, doc) {
+      if (err) {
+        const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+        res.status(400).json({ ok: true, error: errMsgMongoDB });
+        return;
+      } else {
+        if (doc) {
+          console.log("Delete the Id in collection Employees completely");
+        } else {
+          console.log("Not existing the Id in collection Employees completely");
+        }
+      }
+    });
     res.json({
       ok: true,
       message: "Delete the document in MongoDB successfully",
