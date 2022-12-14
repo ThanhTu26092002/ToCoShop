@@ -9,4 +9,3 @@ sendingDate (setField sendingDate in tag DatePicker): Moment {_isAMomentObject:
 ### Comparison two objects 
 JSON.stringify(test1) === JSON.stringify(test2)
 
-
