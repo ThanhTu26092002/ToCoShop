@@ -7,11 +7,7 @@ const upload = require("../middleware/multerUpload");
 const multer = require("multer");
 const fs = require("fs");
 
-const { ObjectId } = require("mongodb");
-var MongoClient = require("mongodb").MongoClient;
 var router = express.Router();
-
-const COLLECTION_NAME = "employees";
 
 const {
   insertDocument,
@@ -37,6 +33,7 @@ const Login = require("../models/Login");
 const { formatterErrorFunc } = require("../utils/formatterError");
 const {
   COLLECTION_EMPLOYEES,
+  COLLECTION_LOGINS,
   PATH_FOLDER_IMAGES,
   PATH_FOLDER_PUBLIC_UPLOAD,
 } = require("../configs/constants");
@@ -194,7 +191,7 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
-    const opts = { runValidators: true };
+    const opts = { runValidators: true, new: true };
     //--Update in Mongodb
     const updatedDoc = await Employee.findByIdAndUpdate(id, updateData, opts);
     if (!updatedDoc) {
@@ -207,12 +204,63 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       });
       return;
     }
-
-    res.json({
-      ok: true,
-      message: "Update the Id successfully",
-      result: updatedDoc,
-    });
+    //Check having email in updateData, and update into collection Logins
+    if (updateData.email) {
+      const newEmail = updateData.email;
+      //Find the login have the email
+      try {
+        const findDoc = await Login.findOne({ email: newEmail });
+        if (!findDoc) {
+          res.json({
+            ok: true,
+            message: "Update the Id successfully",
+            result: updatedDoc,
+            other:
+              "Don't have the document having the email in the collection Logins",
+          });
+          return;
+        }
+        //Update new email for the login
+        try {
+          const idLogin = findDoc._id;
+          const updatedDocLogin = await Login.findByIdAndUpdate(
+            idLogin,
+            { email: newEmail },
+            opts
+          );
+          res.json({
+            ok: true,
+            message:
+              "Update the Id successfully in collection Employees and Logins",
+            result: updatedDoc,
+            result2: updatedDoc,
+          });
+          return;
+        } catch (err) {
+          const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+          res.json({
+            ok: true,
+            message: "Update the Id successfully in collection Employees",
+            result: updatedDoc,
+            errFindByIdAndUpdate: errMsgMongoDB,
+            warning:
+              "having error when update email for the login having the same email",
+          });
+          return;
+        }
+      } catch (err) {
+        const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+        res.json({
+          ok: true,
+          message: "Update the Id successfully",
+          result: updatedDoc,
+          errorFindOne: errMsgMongoDB,
+          other:
+            "Update the Id successfully, but, having error when check existing of the relative email of the employee in collection Logins",
+        });
+        return;
+      }
+    }
   } catch (errMongoDB) {
     const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_EMPLOYEES);
     res.status(400).json({ ok: true, error: errMsgMongoDB });
@@ -232,20 +280,31 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
       });
       return;
     }
-    //Delete the Id with email in Collection Logins
-    Login.findOneAndDelete({ email: email }, function (err, doc) {
-      if (err) {
-        const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_CATEGORIES);
-        res.status(400).json({ ok: true, error: errMsgMongoDB });
-        return;
+    //
+    //Find following email in collection Logins and delete it
+    try {
+      const deleteLogin = await Login.findOneAndDelete({ email });
+      if (deleteLogin) {
+        console.log({
+          ok: true,
+          message: "Delete the relative email in collection Logins completely",
+        });
       } else {
-        if (doc) {
-          console.log("Delete the Id in collection Logins completely");
-        } else {
-          console.log("Not existing the Id in collection Logins completely");
-        }
+        console.log({
+          ok: true,
+          message:
+            "Not existing the relative email in collection Logins completely",
+        });
       }
-    });
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+      console.log({
+        ok: true,
+        errorFindOneAndDelete: errMsgMongoDB,
+        warning:
+          "Delete a login successfully, but having error when finding and deleting of the relative email in the collection Logins",
+      });
+    }
     //
     //--Delete the folder containing image of the account
     try {

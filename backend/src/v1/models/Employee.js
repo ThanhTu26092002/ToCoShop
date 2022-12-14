@@ -8,14 +8,23 @@ const employeeSchema = new Schema(
             type: String,
             trim: true,
             maxLength: 50,
-            // required: true
+            required: true,
+            default: "unknown"
         },
         lastName: {
             type: String,
             trim: true,
             maxLength: 50,
-            // required: true
+            required: true,
+            default: "unknown"
         },
+        gender: {
+            type: String,
+            trim: true,
+            enum: ["NAM", "NU", "KHONG_XAC_DINH"],
+            default: "KHONG_XAC_DINH",
+            required: true,
+          },
         phoneNumber: {
             type: String,
             trim: true,
@@ -25,10 +34,12 @@ const employeeSchema = new Schema(
             type: String,
             trim: true,
             maxLength: 500,
-            // required: true
+            required: true,
+            default: "unknown"
         },
         email: {
             type: String,
+            ref: 'Employee',
             trim: true, 
             unique: true,
             lowercase : true,
@@ -50,7 +61,6 @@ const employeeSchema = new Schema(
                 message: 'nhân viên phải lớn hơn hoặc bằng 18 tuổi'
             }
         },
-        // imageUrl: {
         imageUrl: {
             type: String,
             trim: true,
