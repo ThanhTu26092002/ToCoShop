@@ -105,7 +105,7 @@ router.post('/insertOne', async (req, res, next) => {
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
-router.patch('/:id', async (req, res, next) => {
+router.patch('/updateOne/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const update = req.body;
@@ -119,6 +119,20 @@ router.patch('/:id', async (req, res, next) => {
   }
 });
 
+// Edit all of one product
+// router.put('/updateAllOfOne/:id', async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const update = req.body;
+//     const product = await Product.findByIdAndUpdate(id, update, {
+//       new: true,
+//     });
+
+//     res.json(product);
+//   } catch (err) {
+//     res.status(400).json({ error: { name: err.name, message: err.message } });
+//   }
+// });
 router.post("/productImage/:id",loadProduct, function (req, res) {
   upload.single("file")(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
