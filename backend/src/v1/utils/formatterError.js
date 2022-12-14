@@ -6,9 +6,13 @@ const formatterErrorFunc = (err, collection) => {
   if (err.code === 11000) {
     const errName = Object.keys(err.keyValue)[0];
     switch (errName) {
+      case "productCode":
+        errors.name = "productCode";
+        errors.message = "The productCode must be unique";
+        break;
       case "name":
         errors.name = "name";
-        errors.message = "Name of Category must be unique";
+        errors.message = "The name must be unique";
         break;
       case "email":
         switch (collection) {
