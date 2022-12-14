@@ -198,17 +198,30 @@ function Products() {
   const optionspromotion = [];
   optionspromotion.push(
     {
-      label: "đồ nử",
-      value: "donu",
+      label: "Mẫu hot nhất năm 2022",
+      value: "hot2022",
     },
     {
-      label: "đồ nam",
-      value: "donam",
+      label: "Outfit Mùa Hè",
+      value: "muahe",
     },
     {
-      label: "áo khoác",
-      value: "aokhoac",
+      label: "Outfit Mùa thu",
+      value: "muathu",
     },
+    {
+      label: "Outfit Mùa xuân",
+      value: "muaxuan",
+    },
+    {
+      label: "Outfit Mùa đông",
+      value: "muadong",
+    },
+    {
+      label: "Couple",
+      value: "couple",
+    },
+    
 
   );
   const handleClick_EditBtn = (record) => {
