@@ -13,6 +13,7 @@ const {
   PATH_FOLDER_PUBLIC_UPLOAD,
   PATH_FOLDER_IMAGES,
 } = require("../configs/constants");
+const { formatterErrorFunc } = require("../utils/formatterError");
 const COLLECTION_NAME = 'products';
 const lookupCategory = {
   $lookup: {
@@ -31,6 +32,18 @@ const lookupSupplier = {
     as: 'suppliers', // alias
   },
 };
+//Get all products without unwrap categoryId and supplierId
+router.get("/getAll", async (req, res, next) => {
+  try {
+    const docs = await Product.find().sort({ _id: -1 });
+    // const docs = await Category.find();
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
+//
 //Get all products
 router.get('/', function (req, res, next) {
 
@@ -57,14 +70,14 @@ router.get('/', function (req, res, next) {
 // })
 
 //Get the product following Id
-router.get('/:id', async (req, res, next) => {
+router.get('/findById/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
     // const product = await Product.findOne({ _id: id });
     res.json(product);
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, messgae: err.message } });
+    res.status(400).json({ error: { name: err.name, message: err.message } });
   }
 });  
 
@@ -75,10 +88,10 @@ router.delete('/:id', async (req, res, next) => {
     // const product = await Product.findOne({ _id: id });
     res.json(product);
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, messgae: err.message } });
+    res.status(400).json({ error: { name: err.name, message: err.message } });
   }
 });
-router.post('/', async (req, res, next) => {
+router.post('/insertOne', async (req, res, next) => {
   try {
     const data = req.body;
     // Create a new blog post object
@@ -88,7 +101,8 @@ router.post('/', async (req, res, next) => {
     await product.save();
     res.status(200).json(product);
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, messgae: err.message } });
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 router.patch('/:id', async (req, res, next) => {
@@ -101,7 +115,7 @@ router.patch('/:id', async (req, res, next) => {
 
     res.json(product);
   } catch (err) {
-    res.status(400).json({ error: { name: err.name, messgae: err.message } });
+    res.status(400).json({ error: { name: err.name, message: err.message } });
   }
 });
 
@@ -213,7 +227,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
   //     const products = await Product.find({ categoryId:id}).sort({'price':1});
   //     res.json(products);
   //   } catch (err) {
-  //     res.status(400).json({ error: { name: err.name, messgae: err.message } });
+  //     res.status(400).json({ error: { name: err.name, message: err.message } });
   //   }
   // });
   // router.get('/producttype/Dssort/:id', async (req, res, next) => {
@@ -222,7 +236,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
   //     const products = await Product.find({ categoryId:id}).sort({'price':-1});
   //     res.json(products);
   //   } catch (err) {
-  //     res.status(400).json({ error: { name: err.name, messgae: err.message } });
+  //     res.status(400).json({ error: { name: err.name, message: err.message } });
   //   }
   // });
   // router.get('/producttype/AZsort/:id', async (req, res, next) => {
@@ -231,7 +245,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
   //     const products = await Product.find({ categoryId:id}).sort({'name':1});
   //     res.json(products);
   //   } catch (err) {
-  //     res.status(400).json({ error: { name: err.name, messgae: err.message } });
+  //     res.status(400).json({ error: { name: err.name, message: err.message } });
   //   }
   // });
   
@@ -241,7 +255,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
   //     const products = await Product.find({ categoryId:id}).sort({'name':-1});
   //     res.json(products);
   //   } catch (err) {
-  //     res.status(400).json({ error: { name: err.name, messgae: err.message } });
+  //     res.status(400).json({ error: { name: err.name, message: err.message } });
   //   }
   // });
   // router.get('/producttype/:id', async (req, res, next) => {
@@ -250,7 +264,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
   //     const products = await Product.find({ categoryId:id});
   //     res.json(products);
   //   } catch (err) {
-  //     res.status(400).json({ error: { name: err.name, messgae: err.message } });
+  //     res.status(400).json({ error: { name: err.name, message: err.message } });
   //   }
   // });
   
@@ -260,7 +274,7 @@ router.post("/productImage/:id",loadProduct, function (req, res) {
       const product = await Product.find().byName(name);
       res.json(product);
     } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+      res.status(400).json({ error: { name: err.name, message: err.message } });
     }
   });
   

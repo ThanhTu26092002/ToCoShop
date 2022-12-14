@@ -39,7 +39,7 @@ DELETE http://localhost:9000/v1/categories/deleteOne/:id
 ###################################EMPLOYEES################################################################
 GET http://localhost:9000/v1/employees
 ### Get one employee following Id
-GET http://localhost:9000/v1/employees/findById/63989ea171b18b684332143c
+GET http://localhost:9000/v1/employees/findById/:id
 
 
 
@@ -47,18 +47,18 @@ GET http://localhost:9000/v1/employees/findById/63989ea171b18b684332143c
 GET http://localhost:9000/v1/products
 
 ###Find one employee following Id
-GET http://localhost:9000/v1/employees/findById/63989ea171b18b684332143c
+GET http://localhost:9000/v1/products/findById/:id
 #### Update one product
 POST http://localhost:9000/v1/products/productImage/:id
 
 ### insert one employee
-POST http://localhost:9000/v1/employees/insertOne
+POST http://localhost:9000/v1/products/insertOne
 
 ## update image of one employee
-POST http://localhost:9000/v1/employees//employeeImage/:id
+POST http://localhost:9000/v1/products//employeeImage/:id
 
 ###delete one employee
-DELETE http://localhost:9000/v1/employees/deleteOne/63989ea171b18b684332143c
+DELETE http://localhost:9000/v1/products/deleteOne/63989ea171b18b684332143c
 
 ###################################LOGINS################################################################
 ###Check for login with email and password
