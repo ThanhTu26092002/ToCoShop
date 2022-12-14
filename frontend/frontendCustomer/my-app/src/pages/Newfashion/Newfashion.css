@@ -1,0 +1,25 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+.listproducts{
+    width: 100%;
+    
+}
+.listproducts_title{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.listproducts_main{
+    width: 100%;
+    margin-top: 20px;
+} 
+
+
+
+
+
+
