@@ -12,7 +12,6 @@ const loginSchema = new Schema(
       maxLength: 50,
       required: true,
       match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Vui lòng nhập đúng định dạng email'],
-      // immutable: true, // not allow to update
   },
     password: {
       type: String,

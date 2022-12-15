@@ -18,12 +18,9 @@ function Nav() {
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-
         axios.get("http://localhost:9000/v1/categories").then((response) => {
             setCategories(response.data.results);
         });
-
-
     }, [])
   return (
 
