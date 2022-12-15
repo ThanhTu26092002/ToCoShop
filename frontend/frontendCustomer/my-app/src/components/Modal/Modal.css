@@ -97,7 +97,7 @@
   #cancelBtn {
     background-color: crimson;
   }
-  a{
+ .footer_modal_btn a{
     color: white;
     text-decoration: none;
   }

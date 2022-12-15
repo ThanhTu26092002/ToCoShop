@@ -37,7 +37,6 @@ import LabelCustomization, {
 import ConfigProvider from "antd/es/config-provider";
 
 function Employees() {
-  const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
@@ -354,22 +353,6 @@ function Employees() {
     },
   };
 
-  const PropsFormItemUpload = { 
-    label: <LabelCustomization title={"Hình ảnh"} />,
-    name: "file",
-    valuePropName: "fileList",
-  };
-  //End: Props for components
-
-  const normFile = (e) => {
-    setIsChangeValueUpload(true);
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList.slice(-1);
-  };
-  //
-
   const handleOk = () => {
     formUpdate.submit();
   };
@@ -471,7 +454,6 @@ function Employees() {
         );
       })
       .finally(() => {
-        setUploading(false);
       });
   };
   //
@@ -507,7 +489,6 @@ function Employees() {
         );
       })
       .finally(() => {
-        setUploading(false);
       });
   };
   //
@@ -549,7 +530,7 @@ function Employees() {
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
-        <ConfigProvider locale={locale}>
+        {/* <ConfigProvider locale={locale}> */}
           <Form
             {...PropsForm}
             form={formCreate}
@@ -623,7 +604,7 @@ function Employees() {
               </Button>
             </Form.Item>
           </Form>
-        </ConfigProvider>
+        {/* </ConfigProvider> */}
 
         <Table
           {...PropsTable}

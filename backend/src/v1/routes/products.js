@@ -82,6 +82,14 @@ const lookupSupplier = {
     as: "suppliers", // alias
   },
 };
+
+const stockTotalMoreThanZero = {
+  $match: {
+    $expr: {
+      $lt: [0, "$stockTotal"],
+    },
+  },
+};
 //Get all products without unwrap categoryId and supplierId
 // Lấy toàn bộ sản phẩm trong một danh mục nổi bật- theo id sản phẩm( hàng mới cập nhật)
 router.get("/getAll", async (req, res, next) => {
@@ -362,8 +370,54 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
     const aggregate = [
       { $match: { categoryId } },
       unWindAttribute,
+      // Loại bỏ chi tiết sản phẩm có stock=0
+      {
+        $match: {
+          $expr: {
+            $lt: [0, "$attributes.stock"],
+          },
+        },
+      },
+      //Thêm field attributes.totalPriceEachType
       addFieldTotalPriceEachType,
-      groupBeforeFinish,
+      {
+        $group: {
+          ...groupBeforeFinish.$group,
+          minTotalPrice: { $min: "$attributes.totalPriceEachType" },
+        },
+      },
+      stockTotalMoreThanZero,
+      unWindAttribute,
+      {
+        $match: {
+          $expr: {
+            $eq: ["$minTotalPrice", "$attributes.totalPriceEachType"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          productCode: { $first: "$productCode" },
+          name: { $first: "$name" },
+          categoryId: { $first: "$categoryId" },
+          supplierId: { $first: "$supplierId" },
+          description: { $first: "$description" },
+          promotionPosition: { $first: "$promotionPosition" },
+          imageUrls: { $first: "$imageUrls" },
+          coverImage: { $first: "$coverImage" },
+          size: { $first: "$attributes.size" },
+          color: { $first: "$attributes.color" },
+          stock: { $first: "$attributes.stock" },
+          discount: { $first: "$attributes.discount" },
+          price: { $first: "$attributes.price" },
+          attributeId: { $first: "$attributes._id" },
+          stockTotal: { $first: "$stockTotal" },
+          minTotalPrice: { $first: "$minTotalPrice" },
+        },
+      },
+
+      // { $sort: { minTotalPrice: 1 } },
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
@@ -382,6 +436,7 @@ router.get("/03getBySupplierId/:id", loadSupplier, async (req, res, next) => {
       unWindAttribute,
       addFieldTotalPriceEachType,
       groupBeforeFinish,
+      stockTotalMoreThanZero,
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
@@ -418,6 +473,7 @@ router.get("/04GetWithSortingPrice", async function (req, res, next) {
         maxTotalPrice: { $max: "$attributes.totalPriceEachType" },
       },
     },
+    stockTotalMoreThanZero,
     sorting,
   ];
   try {
@@ -455,6 +511,7 @@ router.get("/05GetWithSortingDiscount", async function (req, res, next) {
         maxDiscount: { $max: "$attributes.discount" },
       },
     },
+    stockTotalMoreThanZero,
     sorting,
   ];
   try {
@@ -477,12 +534,15 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
       return;
     }
     const aggregate = [
-      {$match: {
-        promotionPosition: {$in: [value]}
-      }},
+      {
+        $match: {
+          promotionPosition: { $in: [value] },
+        },
+      },
       unWindAttribute,
       addFieldTotalPriceEachType,
       groupBeforeFinish,
+      stockTotalMoreThanZero,
     ];
 
     const docs = await Product.aggregate(aggregate);
@@ -494,6 +554,22 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
 });
 //
 
+//----08---GLấy toàn bộ sản phẩm có thêm stockTotal mô tả số lượng sản phẩm tồn kho >0 và totalPrice- giá sản phẩm theo mỗi [size và màu sắc]
+router.get("/08getStockTotalMoreThan0", async function (req, res, next) {
+  const aggregate = [
+    unWindAttribute,
+    addFieldTotalPriceEachType,
+    groupBeforeFinish,
+    stockTotalMoreThanZero,
+  ];
+  try {
+    const docs = await Product.aggregate(aggregate);
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
 // router.get('/producttype/Assort/:id', async (req, res, next) => {
 //   try {
 //     const { id } = req.params;

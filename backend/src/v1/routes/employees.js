@@ -222,9 +222,9 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
         }
         //Update new email for the login
         try {
-          const idLogin = findDoc._id;
+          const loginId = findDoc._id;
           const updatedDocLogin = await Login.findByIdAndUpdate(
-            idLogin,
+            loginId,
             { email: newEmail },
             opts
           );
@@ -233,7 +233,7 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
             message:
               "Update the Id successfully in collection Employees and Logins",
             result: updatedDoc,
-            result2: updatedDoc,
+            result2: updatedDocLogin,
           });
           return;
         } catch (err) {
@@ -260,6 +260,13 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
         });
         return;
       }
+    }else{
+      res.json({
+        ok: true,
+        message: `Update the Id successfully in collection ${COLLECTION_EMPLOYEES}`,
+        result: updatedDoc,
+      });
+      return;
     }
   } catch (errMongoDB) {
     const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_EMPLOYEES);

@@ -1,7 +1,6 @@
 import React from "react";
 
 function SliderContent({ activeIndex, sliderImage }) {
-  console.log(sliderImage.imageUrl)
   return (
     <section>
       {sliderImage.map((slide, index) => (
