@@ -370,9 +370,54 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
     const aggregate = [
       { $match: { categoryId } },
       unWindAttribute,
+      // Loại bỏ chi tiết sản phẩm có stock=0
+      {
+        $match: {
+          $expr: {
+            $lt: [0, "$attributes.stock"],
+          },
+        },
+      },
+      //Thêm field attributes.totalPriceEachType
       addFieldTotalPriceEachType,
-      groupBeforeFinish,
+      {
+        $group: {
+          ...groupBeforeFinish.$group,
+          minTotalPrice: { $min: "$attributes.totalPriceEachType" },
+        },
+      },
       stockTotalMoreThanZero,
+      unWindAttribute,
+      {
+        $match: {
+          $expr: {
+            $eq: ["$minTotalPrice", "$attributes.totalPriceEachType"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          productCode: { $first: "$productCode" },
+          name: { $first: "$name" },
+          categoryId: { $first: "$categoryId" },
+          supplierId: { $first: "$supplierId" },
+          description: { $first: "$description" },
+          promotionPosition: { $first: "$promotionPosition" },
+          imageUrls: { $first: "$imageUrls" },
+          coverImage: { $first: "$coverImage" },
+          size: { $first: "$attributes.size" },
+          color: { $first: "$attributes.color" },
+          stock: { $first: "$attributes.stock" },
+          discount: { $first: "$attributes.discount" },
+          price: { $first: "$attributes.price" },
+          attributeId: { $first: "$attributes._id" },
+          stockTotal: { $first: "$stockTotal" },
+          minTotalPrice: { $first: "$minTotalPrice" },
+        },
+      },
+
+      // { $sort: { minTotalPrice: 1 } },
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
