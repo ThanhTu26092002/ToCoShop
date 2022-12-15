@@ -6,20 +6,29 @@ import Footer from "../../components/Footer/Footer"
 import Search_cart from "../../components/SearchCart/index"
 
 import axios from 'axios';
-function Newfashion() {
+function Newfashion({categorieId}) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [images, setImages] = useState([]);//danhmuc
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-
-        axios.get("http://localhost:9000/v1/products/").then((response) => {
-            
-            setImages(response.data);
-        });
+        console.log(categorieId);
+if(categorieId){
+    axios.get("http://localhost:9000/v1/products/02getByCategoryId/" + categorieId).then((response) => {
+        console.log('data categories',response.data.results)
+        setImages(response.data.results);
+    });
+}else{
+    axios.get("http://localhost:9000/v1/products/01getStockTotal/").then((response) => {
+        console.log('data',response.data.results)
+        setImages(response.data.results);
+    });
+}
+        
 
 
     }, [])
+
     return (
         <div className='mainhome'>
             <Slider />

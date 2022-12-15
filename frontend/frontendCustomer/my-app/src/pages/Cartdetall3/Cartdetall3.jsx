@@ -89,7 +89,7 @@ function Cartdetall3() {
                             </Form.Item>
                         </Form>
                     </div>
-                <div className='Cartdetall2btn'>
+                <div className='Cartdetall3btn'>
                         <button><Link to='/Thanhtoan2'><DoubleLeftOutlined /></Link></button>
                         <button>OK</button>
                     </div>
