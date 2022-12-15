@@ -55,10 +55,42 @@ POST http://localhost:9000/v1/products/productImage/:id
 POST http://localhost:9000/v1/products/insertOne
 
 ## update image of one employee
-POST http://localhost:9000/v1/products//employeeImage/:id
+POST http://localhost:9000/v1/products/productImage/:id
 
 ###delete one employee
 DELETE http://localhost:9000/v1/products/deleteOne/63989ea171b18b684332143c
+
+###----01---Get all products- container category and supplier- show stockTotal
+GET http://localhost:9000/v1/products/01getStockTotal
+
+### ---02--- Get products following categoryId
+GET http://localhost:9000/v1/products/02getByCategoryId/:id
+
+### ---03--- Get products following supplierId
+GET http://localhost:9000/v1/products/03getBySupplierId/:id
+ ###---04---Sorting products following price from low <-> high
+###
+GET http://localhost:9000/v1/products/04GetWithSortingPrice?sort=[low/high]
+
+###---05---Sorting products following discount from low <-> high
+###
+GET http://localhost:9000/v1/products/05GetWithSortingDiscount?sort=[low/high]
+
+### ---06---Lấy toàn bộ sản phẩm trong một danh mục nổi bật- theo id sản phẩm( hàng mới cập nhật)
+GET http://localhost:9000/v1/products/getAll
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###################################LOGINS################################################################
 ###Check for login with email and password
