@@ -4,8 +4,10 @@ import Product from "./product/index"
 import './images.css'
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 function images(props) {
+  // function images(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-
+console.log('get demo count:', props.count)
+console.log('get demo props:', props.data)
   const { data } = props;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [currentItems, setCurrentItems] = useState([]);
@@ -14,7 +16,11 @@ function images(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [itemOffset, setItemOffset] = useState(0);
 
-  const itemsPerPage = 8;
+  let itemsPerPage = 8;
+if(props.count){
+itemsPerPage=props.count
+}
+console.log('get demo itemsPerPage:', itemsPerPage)
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -37,7 +43,7 @@ function images(props) {
         {currentItems.map(image => {
           return (
             <React.Fragment key={image._id}>
-              <Link to={'/productdetall'}>
+              <Link to={`/productDetail/${image._id}`}>
                 <Product imgproduct={image} />
               </Link>
 

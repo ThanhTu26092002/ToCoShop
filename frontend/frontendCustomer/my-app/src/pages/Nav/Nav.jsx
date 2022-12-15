@@ -20,7 +20,6 @@ function Nav() {
     useEffect(() => {
 
         axios.get("http://localhost:9000/v1/categories").then((response) => {
-            console.log('data',response.data.results)
             setCategories(response.data.results);
         });
 
@@ -59,21 +58,19 @@ function Nav() {
           
           <nav>
             <ul>
+            {
+                categories.map((item, index)=>{
+                    return(
+                      <li key= {index} className='menu_item'><Link to={`/Menclothes/${item._id}`}>{item.name}</Link></li>
+                    )
+                })
+              }
               {/* <li className='menu_item'><Link to='/'>N E W   F A S H I O N </Link></li>
               <li className='menu_item'><Link to='/Menclothes'>M E N C L O T H E S</Link></li>
               <li className='menu_item'><Link to='/'>W O M E N   C L O T H E S  </Link></li>
               <li className='menu_item'><Link to='/'>U N I S E X </Link></li>
               <li className='menu_item'><Link to='/'>O U T F I T W I N T E R </Link></li>
               <li className='menu_item'><Link to='/'>O U T F I T S U M M E R  </Link></li> */}
-              {
-                categories.map((item)=>{
-                    return(
-                      <li className='menu_item'><Link onClick={()=>{
-                        setCategoryId(item._id)
-                      }}>{item.name}</Link></li>
-                    )
-                })
-              }
             </ul>
           </nav>
           <div className='sidebar_footer'>
@@ -100,8 +97,8 @@ function Nav() {
         
           <Routes>
             <Route path='/' element={<Home categorieId={categoryId}/>} />
-            <Route path='/Menclothes' element={<Menclothes />} />
-            <Route path='/productdetall' element={<Productdetal />} />
+            <Route path='/Menclothes/:id' element={<Menclothes />} />
+            <Route path='/productDetail/:id' element={<Productdetal />} />
             <Route path='/Thanhtoan' element={<Cartdetall />} />
             <Route path='/Thanhtoan2' element={<Cartdetall2 />} />
             <Route path='/Thanhtoan3' element={<Cartdetall3 />} />

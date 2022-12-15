@@ -364,6 +364,7 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
       unWindAttribute,
       addFieldTotalPriceEachType,
       groupBeforeFinish,
+      
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
