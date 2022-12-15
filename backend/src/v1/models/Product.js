@@ -79,26 +79,28 @@ const productSchema = new Schema(
     ],
   },
 
-  {
-    // QUERY
-    query: {
-      byName(name) {
-        return this.where({ name: new RegExp(name, "i") });
-      },
-    },
-    // VIRTUALS
-    virtuals: {
-      total: {
-        get() {
-          return (this.price * (100 - this.discount)) / 100;
-        },
-      },
-    },
-  }
+  // {
+  //   // QUERY
+  //   query: {
+  //     byName(name) {
+  //       return this.where({ name: new RegExp(name, "i") });
+  //     },
+  //   },
+  //   // VIRTUALS
+  //   virtuals: {
+  //     total: {
+  //       get() {
+  //         return (this.price * (100 - this.discount)) / 100;
+  //       },
+  //     },
+  //   },
+  // },
+  { strict: "throw" } // If the field haven't existed in MongooseSchema, throw error
+
 );
 // Include virtuals
-productSchema.set("toObject", { virtuals: true });
-productSchema.set("toJSON", { virtuals: true });
+// productSchema.set("toObject", { virtuals: true });
+// productSchema.set("toJSON", { virtuals: true });
 
 // validateBeforeSave
 productSchema.set("validateBeforeSave", true);

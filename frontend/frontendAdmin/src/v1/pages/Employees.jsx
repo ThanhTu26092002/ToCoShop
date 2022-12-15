@@ -447,7 +447,7 @@ function Employees() {
     }
 
     //POST
-    axios
+    axiosClient
       .post(URL, newData)
       .then((response) => {
         if (response.status === 201) {
@@ -481,7 +481,7 @@ function Employees() {
 
     let URL = URLEmployee + "/updateOne/" + selectedId;
     //POST
-    axios
+    axiosClient
       .patch(URL, values)
       .then((response) => {
         if (response.status === 200) {
@@ -512,7 +512,7 @@ function Employees() {
   };
   //
   const handleConfirmDelete = (_id) => {
-    axios.delete(URLEmployee + "/deleteOne/" + _id).then((response) => {
+    axiosClient.delete(URLEmployee + "/deleteOne/" + _id).then((response) => {
       if (response.status === 200) {
         setRefresh((e) => !e);
         message.info("Xóa thành công");
@@ -521,10 +521,8 @@ function Employees() {
   };
 
   useEffect(() => {
-    axios.get(URLEmployee).then((response) => {
-      const employees = response.data;
-
-      //console.log("data",response.data)
+    axiosClient.get(URLEmployee).then((response) => {
+      const employees = response.data.results;
       let newEmployees = [];
       employees.map((e) => {
         // Formatting birthday before showing
