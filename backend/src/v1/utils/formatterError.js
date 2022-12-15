@@ -8,27 +8,27 @@ const formatterErrorFunc = (err, collection) => {
     switch (errName) {
       case "productCode":
         errors.name = "productCode";
-        errors.message = "The productCode must be unique";
+        errors.message = "Mã sản phẩm này đã tồn tại";
         break;
       case "name":
         errors.name = "name";
-        errors.message = "The name must be unique";
+        errors.message = "Tên đã tồn tại";
         break;
       case "email":
         switch (collection) {
           case "logins":
             errors.name = "Email";
-            errors.message = "Email of the Employee must be unique";
+            errors.message = "Email này đã tồn tại";
             break;
 
           case "employees":
             errors.name = "Email";
-            errors.message = "Email of the Employee must be unique";
+            errors.message = "Email này đã tồn tại";
             break;
 
           case "categories":
             errors.name = "Email";
-            errors.message = "Email of Employee must be unique";
+            errors.message = "Email này đã tồn tại";
             break;
 
           default:

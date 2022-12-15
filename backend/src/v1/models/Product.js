@@ -51,7 +51,7 @@ const productSchema = new Schema(
     },
     attributes: {
       type: [attributeSchema],
-      required: true,
+      required: [true, 'Vui lòng nhập chi tiết sản phẩm'],
       default: undefined,
     },
     categoryId: { type: Schema.Types.ObjectId, ref: "Category" },

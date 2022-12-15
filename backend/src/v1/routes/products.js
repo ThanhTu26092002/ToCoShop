@@ -210,7 +210,7 @@ router.post("/insertOne", async (req, res, next) => {
     const newDoc = new Product(data);
 
     // Insert the article in our MongoDB database
-    await product.save();
+    await newDoc.save();
     res.status(201).json({ ok: true, result: newDoc });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
