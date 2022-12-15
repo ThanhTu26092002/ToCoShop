@@ -6,19 +6,20 @@ import Images from "../../components/Listproducts/images"
 import Footer from "../../components/Footer/Footer"
 import axios from 'axios';
 import Search_cart from "../../components/SearchCart/index"
+import { useParams } from "react-router-dom";
 function Menclothes() {
   const [images, setImages] = useState([]);//danhmuc
 
+
+  const { id } = useParams();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-
-    axios.get("http://localhost:9000/v1/products/02getByCategoryId/632c5c372c717789c1e4926f").then((response) => {
-      console.log(response.data.results);
+    axios.get("http://localhost:9000/v1/products/02getByCategoryId/"+ id).then((response) => {
       setImages(response.data.results);
     });
 
 
-  }, [])
+  }, [id])
   return (
     <div className="Men_product">
       <Slider />
@@ -36,7 +37,8 @@ function Menclothes() {
       </div>
       <div className='listproducts'>
         <div className="listproducts_title">
-          <h1>WOMEN CLOTHES</h1>
+          <h1>Demo</h1>
+          {/* <h1>{id}</h1> */}
         </div>
         <div className='listproducts_main'>
           <Images amount={12} data={images}  /> 
