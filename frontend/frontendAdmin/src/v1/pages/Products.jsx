@@ -1,14 +1,52 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm, Upload } from 'antd'
-import Operation from 'antd/lib/transfer/operation'
-import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Space,
+  Select,
+  Layout,
+  InputNumber,
+  Modal,
+  Table,
+  notification,
+  message,
+  Popconfirm,
+  Upload,
+  Typography,
+} from "antd";
+import Operation from "antd/lib/transfer/operation";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import {
+  PropsForm,
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItemStatus,
+  PropsFormItem_Label_Name,
+  PropsTable,
+} from "../config/props";
 import { Content } from "antd/lib/layout/layout";
 import TextArea from "antd/lib/input/TextArea";
 import axios from "axios";
-import { URLProduct, WEB_SERVER_UPLOAD_URL } from "../config/constants";
+import {
+  colorList,
+  sizeList,
+  URLProduct,
+  WEB_SERVER_UPLOAD_URL,
+} from "../config/constants";
 import axiosClient from "../config/axios";
+import { beforeUpload } from "../config/helperFuncs";
 function Products() {
-
+  const [isCreate, setIsCreate] = useState(false);
   const [categories, setCategories] = useState(null);
   const [suppliers, setSuppliers] = useState(null);
   const [products, setProducts] = useState([]);
@@ -24,55 +62,6 @@ function Products() {
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm();
 
-  const beforeUpload = (file) => {
-    const isImage =
-      file.type === "image/jpg" ||
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/gif";
-    if (!isImage) {
-      message.error("You can only upload jpg-jpeg-png-gif file!");
-      return false;
-    } else {
-      return true;
-    }
-  };
-
-  const handleUploadImage = (options, record) => {
-    setLoading(true);
-    const { file } = options;
-    let formData = new FormData();
-    let URL = URLProduct + "/productImage/" + record._id;
-    //If containing an image <=> file !== null
-    if (!record.coverImage) {
-      console.log(record.coverImage)
-      formData.append("currentImgUrl", null);
-    } else {
-
-      formData.append("currentImgUrl", record.coverImage);
-    }
-    formData.append("file", file);
-
-    const config = {
-      headers: { "content-type": "multipart/form-data" },
-    };
-
-    //POST
-    axiosClient
-      .post(URL, formData, config)
-      .then((response) => {
-        if (response.status === 200) {
-          console.log("ok upload image");
-          setRefresh((f) => f + 1);
-          message.success(`Cập nhật hình ảnh thành công!`);
-        }
-      })
-      .catch((error) => {
-        message.error(`Cập nhật hình ảnh thất bại.`);
-        setLoading(false);
-      })
-      .finally(() => { });
-  };
   const columns = [
     {
       title: "hình ảnh",
@@ -102,8 +91,8 @@ function Products() {
 
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
-        return <span style={{ fontWeight: '600' }}>{Text}</span>
-      }
+        return <span style={{ fontWeight: "600" }}>{Text}</span>;
+      },
     },
     {
       title: "Tên sản phẩm ",
@@ -113,26 +102,42 @@ function Products() {
       // defaultSortOrder: 'ascend',
       sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
-        return <span style={{ fontWeight: '600' }}>{Text}</span>
-      }
+        return <span style={{ fontWeight: "600" }}>{Text}</span>;
+      },
     },
-
-
 
     {
       title: "Nhóm sản phẩm",
-      key: "categoryId",
-      dataIndex: "categoryId",
+      key: "categoryName",
+      dataIndex: "categoryName",
       render: (text) => {
-        return <div style={{ textAlign: "left" }}> {text ? text.name : <span style={{ color: 'red' }}>Không tìm thấy</span>}</div>;
+        return (
+          <div style={{ textAlign: "left" }}>
+            {" "}
+            {text ? (
+              text.name
+            ) : (
+              <span style={{ color: "red" }}>Không tìm thấy</span>
+            )}
+          </div>
+        );
       },
     },
     {
       title: "NCC",
-      key: "supplierId",
-      dataIndex: "supplierId",
+      key: "supplierName",
+      dataIndex: "supplierName",
       render: (text) => {
-        return <div style={{ textAlign: "left" }}> {text ? text.name : <span style={{ color: 'red' }}>Không tìm thấy</span>}</div>;
+        return (
+          <div style={{ textAlign: "left" }}>
+            {" "}
+            {text ? (
+              text.name
+            ) : (
+              <span style={{ color: "red" }}>Không tìm thấy</span>
+            )}
+          </div>
+        );
       },
     },
     {
@@ -141,13 +146,12 @@ function Products() {
       dataIndex: "description",
     },
     {
-      title: 'Thao tác',
-      key: 'actions',
-      width: '10%',
+      title: "Thao tác",
+      key: "actions",
+      width: "10%",
       render: (record) => {
         return (
           <Space>
-
             <Upload
               beforeUpload={(file) => beforeUpload(file)}
               showUploadList={false}
@@ -162,16 +166,19 @@ function Products() {
                 style={{ backgroundColor: "#1890ff" }}
               ></Button>
             </Upload>
-            <Button type='dashed' icon={<EditOutlined />} style={{ fontWeight: '600' }} onClick={() => {
-              setVisible(true)
-              setSelectedRow(record)
-
-              // {sizeM: 10, sizeS: }
-              console.log("record", record)
-              handleClick_EditBtn(record)
-              formEdit.setFieldValue('categoryId', record.categoryId._id)
-              formEdit.setFieldValue('supplierId', record.supplierId._id)
-            }}></Button>
+            <Button
+              type="dashed"
+              icon={<EditOutlined />}
+              style={{ fontWeight: "600" }}
+              onClick={() => {
+                setVisible(true);
+                setSelectedRow(record);
+                handleClick_EditBtn(record);
+                // NGHIA
+                // formEdit.setFieldValue("categoryId", record.categoryId._id);
+                // formEdit.setFieldValue("supplierId", record.supplierId._id);
+              }}
+            ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
               title="Bạn muốn xóa không ?"
@@ -183,18 +190,15 @@ function Products() {
                 icon={<DeleteOutlined />}
                 type="danger"
                 style={{ fontWeight: 600 }}
-                onClick={() => { }}
+                onClick={() => {}}
                 title="Xóa"
               ></Button>
             </Popconfirm>
           </Space>
-        )
-      }
-
-    }
-
-
-  ]
+        );
+      },
+    },
+  ];
   const optionspromotion = [];
   optionspromotion.push(
     {
@@ -220,13 +224,45 @@ function Products() {
     {
       label: "Couple",
       value: "couple",
-    },
-    
-
+    }
   );
+
+  const handleUploadImage = (options, record) => {
+    setLoading(true);
+    const { file } = options;
+    let formData = new FormData();
+    let URL = URLProduct + "/productImage/" + record._id;
+    //If containing an image <=> file !== null
+    if (!record.coverImage) {
+      console.log(record.coverImage);
+      formData.append("currentImgUrl", null);
+    } else {
+      formData.append("currentImgUrl", record.coverImage);
+    }
+    formData.append("file", file);
+
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+
+    //POST
+    axiosClient
+      .post(URL, formData, config)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("ok upload image");
+          setRefresh((f) => f + 1);
+          message.success(`Cập nhật hình ảnh thành công!`);
+        }
+      })
+      .catch((error) => {
+        message.error(`Cập nhật hình ảnh thất bại.`);
+        setLoading(false);
+      })
+      .finally(() => {});
+  };
+
   const handleClick_EditBtn = (record) => {
-
-
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
@@ -238,7 +274,7 @@ function Products() {
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
-// chưa hoàng thiện
+    // chưa hoàng thiện
     // const tmp = {
     //   productCode: selectedRecord.productCode, description: selectedRecord.description, name: selectedRecord.name, categoryId: selectedRecord.categoryId._id, supplierId: selectedRecord.supplierId._id, promotionPosition: selectedRecord.promotionPosition, sizes: selectedRecord.sizes
     // }
@@ -265,10 +301,7 @@ function Products() {
 
     setLoadingBtn(true);
     axiosClient
-      .patch(
-        `${URLProduct}/${selectedId}`,
-        values
-      )
+      .patch(`${URLProduct}/${selectedId}`, values)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -292,7 +325,7 @@ function Products() {
       .finally(() => {
         setLoadingBtn(false);
       });
-  }
+  };
   const handleChange = (value) => {
     console.log(`selected ${value}`);
   };
@@ -302,182 +335,306 @@ function Products() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-  React.useEffect(() => {
-    axios.get("http://localhost:9000/v1/products/").then((response) => {
-      setProducts(response.data);
 
-    })
-  }, [refresh])
-
-  useEffect(() => {
-    axios.get("http://localhost:9000/v1/categories").then((response) => {
-      setCategories(response.data.results);
-    })
-  })
-  useEffect(() => {
-    axios.get("http://localhost:9000/v1/suppliers").then((response) => {
-      setSuppliers(response.data.results);
-
-    })
-  })
   const handleConfirmDelete = (_id) => {
-    axios.delete("http://localhost:9000/v1/products/" + _id).then((response) => {
-      if (response.status === 200) {
+    axiosClient
+      .delete(URLProduct + "/deleteOne/" + _id)
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+          if (response.data?.noneExist) {
+            console.log("test error");
+            message.warning(response.data.noneExist);
+          } else {
+            message.info("Xóa thành công");
+          }
+        }
         setRefresh((f) => f + 1);
-        message.info("Xóa thành công");
-      }
-    });
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+        setLoading(false);
+      })
+      .finally(() => {});
   };
-  const sizeList = ['S', 'M', 'L', 'XL', 'XXL']
+
+  const handleFinishCreate = (values) => {
+    setLoadingBtn(true);
+    axiosClient
+      .post(`${URLProduct}/insertOne`, values)
+      .then((response) => {
+        if (response.status === 201) {
+          setLoading(true);
+          setIsCreate(false);
+          setRefresh((f) => f + 1);
+          form.resetFields();
+          notification.info({
+            message: "Thông báo",
+            description: "thêm mới thành công",
+          });
+        }
+      })
+      .catch((error) => {
+        message.error(
+          error.response?.data?.error?.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
+      });
+  };
+
+  useEffect(() => {
+    axiosClient.get(`${URLProduct}`).then((response) => {
+      setProducts(response.data.results);
+    });
+  }, [refresh]);
+
+  useEffect(() => {
+    axiosClient.get("http://localhost:9000/v1/categories").then((response) => {
+      setCategories(response.data.results);
+    });
+  }, []);
+  useEffect(() => {
+    axiosClient.get("http://localhost:9000/v1/suppliers").then((response) => {
+      setSuppliers(response.data.results);
+    });
+  }, []);
 
   return (
     <div>
       <Layout>
         <Content>
           <Form
-            style={{ marginLeft: 400 }}
+            {...PropsForm}
+            labelCol={{ span: 0 }}
+            wrapperCol={{ span: 0 }}
             form={form}
-
-            onFinish={
-              (values) => {
-
-
-
-                axios.post('http://localhost:9000/v1/products/', values).then(response => {
-                  if (response.status === 200) {
-                    setRefresh((f) => f + 1);
-                    form.resetFields();
-                    notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
-                  }
-                })
-                console.log(values);
-              }}
+            onFinish={handleFinishCreate}
           >
-            <Form.Item rules={[{
-              required: true,
-              message: "nhập mã sản phẩm"
-            }]} name={"productCode"} label="mã sản phẩm" >
-              <Input placeholder='product code' />
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Mã sản phẩm",
+                name: "productCode",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Nhập mã sản phẩm",
+                },
+              ]}
+            >
+              <Input placeholder="Mã sản phẩm" />
             </Form.Item>
 
-            <Form.Item rules={[{
-              required: true,
-              message: "nhập tên sản phẩm"
-            }]} name={"name"} label="tên sản phẩm" >
-              <Input placeholder='name product' />
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Tên sản phẩm",
+                name: "name",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Nhập tên sản phẩm",
+                },
+              ]}
+            >
+              <Input placeholder="Tên sản phẩm" />
             </Form.Item>
-            <Form.List name={"sizes"}>
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <Typography.Text strong>
+                CHI TIẾT: Size-Màu sắc- Số lượng- Giá tiền- Giảm giá
+              </Typography.Text>
+            </div>
+            <Form.List name={"attributes"}>
               {(field, { add, remove }) => (
                 <>
                   {field.map((field, index) => {
                     return (
-                      <Space direction='horizontal' key={field.key}>
-                        <Form.Item name={[field.name, "stock"]} label={`${index + 1}-Size`} rules={[{ required: true, message: "size required." }]} >
-                          <InputNumber
-                            placeholder='số lượng'
-                            addonBefore={
-                              <Form.Item
-                                name={[field.name, "size"]}
-                                noStyle
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: "Chưa chọn Size",
-                                  },
-                                ]}
-                              >
-                                <Select
-                                  placeholder="Size"
-                                  style={{
-                                    width: 70,
-                                  }}
-                                  showSearch
-                                  optionFilterProp="children"
-                                  filterOption={(input, option) =>
-                                    (option?.label ?? "")
-                                      .toLowerCase()
-                                      .includes(input.toLowerCase())
-                                  }
-                                  options={
-                                    sizeList &&
-                                    sizeList.map((s) => {
-                                      const tmp = {
-                                        value: s,
-                                        label: s,
-                                      };
-                                      return tmp;
-                                    })
-                                  }
-                                />
-                              </Form.Item>
+                      <Space
+                        style={{
+                          display: "flex",
+                          marginBottom: 8,
+                          alignItems: "center",
+                        }}
+                        align="baseline"
+                        //  direction="horizontal"
+                        key={field.key}
+                      >
+                        <Form.Item
+                          name={[field.name, "size"]}
+                          label={`${index + 1}`}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chưa chọn Size",
+                            },
+                          ]}
+                        >
+                          <Select
+                            placeholder="Size"
+                            style={{
+                              width: 70,
+                            }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                              (option?.label ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
                             }
-                          >
-
-                          </InputNumber>
+                            options={
+                              sizeList &&
+                              sizeList.map((s) => {
+                                const tmp = {
+                                  value: s,
+                                  label: s,
+                                };
+                                return tmp;
+                              })
+                            }
+                          />
                         </Form.Item>
-                        <Form.Item name={[field.name, "price"]} rules={[
-                          {
-                            required: true,
-                            message: "Chưa nhập giá tiền",
-                          },
-                        ]} >
+                        <Form.Item
+                          name={[field.name, "color"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chưa chọn màu sản phẩm",
+                            },
+                          ]}
+                        >
+                          <Select
+                            placeholder="Màu"
+                            style={{
+                              width: 100,
+                            }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                              (option?.label ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
+                            }
+                            options={
+                              colorList &&
+                              colorList.map((s) => {
+                                const tmp = {
+                                  value: s,
+                                  label: s,
+                                };
+                                return tmp;
+                              })
+                            }
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, "stock"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Vui lòng nhập số lượng hàng trong kho",
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            placeholder="Số lượng"
+                            formatter={(value) =>
+                              ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }
+                            style={{ width: 200 }}
+                            min={0}
+                            addonAfter="Sản phẩm"
+                          ></InputNumber>
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, "price"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chưa nhập giá tiền",
+                            },
+                          ]}
+                        >
                           <InputNumber
                             defaultValue={0}
                             formatter={(value) =>
-                              ` ${value}`.replace(
-                                /\B(?=(\d{3})+(?!\d))/g,
-                                ","
-                              )
+                              ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                             }
-                            style={{ minWidth: 120, maxWidth: 360 }}
+                            style={{ width: 200 }}
                             min={0}
                             addonAfter="VNĐ"
-                            placeholder='giá bán'
+                            placeholder="giá bán"
                           />
                         </Form.Item>
-                        <Form.Item name={[field.name, "discount"]}  >
+                        <Form.Item name={[field.name, "discount"]}>
                           <InputNumber
                             defaultValue={0}
-                            style={{ minWidth: 120, maxWidth: 150 }}
+                            style={{ width: 200 }}
                             min={0}
                             max={100}
                             placeholder="giảm giá"
                             addonAfter="%"
                           />
-
                         </Form.Item>
-                        <MinusCircleOutlined style={{ height: 40, color: "red" }} onClick={() => {
-                          remove(field.name)
-                        }} />
+                        <MinusCircleOutlined
+                          style={{ height: 40, color: "red" }}
+                          onClick={() => {
+                            remove(field.name);
+                          }}
+                        />
                       </Space>
                     );
                   })}
                   <Form.Item>
-                    <Button icon={<PlusOutlined />} type='dashed' block onClick={() => {
-                      add();
-                    }}>Thêm size</Button>
+                    <Button
+                      icon={<PlusOutlined />}
+                      type="dashed"
+                      block
+                      onClick={() => {
+                        add();
+                      }}
+                    >
+                      Thêm size
+                    </Button>
                   </Form.Item>
                 </>
               )}
             </Form.List>
-            <Form.Item name={"promotionPosition"} label="promotionPosition">
+            <Form.Item name={"promotionPosition"} label="Nhóm siêu giảm">
               <Select
                 mode="multiple"
                 allowClear
                 style={{
-                  width: '100%',
+                  width: "100%",
                 }}
                 placeholder="Please select"
-
                 onChange={handleChange}
                 options={optionspromotion}
               />
             </Form.Item>
-            <Form.Item name={"categoryId"} rules={[{
-              required: true,
-              message: "Vui lòng chọn loại hàng hóa!",
-            }]} label="loại hàng hóa">
-              <Select placeholder="Chọn tùy thuộc danh mục" loading={!categories}>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                name: "categoryId",
+                label: "Loại hàng hóa",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn danh hàng hóa!",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Chọn tùy thuộc danh mục"
+                loading={!categories}
+              >
                 {categories &&
                   categories.map((c) => {
                     return (
@@ -488,10 +645,19 @@ function Products() {
                   })}
               </Select>
             </Form.Item>
-            <Form.Item name={"supplierId"} rules={[{
-              required: true,
-              message: "Vui lòng chọn nhà phân phối!",
-            }]} label="nhà phân phối">
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                name: "supplierId",
+                label: "Nhà phân phối",
+              })}
+              name={"supplierId"}
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn nhà phân phối!",
+                },
+              ]}
+            >
               <Select placeholder="Chọn nhà phân phối" loading={!suppliers}>
                 {suppliers &&
                   suppliers.map((c) => {
@@ -503,72 +669,93 @@ function Products() {
                   })}
               </Select>
             </Form.Item>
-            <Form.Item name={"description"} label="Mô tả sản phẩm" >
+            <Form.Item name={"description"} label="Mô tả sản phẩm">
               <TextArea rows={3} placeholder="Mô tả sản phẩm mới" />
             </Form.Item>
             <Button type="primary" htmlType="submit">
               Lưu thông tin
             </Button>
           </Form>
-          <Table rowKey='_id' columns={columns} dataSource={products} pagination={false} />
-          <Modal title="chinh sua thon tin danh muc" open={isModalOpen}
+          <Table
+            rowKey="_id"
+            columns={columns}
+            dataSource={products}
+            pagination={false}
+          />
+          <Modal
+            title="chinh sua thon tin danh muc"
+            open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
-            footer={
-              [
-                <Button key="back" onClick={handleCancel}>
-                  Hủy
-                </Button>,
-                <Button
-                  key="submit"
-                  type="primary"
-                  loading={loadingBtn}
-                  onClick={handleOk}
-                >
-                  Sửa
-                </Button>
-              ]
-            }>
+            footer={[
+              <Button key="back" onClick={handleCancel}>
+                Hủy
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                loading={loadingBtn}
+                onClick={handleOk}
+              >
+                Sửa
+              </Button>,
+            ]}
+          >
             <Form
               style={{}}
               form={formEdit}
               initialValues={{
-                productCode: '',
-                name: '',
-                price: '',
-                discount: '',
-                description: '',
-                categoryId: '',
-                supplierId: '',
-                promotionPosition: ''
-
+                productCode: "",
+                name: "",
+                price: "",
+                discount: "",
+                description: "",
+                categoryId: "",
+                supplierId: "",
+                promotionPosition: "",
               }}
-              onFinish={
-                handleFinishUpdate
-              }
+              onFinish={handleFinishUpdate}
             >
-              <Form.Item rules={[{
-                required: true,
-                message: "nhập mã sản phẩm"
-              }]} name={"productCode"} label="mã sản phẩm" >
-                <Input placeholder='product code' />
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                    message: "nhập mã sản phẩm",
+                  },
+                ]}
+                name={"productCode"}
+                label="mã sản phẩm"
+              >
+                <Input placeholder="product code" />
               </Form.Item>
 
-              <Form.Item rules={[{
-                required: true,
-                message: "nhập tên sản phẩm"
-              }]} name={"name"} label="tên sản phẩm" >
-                <Input placeholder='name product' />
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                    message: "nhập tên sản phẩm",
+                  },
+                ]}
+                name={"name"}
+                label="tên sản phẩm"
+              >
+                <Input placeholder="name product" />
               </Form.Item>
               <Form.List name={"sizes"}>
                 {(field, { add, remove }) => (
                   <>
                     {field.map((field, index) => {
                       return (
-                        <Space direction='horizontal' key={field.key}>
-                          <Form.Item name={[field.name, "stock"]} label={`${index + 1}-Size`} rules={[{ required: true, message: "size required." }]} >
+                        <Space direction="horizontal" key={field.key}>
+                          <Form.Item
+                            name={[field.name, "stock"]}
+                            label={`${index + 1}-Size`}
+                            rules={[
+                              { required: true, message: "size required." },
+                            ]}
+                          >
                             <InputNumber
-                              placeholder='số lượng'
+                              placeholder="số lượng"
                               addonBefore={
                                 <Form.Item
                                   name={[field.name, "size"]}
@@ -605,16 +792,17 @@ function Products() {
                                   />
                                 </Form.Item>
                               }
-                            >
-
-                            </InputNumber>
+                            ></InputNumber>
                           </Form.Item>
-                          <Form.Item name={[field.name, "price"]} rules={[
-                            {
-                              required: true,
-                              message: "Chưa nhập giá tiền",
-                            },
-                          ]} >
+                          <Form.Item
+                            name={[field.name, "price"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa nhập giá tiền",
+                              },
+                            ]}
+                          >
                             <InputNumber
                               defaultValue={0}
                               formatter={(value) =>
@@ -626,10 +814,10 @@ function Products() {
                               style={{ minWidth: 120, maxWidth: 360 }}
                               min={0}
                               addonAfter="VNĐ"
-                              placeholder='giá bán'
+                              placeholder="giá bán"
                             />
                           </Form.Item>
-                          <Form.Item name={[field.name, "discount"]}  >
+                          <Form.Item name={[field.name, "discount"]}>
                             <InputNumber
                               defaultValue={0}
                               style={{ minWidth: 120, maxWidth: 150 }}
@@ -638,18 +826,27 @@ function Products() {
                               placeholder="giảm giá"
                               addonAfter="%"
                             />
-
                           </Form.Item>
-                          <MinusCircleOutlined style={{ height: 40, color: "red" }} onClick={() => {
-                            remove(field.name)
-                          }} />
+                          <MinusCircleOutlined
+                            style={{ height: 40, color: "red" }}
+                            onClick={() => {
+                              remove(field.name);
+                            }}
+                          />
                         </Space>
                       );
                     })}
                     <Form.Item>
-                      <Button icon={<PlusOutlined />} type='dashed' block onClick={() => {
-                        add();
-                      }}>Thêm size</Button>
+                      <Button
+                        icon={<PlusOutlined />}
+                        type="dashed"
+                        block
+                        onClick={() => {
+                          add();
+                        }}
+                      >
+                        Thêm size
+                      </Button>
                     </Form.Item>
                   </>
                 )}
@@ -660,19 +857,27 @@ function Products() {
                   mode="multiple"
                   allowClear
                   style={{
-                    width: '100%',
+                    width: "100%",
                   }}
                   placeholder="Please select"
-
                   onChange={handleChange}
                   options={optionspromotion}
                 />
               </Form.Item>
-              <Form.Item name={"categoryId"} rules={[{
-                required: true,
-                message: "Vui lòng chọn loại hàng hóa!",
-              }]} label="loại hàng hóa    ">
-                <Select placeholder="Chọn tùy thuộc danh mục" loading={!categories}>
+              <Form.Item
+                name={"categoryId"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn loại hàng hóa!",
+                  },
+                ]}
+                label="loại hàng hóa    "
+              >
+                <Select
+                  placeholder="Chọn tùy thuộc danh mục"
+                  loading={!categories}
+                >
                   {categories &&
                     categories.map((c) => {
                       return (
@@ -683,10 +888,16 @@ function Products() {
                     })}
                 </Select>
               </Form.Item>
-              <Form.Item name={"supplierId"} rules={[{
-                required: true,
-                message: "Vui lòng chọn nhà phân phối!",
-              }]} label="nhà phân phối">
+              <Form.Item
+                name={"supplierId"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn nhà phân phối!",
+                  },
+                ]}
+                label="nhà phân phối"
+              >
                 <Select placeholder="Chọn nhà phân phối" loading={!suppliers}>
                   {suppliers &&
                     suppliers.map((c) => {
@@ -698,7 +909,7 @@ function Products() {
                     })}
                 </Select>
               </Form.Item>
-              <Form.Item name={"description"} label="Mô tả sản phẩm" >
+              <Form.Item name={"description"} label="Mô tả sản phẩm">
                 <TextArea rows={3} placeholder="Mô tả sản phẩm mới" />
               </Form.Item>
             </Form>
@@ -706,10 +917,7 @@ function Products() {
         </Content>
       </Layout>
     </div>
-  )
+  );
 }
 
-export default Products
-
-
-
+export default Products;
