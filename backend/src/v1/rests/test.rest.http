@@ -79,7 +79,11 @@ GET http://localhost:9000/v1/products/05GetWithSortingDiscount?sort=[low/high]
 ### ---06---Lấy toàn bộ sản phẩm trong một danh mục nổi bật- theo id sản phẩm( hàng mới cập nhật)
 GET http://localhost:9000/v1/products/getAll
 
+###---07---Lấy toàn bộ sản phẩm có thêm stockTotal mô tả số lượng sản phẩm tồn kho và totalPrice- giá sản phẩm theo mỗi [size và màu sắc] có trường mảng Array- promotionPosition- chứa cụm từ "Giảm sốc trong ngày" hoặc "Gợi ý trong tuần"
+GET http://localhost:9000/v1/products/07getByPromotionPosition?value=muahe
 
+###---08---Lấy toàn bộ sản phẩm có thêm stockTotal mô tả số lượng sản phẩm tồn kho >0 và totalPrice- giá sản phẩm theo mỗi [size và màu sắc]
+GET http://localhost:9000/v1/products/08getStockTotalMoreThan0
 ###################################EMPLOYEES################################################################
 ###Get all employees
 ###

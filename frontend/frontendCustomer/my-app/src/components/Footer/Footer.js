@@ -7,7 +7,6 @@ function Footer() {
       <div className="footer_body">
         <a href="#">Features</a>
         <a href="#">Pricing</a>
-        <a href="#">Blog</a>
         <a href="#">About Us</a>
         <a href="#">Help Center</a>
       </div>
