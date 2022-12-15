@@ -46,3 +46,7 @@
     color: rgb(0, 0, 0);
    
   }
+  .images a{
+    text-decoration: none;
+    color: black;
+  }

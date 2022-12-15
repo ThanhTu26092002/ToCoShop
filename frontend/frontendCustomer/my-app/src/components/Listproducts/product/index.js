@@ -7,7 +7,7 @@ function index({imgproduct}) {
   return (
     <div className='product'>
         <div className='product_img'>
-            <img src={"http://localhost:9000/"+imgproduct.coverImage} alt=''></img>
+            <img src={"http://localhost:9000/uploads"+imgproduct.coverImage} alt=''></img>
             <div className='addToCart cart1'>
                     <a  href='#'>Add to Cart</a>
                 </div>
@@ -15,7 +15,7 @@ function index({imgproduct}) {
         <div className='product_title'>
             <div className='product_price'>
                 <p>{imgproduct.name}</p>
-                <p>{imgproduct.description}</p>
+                {/* <p>{imgproduct.description}</p> */}
             </div>
             <div className='product_evaluate'>
                 <AiOutlineHeart style={{ width: 40, height: 40 }}/>

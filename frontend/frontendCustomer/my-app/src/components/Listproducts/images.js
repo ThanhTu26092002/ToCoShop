@@ -37,7 +37,7 @@ function images(props) {
         {currentItems.map(image => {
           return (
             <React.Fragment key={image._id}>
-              <Link to={'/' + image.name}>
+              <Link to={'/productdetall'}>
                 <Product imgproduct={image} />
               </Link>
 

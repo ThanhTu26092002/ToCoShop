@@ -1,6 +1,7 @@
 import React from "react";
 
 function SliderContent({ activeIndex, sliderImage }) {
+  console.log(sliderImage.imageUrl)
   return (
     <section>
       {sliderImage.map((slide, index) => (
@@ -8,7 +9,7 @@ function SliderContent({ activeIndex, sliderImage }) {
           key={index}
           className={index === activeIndex ? "slides active" : "inactive"}
         >
-          <img className="slide-image" src={"http://localhost:9000"+slide.imageUrl} alt="" />
+          <img className="slide-image" src={"http://localhost:9000/uploads"+slide.imageUrl} alt="" />
           
         </div>
       ))}

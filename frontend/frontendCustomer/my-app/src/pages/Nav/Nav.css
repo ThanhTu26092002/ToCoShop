@@ -21,7 +21,7 @@
   justify-content: center;
 }
 .container_sldebar_logo img{
-  width: 170px;
+  width: 100%;
 }
 .sidebar_extra{
   width: 100%;
@@ -64,6 +64,9 @@ nav{
   background-color: gray;
   border-radius: 10px;
 }
+nav{
+  margin-top: 25px;
+}
 nav .menu_item{
   display: block;
   width: 100%;
@@ -90,7 +93,7 @@ nav .menu_item{
   
 }
 .box_hotline{
-  width: 257px;
+  width: 100%;
   height: 55px;
   background: black;
   margin: auto;
@@ -106,7 +109,7 @@ nav .menu_item{
 .container_hotline img{
   float: left;
   margin: 5px;
-  
+  margin-left: 35px;
 }
 .container_hotline span{
   float: left;

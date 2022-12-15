@@ -13,9 +13,9 @@ function Newfashion() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
 
-        axios.get("http://localhost:9000/categories3/").then((response) => {
+        axios.get("http://localhost:9000/v1/products/").then((response) => {
             
-            setImages(response.data.results);
+            setImages(response.data);
         });
 
 

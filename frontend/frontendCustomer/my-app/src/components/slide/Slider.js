@@ -21,9 +21,9 @@ function Slider(props) {
  
 
   useEffect(()=>{
-    axios.get("http://localhost:9000/categories3/").then((response) => {
+    axios.get("http://localhost:9000/v1/slides").then((response) => {
       
-      setImages(response.data.results);
+      setImages(response.data);
     });
 
 
