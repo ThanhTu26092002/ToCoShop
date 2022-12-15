@@ -11,10 +11,19 @@ import {
 const useAuth = create(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         auth: null,
         signIn: (payload) =>
           set(() => ({ auth: payload }), false, "@auth/signIn"),
+        setEmployee: (payload) => {
+          const savedContent = get().auth;
+          savedContent.employeeInfo = payload;
+          return set(
+            () => ({ auth: savedContent }),
+            false,
+            "@auth/setEmployee"
+          );
+        },
         signOut: () => set({ auth: null }, false, "@auth/signOut"),
       }),
       {
