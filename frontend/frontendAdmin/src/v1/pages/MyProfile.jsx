@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image } from 'antd';
-import { Typography } from 'antd';
+import { Image, Spin } from "antd";
 import "../css/CommonStyle.css";
 import axios from "axios";
 import moment from "moment";
@@ -9,7 +8,6 @@ import locale from "antd/es/locale/vi_VN";
 import {
   Button,
   Layout,
-  Table,
   Form,
   Input,
   Popconfirm,
@@ -20,12 +18,7 @@ import {
   DatePicker,
   Descriptions,
 } from "antd";
-import { Content } from "antd/lib/layout/layout";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
 import { URLEmployee, WEB_SERVER_UPLOAD_URL } from "../config/constants";
@@ -34,63 +27,36 @@ import LabelCustomization, {
   BoldText,
   TitleTable,
 } from "../components/subComponents";
-import ConfigProvider from "antd/es/config-provider";
+import { Content } from "antd/lib/layout/layout";
+import useAuth from "../hooks/useZustand";
+import { beforeUpload } from "../config/helperFuncs";
+import axiosClient from "../config/axios";
 
-function Employees() {
-
-  const [uploading, setUploading] = useState(false);
+function MyProfile() {
+  const [myProfile, setMyProfile] = useState(null);
   const [file, setFile] = useState(null);
-  const [employees, setEmployees] = useState([]);
-  const [totalDocs, setTotalDocs] = useState(0);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [isChangedImage, setIsChangedImage] = useState(false);
   const [isChangeValueUpload, setIsChangeValueUpload] = useState(false);
-  
 
-  const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
 
-  const payload = localStorage.getItem('auth-toCoShop'); 
-  // payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
-  // convert type of payload: from STRING to OBJECT
-  const convertedPayload = JSON.parse(payload)
-  //console.log("ok true",myprofile);
-  console.log("get type of employee:",typeof(convertedPayload));
-  // Lấy ra từng phần nhỏ trong Object
-  console.log('get',convertedPayload.state.auth.employeeInfo)
-  let fieldsValues = {};
-    for (let key in convertedPayload.state.auth.employeeInfo) {
-      fieldsValues[key] = convertedPayload.state.auth.employeeInfo[key];
-    }
-    formUpdate.setFieldsValue(fieldsValues);
-    
-    const info = convertedPayload.state.auth.employeeInfo;
-    const firstName = info.firstName;
-    const lastName = info.lastName;
-    const email = info.email;
-    const phoneNumber = info.phoneNumber;
-    const address = info.address;
-    const avatar = info.imageUrl;
-    console.log('if', info)
-  
-
- 
+  const { setEmployee } = useAuth((state) => state);
 
   const disabledDate = (current) => {
     // Can not select days after 18 years ago
     return current >= moment().add(-18, "year");
   };
   //Begin: Props for components
-  
-  
+
   const PropsForm = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
-    initialValues: { name: "", description: "", file: null },
+    initialValues: { name: "", description: "" },
     autoComplete: "off",
   };
 
@@ -199,16 +165,47 @@ function Employees() {
     },
   };
   const handleFinishUpdate = (values) => {
-    console.log('values', values)
-    //SUBMIT
+    values.birthday = values.currentBirthday;
+    delete values.currentBirthday;
+    const tmp1 = {
+      firstName: myProfile.firstName,
+      lastName: myProfile.lastName,
+      email: myProfile.email,
+      phoneNumber: myProfile.phoneNumber,
+      address: myProfile.address,
+      birthday: moment(myProfile.birthday),
+    };
+    const tmp2 = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      phoneNumber: values.phoneNumber,
+      address: values.address,
+      birthday: values.birthday,
+    };
+    console.log("myProfile", myProfile);
+    delete values.currentBirthday;
 
-    let URL = URLEmployee + "/updateOne/" + selectedId;
+    if (JSON.stringify(tmp2) === JSON.stringify(tmp1)) {
+      console.log("the same");
+      setIsModalOpen(false);
+      formUpdate.resetFields();
+      setSelectedId(null);
+      return;
+    }
+    if (values.email === myProfile.email) {
+      delete values.email;
+    }
+
+    let URL = URLEmployee + "/updateOne/" + myProfile._id;
     //POST
     axios
       .patch(URL, values)
       .then((response) => {
         if (response.status === 200) {
+          console.log("result:", response);
           setIsModalOpen(false);
+          setEmployee(response.data.result);
           setRefresh((e) => !e);
           setSelectedId(null);
           setIsChangedImage(false);
@@ -229,41 +226,24 @@ function Employees() {
             : error
         );
       })
-      .finally(() => {
-        setUploading(false);
-      });
+      .finally(() => {});
   };
 
-
   const handleClick_EditBtn = (record) => {
-    const savedUrl = [
-      {
-        uid: "-1",
-        // name: 'IMG_0693.JPG',
-        status: "done",
-        url: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
-        thumbUrl: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
-      },
-    ];
-
     setIsModalOpen(true);
-    // return;
-    setSelectedId(record._id);
-    setCurrentImageUrl(record.imageUrl ? record.imageUrl : null);
-    setIsChangedImage(false);
     setIsChangeValueUpload(false);
-    let fieldsValues = { file: record.imageUrl ? savedUrl : [] };
+    let fieldsValues = {};
     for (let key in record) {
-        fieldsValues[key] = record[key];
+      fieldsValues[key] = record[key];
     }
-    if(record.birthday){
-      fieldsValues.birthday = moment(record.birthday )
+    if (record.birthday) {
+      fieldsValues.currentBirthday = moment(record.birthday);
+      // fieldsValues.birthday =null
+    } else {
+      fieldsValues.currentBirthday = moment(record.birthday);
+      fieldsValues.birthday = null;
     }
-    else{
-       fieldsValues.birthday =undefined
-    }
-    
-    console.log(fieldsValues)
+
     formUpdate.setFieldsValue(fieldsValues);
   };
   const handleOk = () => {
@@ -273,76 +253,163 @@ function Employees() {
     setIsModalOpen(false);
     setFile(null);
   };
-///myinfo
+  //
+  const handleUploadImage = (options, record) => {
+    const { file } = options;
+    let formData = new FormData();
+    let URL = URLEmployee + "/employeeImage/" + record._id;
+    //If containing an image <=> file !== null
+    if (!record.imageUrl) {
+      formData.append("currentImgUrl", null);
+    } else {
+      formData.append("currentImgUrl", record.imageUrl);
+    }
+    formData.append("file", file);
+
+    const config = {
+      headers: { "content-type": "multipart/form-data" },
+    };
+
+    //POST
+    axiosClient
+      .post(URL, formData, config)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("ok upload image", response);
+          setEmployee(response.data.result);
+          setRefresh((e) => !e);
+          message.success(`Cập nhật hình ảnh thành công!`);
+        }
+      })
+      .catch((error) => {
+        message.error(`Cập nhật hình ảnh thất bại.`);
+      })
+      .finally(() => {});
+  };
+
+  ///myinfo
+  useEffect(() => {
+    const payload = localStorage.getItem("auth-toCoShop");
+    // payload là  chuỗi String, phải chuyển thành Object rồi mới lấy ra
+    // convert type of payload: from STRING to OBJECT
+    const convertedPayload = JSON.parse(payload);
+    setMyProfile(convertedPayload.state.auth.employeeInfo);
+  }, [refresh]);
+
   return (
-    
-    <Layout>    
-      <a>Thông Tin Cá Nhân</a>
-      <Image src={`${WEB_SERVER_UPLOAD_URL}${avatar}`} width={100} height={100}/>
-    <Descriptions>
-      
-    <Descriptions.Item label="Họ">{firstName}</Descriptions.Item>
-    <Descriptions.Item label="Tên">{lastName}</Descriptions.Item>
-    <Descriptions.Item label="Email">{email}</Descriptions.Item>
-    <Descriptions.Item label="Số điện thoại">{phoneNumber}</Descriptions.Item>
-    <Descriptions.Item label="Địa chỉ">{address}</Descriptions.Item>
-      </Descriptions> 
-      <Button
-              icon={<EditOutlined />}
-              type="primary"
-              title="Chỉnh sửa"
-              onClick={() => handleClick_EditBtn(info)}
-            ></Button>     
-            <Modal
-          title="Chỉnh sửa thông tin danh mục"
-          open={isModalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          width={800}
-        >
-          <Form
-            {...PropsForm}
-            form={formUpdate}
-            name="formUpdate"
-            onFinish={handleFinishUpdate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formUpdate");
-              console.error("Error at onFinishFailed at formUpdate");
+    <Layout>
+      {!myProfile && <Spin size="large"></Spin>}
+      {myProfile && (
+        <>
+          <a>Thông Tin Cá Nhân</a>
+          <Image
+            src={`${WEB_SERVER_UPLOAD_URL}/${myProfile.imageUrl}`}
+            width={100}
+            height={100}
+          />
+          <Upload
+            beforeUpload={(file) => beforeUpload(file)}
+            showUploadList={false}
+            name="file"
+            customRequest={(options) => {
+              handleUploadImage(options, myProfile);
             }}
           >
-            <Form.Item {...PropsFormItemFirstName}>
-              <Input placeholder="First name" />
-            </Form.Item>
+            <button
+              title="Cập nhật ảnh"
+              style={{
+                cursor: "pointer",
+                width: 100,
+                backgroundColor: "#00cc99",
+                border: "none",
+                marginTop: "12px",
+              }}
+            >
+              Cập nhật ảnh
+            </button>
+          </Upload>
+          <Descriptions style={{ marginTop: 24 }}>
+            <Descriptions.Item label="Họ">
+              {myProfile.firstName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tên">
+              {myProfile.lastName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Giới tính">
+              {myProfile.gender}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày sinh">
+              {moment(myProfile.birthday).format("DD-MM-YYYY")}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {myProfile.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Số điện thoại">
+              {myProfile.phoneNumber}
+            </Descriptions.Item>
+            <Descriptions.Item label="Địa chỉ">
+              {myProfile.address}
+            </Descriptions.Item>
+          </Descriptions>
+          <Button
+            icon={<EditOutlined />}
+            type="primary"
+            title="Chỉnh sửa"
+            onClick={() => handleClick_EditBtn(myProfile)}
+          ></Button>
+        </>
+      )}
 
-            <Form.Item {...PropsFormItemLastName}>
-              <Input placeholder="Last name" />
-            </Form.Item>
+      <Modal
+        title="Chỉnh sửa thông tin danh mục"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        width={800}
+      >
+        <Form
+          {...PropsForm}
+          form={formUpdate}
+          name="formUpdate"
+          onFinish={handleFinishUpdate}
+          onFinishFailed={() => {
+            // message.info("Error at onFinishFailed at formUpdate");
+            console.error("Error at onFinishFailed at formUpdate");
+          }}
+        >
+          <Form.Item {...PropsFormItemFirstName}>
+            <Input placeholder="First name" />
+          </Form.Item>
 
-            <Form.Item {...PropsFormItemEmail}>
-              <Input placeholder="Email" />
-            </Form.Item>
+          <Form.Item {...PropsFormItemLastName}>
+            <Input placeholder="Last name" />
+          </Form.Item>
 
-            <Form.Item {...PropsFormItemPhoneNumber}>
-              <Input placeholder="Số điện thoại của nhan vien" />
-            </Form.Item>
-            {/* <Form.Item {...PropsFormItemBirthday}>
-              <DatePicker
-                allowClear={false}
-                showToday={false}
-                disabledDate={disabledDate}
-                placeholder="dd/mm/yyyy"
-                format={dateFormatList}
-                locale={locale}
-                renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
-              />
-            </Form.Item> */}
-            <Form.Item {...PropsFormItemAddress}>
-              <TextArea rows={3} placeholder="Dia chi nhan vien" />
-            </Form.Item>
-          </Form>
-        </Modal> 
+          <Form.Item {...PropsFormItemEmail}>
+            <Input placeholder="Email" />
+          </Form.Item>
+
+          <Form.Item {...PropsFormItemPhoneNumber}>
+            <Input placeholder="Số điện thoại của nhan vien" />
+          </Form.Item>
+          <Form.Item {...PropsFormItemBirthday} name={"currentBirthday"}>
+            <DatePicker
+              allowClear={false}
+              showToday={false}
+              disabledDate={disabledDate}
+              placeholder="dd/mm/yyyy"
+              format={dateFormatList}
+              locale={locale}
+              renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
+            />
+          </Form.Item>
+          <Form.Item {...PropsFormItemAddress}>
+            <TextArea rows={3} placeholder="Dia chi nhan vien" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 }
 
-export default Employees;
+export default MyProfile;

@@ -162,11 +162,70 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       });
       return;
     }
+
+ //Check having email in updateData, and update into collection Employees
+ if (updateData.email) {
+  const newEmail = updateData.email;
+  //Find the employee have the email
+  try {
+    const findDoc = await Employee.findOne({ email: newEmail });
+    if (!findDoc) {
+      res.json({
+        ok: true,
+        message: "Update the Id successfully",
+        result: updatedDoc,
+        other:
+          "Don't have the document having the email in the collection Employees",
+      });
+      return;
+    }
+    //Update new email for the login
+    try {
+      const employeeId = findDoc._id;
+      const updatedDocEmployee = await Employee.findByIdAndUpdate(
+        employeeId,
+        { email: newEmail },
+        opts
+      );
+      res.json({
+        ok: true,
+        message:
+          "Update the Id successfully in collection Employees and Logins",
+        result: updatedDoc,
+        result2: updatedDocEmployee,
+      });
+      return;
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
+      res.json({
+        ok: true,
+        message: "Update the Id successfully in collection Employees",
+        result: updatedDoc,
+        errFindByIdAndUpdate: errMsgMongoDB,
+        warning:
+          "having error when update email for the Employee having the same email",
+      });
+      return;
+    }
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_LOGINS);
     res.json({
       ok: true,
       message: "Update the Id successfully",
       result: updatedDoc,
+      errorFindOne: errMsgMongoDB,
+      other:
+        "Update the Id successfully, but, having error when check existing of the relative email of the employee in collection Logins",
     });
+    return;
+  }
+}else{
+  res.json({
+    ok: true,
+    message: `Update the Id successfully in collection ${COLLECTION_EMPLOYEES}`,
+    result: updatedDoc,
+  });
+}
   } catch (errMongoDB) {
     const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_LOGINS);
     res.status(400).json({ ok: true, error: errMsgMongoDB });

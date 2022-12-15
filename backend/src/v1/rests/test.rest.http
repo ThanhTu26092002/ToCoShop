@@ -21,7 +21,7 @@ PATCH http://localhost:9000/v1/categories/updateOne/:id
 ### Delete one category with the id
 DELETE http://localhost:9000/v1/categories/deleteOne/:id
  
-##############################################################SUPPLIERS###########################################################
+#######################SUPPLIERS###########################################################
 GET http://localhost:9000/v1/suppliers
 
 ###Update the image of one category
@@ -80,12 +80,29 @@ GET http://localhost:9000/v1/products/05GetWithSortingDiscount?sort=[low/high]
 GET http://localhost:9000/v1/products/getAll
 
 
+###################################EMPLOYEES################################################################
+###Get all employees
+###
+GET http://localhost:9000/v1/employees
 
+### Finding an employee with ID
 
+GET http://localhost:9000/v1/employees/findById/:id
 
+### update the image of the imployee with ID 
 
+POST  http://localhost:9000/v1/employees/employeeImage/:id
 
+### Add a new employee
 
+GET http://localhost:9000/v1/employees/insertOne
+
+###Update info of one employee- if update email, after update employee, We continue to update email in collection Logins
+
+PATCH http://localhost:9000/v1/employees/updateOne/:id
+
+### Delete one employee, if the employee have an account login, we have to delete it
+DELETE http://localhost:9000/v1/employees/deleteOne/:id
 
 
 
@@ -100,11 +117,14 @@ GET http://localhost:9000/v1/login/all
 
 ###Find one employee following Id
 GET http://localhost:9000/v1/employees/findById/:id
-#### Update one 
+
+###Find one employee following email
+GET http://localhost:9000/v1/employees/findByEmail/:email
+#### Update the account login, if update email, we have to update email into collection Employees.
 PATCH  http://localhost:9000/v1/login/updateOne/:id
-### insert one employee
+### insert one employee, check the existing of the email in collection Employee, if don't have, then create a new employee having the email
 POST http://localhost:9000/v1/login/insertOne
-###delete one employee
+###delete one account login
 DELETE http://localhost:9000/v1/login/deleteOne/:id
 
 
