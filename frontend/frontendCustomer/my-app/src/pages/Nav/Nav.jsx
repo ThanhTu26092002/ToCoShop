@@ -6,6 +6,9 @@ import Home from "../Newfashion/Newfashion"
 import Menclothes from "../Menclothes/Menclothes"
 import Productdetal from "../productdetails/productdetails"
 import Modal from "../../components/Modal/Modal";
+import Cartdetall from "../Cartdetall/Cartdetall";
+import Cartdetall2 from "../Cartdetall2/Cartdetall2";
+import Cartdetall3 from "../Cartdetall3/Cartdetall3";
 function Nav() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [modalOpen, setModalOpen] = useState(false);
@@ -17,7 +20,7 @@ function Nav() {
         <div className='sidebar'>
           <div className='sidebar_logo'>
             <div className='container_sldebar_logo'>
-              <img src='logo.png' alt=''></img>
+              <img src='ToCoClothes.png' alt=''></img>
             </div>
 
           </div>
@@ -46,12 +49,8 @@ function Nav() {
               <li className='menu_item'><Link to='/Menclothes'>M E N C L O T H E S</Link></li>
               <li className='menu_item'><Link to='/'>W O M E N   C L O T H E S  </Link></li>
               <li className='menu_item'><Link to='/'>U N I S E X </Link></li>
-              <li className='menu_item'><Link to='/'>P R O M O T I O N </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
-              <li className='menu_item'><Link to='/'>A C C E S S O R Y </Link></li>
+              <li className='menu_item'><Link to='/'>O U T F I T W I N T E R </Link></li>
+              <li className='menu_item'><Link to='/'>O U T F I T S U M M E R  </Link></li>
             </ul>
           </nav>
           <div className='sidebar_footer'>
@@ -79,11 +78,13 @@ function Nav() {
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/Menclothes' element={<Menclothes />} />
-            <Route path='/demo1' element={<Productdetal />} />
+            <Route path='/productdetall' element={<Productdetal />} />
+            <Route path='/Thanhtoan' element={<Cartdetall />} />
+            <Route path='/Thanhtoan2' element={<Cartdetall2 />} />
+            <Route path='/Thanhtoan3' element={<Cartdetall3 />} />
           </Routes>
 
         </div>
-        
       </div>
 
     </BrowserRouter>

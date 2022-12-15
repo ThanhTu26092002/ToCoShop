@@ -1,6 +1,7 @@
 import React from "react";
 import "./Modal.css";
-
+import Productcart from "../Productcart/productcart";
+import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 function Modal({ closeModal }) {
   return (
     <div className="modalBackground">
@@ -15,21 +16,36 @@ function Modal({ closeModal }) {
           </button>
         </div>
         <div className="title">
-          <h1>Are You Sure You Want to Continue?</h1>
+          <p>Thông tin giỏ hàng</p>
         </div>
         <div className="body">
-          <p>The next page looks amazing. Hope you want to go there!</p>
+        <nav className="navproductdetall">
+        <Productcart/>
+        <Productcart/>
+        <Productcart/>
+        <Productcart/>
+        </nav>
+          
         </div>
-        <div className="footer">
+        <div className="footer_modal">
+          <div className="footer_modal_price">
+            <span>Tổng giá trị đơn hàng:</span>
+            <p>2.250.000 VND</p>
+          </div>
+          <div className="footer_modal_btn">
           <button
             onClick={() => {
                 closeModal(false);
             }}
             id="cancelBtn"
           >
-            Cancel
+            Tiếp tục mua hàng
           </button>
-          <button>Continue</button>
+          <button  onClick={() => {
+                closeModal(false);
+            }}><Link to='/Thanhtoan'>Thanh toán</Link></button>
+          </div>
+          
         </div>
       </div>
     </div>
