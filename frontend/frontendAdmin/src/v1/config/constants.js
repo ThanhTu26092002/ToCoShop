@@ -14,6 +14,32 @@ const ICON_NoImage = "./images/logo_toCoShop.png";
 const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 const sizeList =['S', 'M', 'L', 'XL', 'XXL']
 const colorList = ["Xanh Navy", "Vang", "Xam", "Den", "Hong", "Trang"]
+const promotionPositionOptions = [
+    {
+        label: "Mẫu hot nhất năm 2022",
+        value: "hot2022",
+      },
+      {
+        label: "Outfit Mùa Hè",
+        value: "muahe",
+      },
+      {
+        label: "Outfit Mùa thu",
+        value: "muathu",
+      },
+      {
+        label: "Outfit Mùa xuân",
+        value: "muaxuan",
+      },
+      {
+        label: "Outfit Mùa đông",
+        value: "muadong",
+      },
+      {
+        label: "Couple",
+        value: "couple",
+      }
+]
 
 module.exports= {
     URLCategory, URLSupplier, URLCustomer,
@@ -27,5 +53,6 @@ module.exports= {
     dateFormatList,
     sizeList,
     colorList,
-    URLQLLogin
+    URLQLLogin,
+    promotionPositionOptions
 }
