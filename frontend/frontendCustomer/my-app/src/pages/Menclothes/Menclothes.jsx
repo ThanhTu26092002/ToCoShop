@@ -12,7 +12,7 @@ function Menclothes() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
 
-    axios.get("http://localhost:9000/categories3/").then((response) => {
+    axios.get("http://localhost:9000/v1/products/02getByCategoryId/632c5c372c717789c1e4926f").then((response) => {
       console.log(response.data.results);
       setImages(response.data.results);
     });

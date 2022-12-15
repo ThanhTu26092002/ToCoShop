@@ -9,9 +9,23 @@ import Modal from "../../components/Modal/Modal";
 import Cartdetall from "../Cartdetall/Cartdetall";
 import Cartdetall2 from "../Cartdetall2/Cartdetall2";
 import Cartdetall3 from "../Cartdetall3/Cartdetall3";
+import axios from 'axios';
 function Nav() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [modalOpen, setModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]);//danhmuc
+  const [categoryId, setCategoryId] = useState(null);//danhmuc
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+
+        axios.get("http://localhost:9000/v1/categories").then((response) => {
+            console.log('data',response.data.results)
+            setCategories(response.data.results);
+        });
+
+
+    }, [])
   return (
 
     <BrowserRouter>
@@ -45,12 +59,21 @@ function Nav() {
           
           <nav>
             <ul>
-              <li className='menu_item'><Link to='/'>N E W   F A S H I O N </Link></li>
+              {/* <li className='menu_item'><Link to='/'>N E W   F A S H I O N </Link></li>
               <li className='menu_item'><Link to='/Menclothes'>M E N C L O T H E S</Link></li>
               <li className='menu_item'><Link to='/'>W O M E N   C L O T H E S  </Link></li>
               <li className='menu_item'><Link to='/'>U N I S E X </Link></li>
               <li className='menu_item'><Link to='/'>O U T F I T W I N T E R </Link></li>
-              <li className='menu_item'><Link to='/'>O U T F I T S U M M E R  </Link></li>
+              <li className='menu_item'><Link to='/'>O U T F I T S U M M E R  </Link></li> */}
+              {
+                categories.map((item)=>{
+                    return(
+                      <li className='menu_item'><Link onClick={()=>{
+                        setCategoryId(item._id)
+                      }}>{item.name}</Link></li>
+                    )
+                })
+              }
             </ul>
           </nav>
           <div className='sidebar_footer'>
@@ -76,7 +99,7 @@ function Nav() {
         <div className='content'>
         
           <Routes>
-            <Route path='/' element={<Home />} />
+            <Route path='/' element={<Home categorieId={categoryId}/>} />
             <Route path='/Menclothes' element={<Menclothes />} />
             <Route path='/productdetall' element={<Productdetal />} />
             <Route path='/Thanhtoan' element={<Cartdetall />} />
