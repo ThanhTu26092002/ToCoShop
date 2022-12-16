@@ -287,6 +287,7 @@ function MyProfile() {
     formUpdatePassord.submit();
   };
   const handleCancel = () => {
+    formUpdate.resetFields();
     setIsModalOpen(false);
   };
   const handleUpdatePassworkCancel = () => {

@@ -239,6 +239,7 @@ function Orders() {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    formUpdate.resetFields();
     setSendingDateState(null);
     setReceivedDateState(null);
   };
