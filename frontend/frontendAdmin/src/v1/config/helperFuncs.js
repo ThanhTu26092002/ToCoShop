@@ -39,3 +39,30 @@ export const beforeUpload = (file) => {
     return true;
   }
 };
+
+export const objCompare = (newValues, oldValues) => {
+  // Đầu vào là 2 objects
+  for (var p in newValues) {
+    if (oldValues.hasOwnProperty(p)) {
+      if (oldValues[p] === newValues[p]) {
+        delete newValues[p];
+      } else if (
+        oldValues[p] instanceof Array &&
+        newValues[p] instanceof Array
+      ) {
+        if (JSON.stringify(newValues[p]) == JSON.stringify(oldValues[p])) {
+          delete newValues[p];
+        }
+      }
+    }
+  }
+  if (
+    newValues && // 👈 null and undefined check
+    Object.keys(newValues).length === 0 &&
+    Object.getPrototypeOf(newValues) === Object.prototype
+  ) {
+    newValues = null;
+    // return false
+  }
+  return newValues;
+};

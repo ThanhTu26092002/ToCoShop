@@ -21,7 +21,11 @@ import {
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-import { URLEmployee, WEB_SERVER_UPLOAD_URL } from "../config/constants";
+import {
+  URLEmployee,
+  WEB_SERVER_UPLOAD_URL,
+  URLQLLogin,
+} from "../config/constants";
 import LabelCustomization, {
   ImgIcon,
   BoldText,
@@ -29,23 +33,26 @@ import LabelCustomization, {
 } from "../components/subComponents";
 import { Content } from "antd/lib/layout/layout";
 import useAuth from "../hooks/useZustand";
-import { beforeUpload } from "../config/helperFuncs";
+import { beforeUpload, objCompare } from "../config/helperFuncs";
 import axiosClient from "../config/axios";
+import { useNavigate } from "react-router-dom";
+import { PropsFormItem_Label_Name } from "../config/props";
 
 function MyProfile() {
+  const navigate = useNavigate();
+  const { setEmployee, signOut, auth } = useAuth((state) => state);
+
   const [myProfile, setMyProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [authId, setAuthId] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [currentImageUrl, setCurrentImageUrl] = useState(null);
-  const [isChangedImage, setIsChangedImage] = useState(false);
-  const [isChangeValueUpload, setIsChangeValueUpload] = useState(false);
+  const [isModalOpenPassword, setIsModalOpenPassword] = useState(false);
 
   const [formUpdate] = Form.useForm();
+  const [formUpdatePassord] = Form.useForm();
   const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
-
-  const { setEmployee } = useAuth((state) => state);
 
   const disabledDate = (current) => {
     // Can not select days after 18 years ago
@@ -164,54 +171,57 @@ function MyProfile() {
       this.props.setValue(value);
     },
   };
-  const handleFinishUpdate = (values) => {
-    values.birthday = values.currentBirthday;
-    delete values.currentBirthday;
-    const tmp1 = {
-      firstName: myProfile.firstName,
-      lastName: myProfile.lastName,
-      email: myProfile.email,
-      phoneNumber: myProfile.phoneNumber,
-      address: myProfile.address,
-      birthday: moment(myProfile.birthday),
-    };
-    const tmp2 = {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      email: values.email,
-      phoneNumber: values.phoneNumber,
-      address: values.address,
-      birthday: values.birthday,
-    };
-    console.log("myProfile", myProfile);
-    delete values.currentBirthday;
 
-    if (JSON.stringify(tmp2) === JSON.stringify(tmp1)) {
-      console.log("the same");
+  const handleFinishUpdate = (values) => {
+    const oldData = {
+      ...myProfile,
+      birthday: moment(myProfile.birthday).format("YYYY-MM-DD"),
+    };
+    const newData = {
+      ...values,
+      birthday: moment(values.currentBirthday).format("YYYY-MM-DD"),
+    };
+    delete newData.currentBirthday;
+    const checkChangedData = objCompare(newData, oldData);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
       setIsModalOpen(false);
       formUpdate.resetFields();
-      setSelectedId(null);
       return;
     }
-    if (values.email === myProfile.email) {
-      delete values.email;
+    //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
+    if (checkChangedData.email) {
+      checkChangedData.oldEmail = myProfile.email;
     }
-
+    //Nếu thay đổi ngày sinh thì cần chuyển format ngày sinh trước khi gửi cập nhật
+    if (checkChangedData.birthday) {
+      checkChangedData.birthday = moment(checkChangedData.birthday);
+    }
     let URL = URLEmployee + "/updateOne/" + myProfile._id;
     //POST
     axios
-      .patch(URL, values)
+      .patch(URL, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
           console.log("result:", response);
           setIsModalOpen(false);
           setEmployee(response.data.result);
           setRefresh((e) => !e);
-          setSelectedId(null);
-          setIsChangedImage(false);
-          setIsChangeValueUpload(false);
           if (file) {
             setFile(null);
+          }
+
+          //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
+          if (checkChangedData.email) {
+            notification.info({
+              message: "Thông báo",
+              description: "Cập nhật thành công, vui lòng đăng nhập lại",
+            });
+            setTimeout(() => {
+              signOut();
+              navigate("/login");
+            }, 3000);
+            return;
           }
           notification.info({
             message: "Thông báo",
@@ -231,7 +241,6 @@ function MyProfile() {
 
   const handleClick_EditBtn = (record) => {
     setIsModalOpen(true);
-    setIsChangeValueUpload(false);
     let fieldsValues = {};
     for (let key in record) {
       fieldsValues[key] = record[key];
@@ -246,14 +255,44 @@ function MyProfile() {
 
     formUpdate.setFieldsValue(fieldsValues);
   };
+
+  const handleClick_EditPasswordBtn = () => {
+    setLoading(true);
+    const id = auth.payload.uid;
+    axiosClient
+      .get(`${URLQLLogin}/findById/${id}`)
+      .then((response) => {
+        setIsModalOpenPassword(true);
+
+        setAuthId(response.data.result._id);
+      })
+      .catch((err) => {
+        message.error("Lỗi hệ thống");
+        setLoading(false);
+        return;
+      });
+    setLoading(false);
+  };
+
+  const handleFinishUpdatePassword = (values) => {
+    console.log("get new values:", values);
+    console.log("get new values:", authId);
+    return
+  };
+
   const handleOk = () => {
     formUpdate.submit();
   };
+  const handleUpdatePassworkOk = () => {
+    formUpdatePassord.submit();
+  };
   const handleCancel = () => {
     setIsModalOpen(false);
-    setFile(null);
   };
-  //
+  const handleUpdatePassworkCancel = () => {
+    setIsModalOpenPassword(false);
+  };
+  //handleUpdatePassworkOk
   const handleUploadImage = (options, record) => {
     const { file } = options;
     let formData = new FormData();
@@ -298,8 +337,9 @@ function MyProfile() {
 
   return (
     <Layout>
-      {!myProfile && <Spin size="large"></Spin>}
-      {myProfile && (
+      {(!myProfile) && <Spin size="large"></Spin>}
+      {(loading) && <Spin size="large"></Spin>}
+      {(myProfile ) && !loading && (
         <>
           <a>Thông Tin Cá Nhân</a>
           <Image
@@ -352,14 +392,23 @@ function MyProfile() {
             </Descriptions.Item>
           </Descriptions>
           <Button
-            icon={<EditOutlined />}
             type="primary"
-            title="Chỉnh sửa"
+            style={{ width: 200 }}
             onClick={() => handleClick_EditBtn(myProfile)}
-          ></Button>
+          >
+            Cập nhật thông tin cá nhân
+          </Button>
+          <Button
+            type="primary"
+            danger
+            style={{ width: 200, marginTop: 12 }}
+            onClick={() => handleClick_EditPasswordBtn()}
+          >
+            Đổi mật khẩu
+          </Button>
         </>
       )}
-
+      {/* Modal update data */}
       <Modal
         title="Chỉnh sửa thông tin danh mục"
         open={isModalOpen}
@@ -405,6 +454,93 @@ function MyProfile() {
           </Form.Item>
           <Form.Item {...PropsFormItemAddress}>
             <TextArea rows={3} placeholder="Dia chi nhan vien" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal update password */}
+      <Modal
+        title="Đổi mật khẩu"
+        open={isModalOpenPassword}
+        onOk={handleUpdatePassworkOk}
+        onCancel={handleUpdatePassworkCancel}
+        width={800}
+      >
+        <Form
+          {...PropsForm}
+          form={formUpdatePassord}
+          name="formUpdatePassord"
+          onFinish={handleFinishUpdatePassword}
+          onFinishFailed={() => {
+            // message.info("Error at onFinishFailed at formUpdate");
+            console.error("Error at onFinishFailed at formUpdatePassord");
+          }}
+        >
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Mật khẩu cũ",
+              name: "oldPassword",
+            })}
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mật khẩu hiện tại!",
+              },
+              {
+                pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                message:
+                  "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
+              },
+            ]}
+            hasFeedback
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Mật khẩu mới",
+              name: "password",
+            })}
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mật khẩu mới!",
+              },
+              {
+                pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                message:
+                  "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
+              },
+            ]}
+            hasFeedback
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Xác nhận mật khẩu mới",
+              name: "confirm",
+            })}
+            dependencies={["password"]}
+            hasFeedback
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng xác nhận mật khẩu mới!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Không khớp hai mật khẩu!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password />
           </Form.Item>
         </Form>
       </Modal>

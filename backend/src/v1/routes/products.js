@@ -133,9 +133,26 @@ router.get("/", async function (req, res, next) {
 router.get("/findById/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
-    // const product = await Product.findOne({ _id: id });
-    res.json(product);
+    const formattedId = new ObjectId(id)
+    console.log('get:', id)
+    const aggregate = [
+      {$match: {_id: formattedId}},
+      // Thêm field stockTotal
+      unWindAttribute,
+      addFieldTotalPriceEachType,
+      groupBeforeFinish,
+            //Lấy thêm thông tin category và supplier
+            lookupCategory,
+            lookupSupplier,
+            {
+              $project: {
+                categoryId: 0,
+                supplierId: 0,
+              },
+            },
+    ];
+    const docs = await Product.aggregate(aggregate);
+    res.json({ ok: true, results: docs });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
     res.status(400).json({ ok: false, error: errMsgMongoDB });

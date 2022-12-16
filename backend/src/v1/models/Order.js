@@ -172,14 +172,9 @@ const paymentInfoSchema = new Schema(
 
 const orderDetailSchema = new Schema(
   {
-    productId: {
+    producAttributetId: {
       type: Schema.Types.ObjectId,
       required: true,
-    },
-    size: {
-      type: String,
-      required: true,
-      enum: ["S", "M", "L", "XL", "XXL"],
     },
     quantity: {
       type: Number,

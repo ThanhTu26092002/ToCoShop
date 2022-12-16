@@ -1,280 +1,526 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm, Upload, Cascader, Radio } from 'antd'
-import Operation from 'antd/lib/transfer/operation'
-import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Space,
+  Select,
+  Layout,
+  InputNumber,
+  Modal,
+  Table,
+  notification,
+  message,
+  Popconfirm,
+  Upload,
+  Cascader,
+  Radio,
+} from "antd";
+import Operation from "antd/lib/transfer/operation";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
-
+import {
+  PropsForm,
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItemStatus,
+  PropsFormItem_Label_Name,
+  PropsTable,
+} from "../config/props";
 import TextArea from "antd/lib/input/TextArea";
 import axios from "axios";
 import { URLQLLogin, WEB_SERVER_UPLOAD_URL } from "../config/constants";
 import axiosClient from "../config/axios";
-function Slides() {
-    const [login, setLogin] = useState(null);
-    const [refresh, setRefresh] = useState(false);
-    const [visible, setVisible] = React.useState(false);
-    const [selectedRow, setSelectedRow] = React.useState(null);
-    const [loadingBtn, setLoadingBtn] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [selectedId, setSelectedId] = useState(null);
-    const [form] = Form.useForm();
-    const [formEdit] = Form.useForm()
-    const optionspromotion = [];
-    optionspromotion.push(
-        {
-            label: "ADMINISTRATORS",
-            value: "administrators",
-        },
-        {
-            label: " MANAGERS",
-            value: "managers",
-        }
-    );
-    const columns = [
-        {
-            title: "Email",
-            key: "email",
-            dataIndex: "email",
-            render: (Text) => {
-                return <span style={{ fontWeight: '600' }}>{Text}</span>
-            }
-        },
-        {
-            title: "Mật khẩu",
-            key: "password",
-            dataIndex: "password",
-            render: (Text) => {
-                return <span style={{ fontWeight: '600' }}>{Text}</span>
-            }
-        },
-        {
-            title: "Quyền",
-            key: "roles",
-            dataIndex: "roles",
-            render: (Text) => {
-                
-                return <span style={{ fontWeight: '600' }}>{Text}</span>
-            }
-        },
-        {
-            title: "Trạng thái",
-            key: "status",
-            dataIndex: "status",
-            render: (Text) => {
-                return <span style={{ fontWeight: '600' }}>{Text}</span>
-            }
-        },
-        {
-            title: 'Thao tác',
-            key: 'actions',
-            width: '10%',
-            render: (record) => {
-                return (
-                    <Space>
-                        <Button type='dashed' icon={<EditOutlined />} style={{ fontWeight: '600' }} onClick={() => {
-                            setVisible(true)
-                            setSelectedRow(record)
-                            formEdit.setFieldValue('email', record.email)
-                            formEdit.setFieldValue('password', record.password)
-                            formEdit.setFieldValue('roles', record.roles)
-                            formEdit.setFieldValue('status', record.status)
-                            handleClick_EditBtn(record)
+import useAuth from "../hooks/useZustand";
+import { useNavigate } from "react-router-dom";
+import { objCompare } from "../config/helperFuncs";
+import MyProfile from "./MyProfile";
+import { ColorStatus } from "../components/subComponents";
+function AdminManagers() {
+  const navigate = useNavigate();
+  const { auth, signOut } = useAuth((state) => state);
 
-                        }}></Button>
-                        <Popconfirm
-                            overlayInnerStyle={{ width: 300 }}
-                            title="Bạn muốn xóa không ?"
-                            okText="Đồng ý"
-                            cancelText="Đóng"
-                            onConfirm={() => handleConfirmDelete(record._id)}
-                        >
-                            <Button
-                                icon={<DeleteOutlined />}
-                                type="danger"
-                                style={{ fontWeight: 600 }}
-                                onClick={() => { }}
-                                title="Xóa"
-                            ></Button>
-                        </Popconfirm>
-                    </Space>
-                )
-            }
-        }
-    ]
-    const handleOk = () => {
-        formEdit.submit();
-      };
-      const handleCancel = () => {
-        setIsModalOpen(false);
-      };
-    const handleClick_EditBtn = (record) => {
-        setSelectedRecord(record);
-        setIsModalOpen(true);
-        setSelectedId(record._id);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [login, setLogin] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  const [visible, setVisible] = React.useState(false);
+  const [selectedRow, setSelectedRow] = React.useState(null);
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [form] = Form.useForm();
+  const [formEdit] = Form.useForm();
+  const optionspromotion = [];
+  optionspromotion.push(
+    {
+      label: "ADMINISTRATORS",
+      value: "ADMINISTRATORS",
+    },
+    {
+      label: " MANAGERS",
+      value: "MANAGERS",
+    }
+  );
+  const columns = [
+    {
+      title: "Email",
+      key: "email",
+      dataIndex: "email",
+      render: (Text) => {
+        return <span style={{ fontWeight: "600" }}>{Text}</span>;
+      },
+    },
+    {
+      title: "Quyền",
+      key: "formattedRoles",
+      dataIndex: "formattedRoles",
+      render: (Text) => {
+        return <span>{Text}</span>;
+      },
+    },
+    {
+      title: "Trạng thái",
+      key: "status",
+      dataIndex: "status",
+      render: (status) => {
+        return <ColorStatus status={status} />;
+      },
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: "10%",
+      render: (record) => {
+        return (
+          <Space>
+            <Button
+              title="Chỉnh sửa"
+              type="primary"
+              icon={<EditOutlined />}
+              style={{ fontWeight: "600" }}
+              onClick={() => {
+                setVisible(true);
+                setSelectedRow(record);
+                formEdit.setFieldValue("email", record.email);
+                formEdit.setFieldValue("password", record.password);
+                formEdit.setFieldValue("roles", record.roles);
+                formEdit.setFieldValue("status", record.status);
+                handleClick_EditBtn(record);
+              }}
+            ></Button>
+            <Popconfirm
+              overlayInnerStyle={{ width: 300 }}
+              title="Bạn muốn xóa không ?"
+              okText="Đồng ý"
+              cancelText="Đóng"
+              onConfirm={() => handleConfirmDelete(record._id)}
+            >
+              <Button
+                icon={<DeleteOutlined />}
+                type="danger"
+                style={{ fontWeight: 600 }}
+                onClick={() => {}}
+                title="Xóa"
+              ></Button>
+            </Popconfirm>
+          </Space>
+        );
+      },
+    },
+  ];
+  const handleOk = () => {
+    formEdit.submit();
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+  const handleClick_EditBtn = (record) => {
+    setSelectedRecord(record);
+    setIsModalOpen(true);
+    setSelectedId(record._id);
 
-        let fieldsValues = {};
-        for (let key in record) {
-            fieldsValues[key] = record[key];
-        }
-        formEdit.setFieldsValue(fieldsValues);
+    let fieldsValues = {};
+    for (let key in record) {
+      fieldsValues[key] = record[key];
+    }
+    fieldsValues.confirm = record.password;
+    formEdit.setFieldsValue(fieldsValues);
+  };
+  const handleFinishUpdate = (values) => {
+    //Kiểm tra trùng dữ liệu cũ thì ko làm gì cả
+    const tmp = {
+      email: values.email,
+      password: values.password,
+      roles: values.roles,
+      status: values.status,
     };
-    const handleFinishUpdate = (values) => {
-       
-        setLoadingBtn(true);
-        axiosClient
-          .patch(
-            `${URLQLLogin}/updateOne/${selectedId}`,
-            values
-          )
-          .then((response) => {
-            if (response.status === 200) {
-              setIsModalOpen(false);
-              setLoading(true);
-              setRefresh((e) => !e);
-              formEdit.resetFields();
-              setSelectedId(null);
-    notification.info({
-                message: "Thông báo",
-                description: "Cập nhật thành công",
-              });
+    const checkChangedData = objCompare(tmp, selectedRecord);
+
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
+      setIsModalOpen(false);
+      form.resetFields();
+      setSelectedId(null);
+      return;
+    }
+    //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
+    if (checkChangedData.email) {
+      checkChangedData.oldEmail = selectedRecord.email;
+    }
+
+    setLoadingBtn(true);
+    axiosClient
+      .patch(`${URLQLLogin}/updateOne/${selectedId}`, checkChangedData)
+      .then((response) => {
+        if (response.status === 200) {
+          setIsModalOpen(false);
+          setLoading(true);
+          setRefresh((e) => !e);
+          formEdit.resetFields();
+          setSelectedId(null);
+
+          //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
+          if (checkChangedData.email) {
+            notification.info({
+              message: "Thông báo",
+              description: "Cập nhật thành công, vui lòng đăng nhập lại",
+            });
+            const uidCheck = auth.payload.uid;
+            if (uidCheck === selectedId) {
+              setTimeout(() => {
+                signOut();
+                navigate("/login");
+              }, 3000);
+              return;
             }
-          })
-          .catch((error) => {
-            message.error(
-              error.response.data.error.message
-                ? error.response.data.error.message
-                : error
-            );
-          })
-          .finally(() => {
-            setLoadingBtn(false);
+          }
+          notification.info({
+            message: "Thông báo",
+            description: "Cập nhật thành công",
           });
-      }
-    React.useEffect(() => {
-        axios.get("http://localhost:9000/v1/login/all").then((response) => {
-            setLogin(response.data);
-        })
-    }, [refresh])
-    const handleConfirmDelete = (_id) => {
-        axios.delete("http://localhost:9000/v1/login/deleteOne/" + _id).then((response) => {
-            if (response.status === 200) {
-                setRefresh((f) => f + 1);
-                message.info("Xóa thành công");
-            }
-        });
-    };
-    return (
-        <div>
-            <Layout>
-                <Content>
-                    <Form
-                        style={{ marginLeft: 400 }}
-                        form={form}
-                        onFinish={(values) => {
-                            axios.post('http://localhost:9000/v1/login/insertOne', values).then(response => {
-                                if (response.status === 201) {
-                                    setRefresh((f) => f + 1);
-                                    form.resetFields();
-                                    notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
-                                }
-                            })
-                            console.log(values);
-                        }}
-                    >
-                        <Form.Item rules={[{
-                            required: true,
-                            message: "nhập Email"
-                        }]} name={"email"} label="Email" >
-                            <Input placeholder='Email' />
-                        </Form.Item>
-                        <Form.Item rules={[{
-                            required: true,
-                            message: "nhập Pass"
-                        }]} name={"password"} label="Mật khẩu" >
-                            <Input placeholder='password' />
-                        </Form.Item>
-                        <Form.Item name={"roles"} label="Quyền">
-                            <Select
-                                mode="multiple"
-                                allowClear
-                                style={{
-                                    width: '100%',
-                                }}
-                                placeholder="Please select"
-                                options={optionspromotion}
-                            />
-                        </Form.Item>
-                        <Form.Item name={"status"} label="Trạng thái">
-                            <Radio.Group >
-                                <Radio value={"ACTIVE"}>Kích hoạt</Radio>
-                                <Radio value={"INACTIVE"}>Khóa</Radio>
-                            </Radio.Group>
-                        </Form.Item>
-                        <Button type="primary" htmlType="submit">
-                            Lưu thông tin
-                        </Button>
-                    </Form>
-                    <Table rowKey='_id' columns={columns} dataSource={login} pagination={false} />
-                    <Modal title="chinh sua thong tin slides" open={isModalOpen}
-                        onOk={handleOk}
-                        onCancel={handleCancel}
-                        footer={
-                            [
-                                <Button key="back" onClick={handleCancel}>
-                                    Hủy
-                                </Button>,
-                                <Button
-                                    key="submit"
-                                    type="primary"
-                                    loading={loadingBtn}
-                                    onClick={handleOk}
-                                >
-                                    Sửa
-                                </Button>
-                            ]
-                        }
-                    >
-                        <Form
-                            
-                            form={formEdit}
-                            onFinish={handleFinishUpdate}
-                        >
-                            <Form.Item rules={[{
-                                required: true,
-                                message: "nhập Email"
-                            }]} name={"email"} label="Email" >
-                                <Input placeholder='Email' />
-                            </Form.Item>
-                            <Form.Item rules={[{
-                                required: true,
-                                message: "nhập Pass"
-                            }]} name={"password"} label="Mật khẩu" >
-                                <Input placeholder='password' />
-                            </Form.Item>
-                            <Form.Item name={"roles"} label="Quyền">
-                                <Select
-                                    mode="multiple"
-                                    allowClear
-                                    style={{
-                                        width: '100%',
-                                    }}
-                                    placeholder="Please select"
-                                    options={optionspromotion}
-                                />
-                            </Form.Item>
-                            <Form.Item name={"status"} label="Trạng thái">
-                                <Radio.Group >
-                                    <Radio value={"ACTIVE"}>Kích hoạt</Radio>
-                                    <Radio value={"INACTIVE"}>Khóa</Radio>
-                                </Radio.Group>
-                            </Form.Item>
-                        </Form>
-                    </Modal>
-                </Content>
-            </Layout>
-        </div>
-    )
+        }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
+      });
+  };
 
+  const handleCancelCreate = () => {
+    form.resetFields();
+  };
+  const handleConfirmDelete = (_id) => {
+    axios
+      .delete("http://localhost:9000/v1/login/deleteOne/" + _id)
+      .then((response) => {
+        if (response.status === 200) {
+          setRefresh((f) => f + 1);
+          message.info("Xóa thành công");
+        }
+      });
+  };
+
+  React.useEffect(() => {
+    axios.get("http://localhost:9000/v1/login/all").then((response) => {
+      let tmp = response.data.results;
+      tmp.map((e) => {
+        let formattedRoles = "";
+        if (e.roles) {
+          e.roles.map((role) => {
+            formattedRoles += role + " , ";
+          });
+          e.formattedRoles = formattedRoles;
+        }
+      });
+      setTotalDocs(tmp.length);
+      setLogin(tmp);
+    });
+  }, [refresh]);
+
+  return (
+    <div>
+      <Layout>
+        <Content>
+          <Form
+            {...PropsForm}
+            form={form}
+            initialValues={{ status: "ACTIVE", roles: "MANAGERS" }}
+            onFinish={(values) => {
+              axios
+                .post("http://localhost:9000/v1/login/insertOne", values)
+                .then((response) => {
+                  if (response.status === 201) {
+                    setRefresh((f) => f + 1);
+                    form.resetFields();
+                    notification.info({
+                      message: "Thông báo",
+                      description: "thêm mới thành công",
+                    });
+                  }
+                });
+            }}
+          >
+            <Form.Item
+              {...PropsFormItemEmail}
+              rules={[
+                ...PropsFormItemEmail.rules,
+                {
+                  required: true,
+                  message: "Vui lòng nhập email",
+                },
+              ]}
+              hasFeedback
+            >
+              <Input placeholder="Email" />
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Mật khẩu",
+                name: "password",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Please nhập mật khẩu!",
+                },
+                {
+                  pattern:
+                    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                  message:
+                    "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
+                },
+              ]}
+              hasFeedback
+            >
+              <Input.Password />
+            </Form.Item>
+
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Xác nhận mật khẩu",
+                name: "confirm",
+              })}
+              dependencies={["password"]}
+              hasFeedback
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng xác nhận mật khẩu!",
+                },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Không khớp hai mật khẩu!")
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item
+              hasFeedback
+              {...PropsFormItem_Label_Name({
+                label: "Quyền thao tác",
+                name: "roles",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn quyền",
+                },
+              ]}
+            >
+              <Select
+                mode="multiple"
+                allowClear
+                style={{
+                  width: "100%",
+                }}
+                placeholder="Please select"
+                options={optionspromotion}
+              />
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Trạng thái",
+                name: "status",
+              })}
+            >
+              <Radio.Group>
+                <Radio value={"ACTIVE"}>Kích hoạt</Radio>
+                <Radio value={"INACTIVE"}>Khóa</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              wrapperCol={{
+                offset: 8,
+                span: 16,
+              }}
+            >
+              <Space wrap>
+                <Button type="primary" danger onClick={handleCancelCreate}>
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loadingBtn}>
+                  Tạo mới
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+          <Table
+            rowKey="_id"
+            {...PropsTable}
+            columns={columns}
+            dataSource={login}
+            pagination={{
+              total: totalDocs,
+              showTotal: (totalDocs, range) =>
+                `${range[0]}-${range[1]} of ${totalDocs} items`,
+              defaultPageSize: 10,
+              defaultCurrent: 1,
+            }}
+          />
+          <Modal
+            title="chinh sua thong tin slides"
+            open={isModalOpen}
+            onOk={handleOk}
+            onCancel={handleCancel}
+            footer={[
+              <Button key="back" onClick={handleCancel}>
+                Hủy
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                loading={loadingBtn}
+                onClick={handleOk}
+              >
+                Sửa
+              </Button>,
+            ]}
+          >
+            <Form {...PropsForm} form={formEdit} onFinish={handleFinishUpdate}>
+              <Form.Item
+                {...PropsFormItemEmail}
+                rules={[
+                  ...PropsFormItemEmail.rules,
+                  {
+                    required: true,
+                    message: "Vui lòng nhập email",
+                  },
+                ]}
+                hasFeedback
+              >
+                <Input placeholder="Email" />
+              </Form.Item>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Mật khẩu",
+                  name: "password",
+                })}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please nhập mật khẩu!",
+                  },
+                  {
+                    pattern:
+                      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                    message:
+                      "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ cái in hoa và một chữ số",
+                  },
+                ]}
+                hasFeedback
+              >
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Xác nhận mật khẩu",
+                  name: "confirm",
+                })}
+                dependencies={["password"]}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng xác nhận mật khẩu!",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("password") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("Không khớp hai mật khẩu!")
+                      );
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+              <Form.Item
+                hasFeedback
+                {...PropsFormItem_Label_Name({
+                  label: "Quyền thao tác",
+                  name: "roles",
+                })}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn quyền",
+                  },
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  allowClear
+                  style={{
+                    width: "100%",
+                  }}
+                  placeholder="Please select"
+                  options={optionspromotion}
+                />
+              </Form.Item>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Trạng thái",
+                  name: "status",
+                })}
+              >
+                <Radio.Group>
+                  <Radio value={"ACTIVE"}>Kích hoạt</Radio>
+                  <Radio value={"INACTIVE"}>Khóa</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </Content>
+      </Layout>
+    </div>
+  );
 }
-export default Slides
+export default AdminManagers;

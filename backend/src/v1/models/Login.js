@@ -6,17 +6,23 @@ const loginSchema = new Schema(
   {
     email: {
       type: String,
-      trim: true, 
+      trim: true,
       unique: true,
-      lowercase : true,
+      lowercase: true,
       maxLength: 50,
       required: true,
-      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Vui lòng nhập đúng định dạng email'],
-  },
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Vui lòng nhập đúng định dạng email",
+      ],
+    },
     password: {
       type: String,
       trim: true,
-      maxLength: [50, "Mat khau không vượt quá 50 kí tự"],
+      match: [
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+        "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
+      ],
       required: [true, "Mat khau không được để trống"],
     },
     roles: {
@@ -25,7 +31,7 @@ const loginSchema = new Schema(
         values: ["ADMINISTRATORS", "MANAGERS"],
         message: "Quyền người dùng phải là ADMINISTRATORS hay MANAGERS",
       },
-      default: 'MANAGERS',
+      default: "MANAGERS",
       validate: [
         (v) => Array.isArray(v) && v.length > 0,
         "Bạn chưa nhập quyền cho người dùng",

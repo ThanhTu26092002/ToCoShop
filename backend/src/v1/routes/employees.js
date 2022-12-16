@@ -191,6 +191,10 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
+     //oldEmail chính là email cũ, lưu lại để truy vấn tìm bên Logins và cập nhật email mới
+     if(updateData.oldEmail){
+      delete updateData.oldEmail
+    }
     const opts = { runValidators: true, new: true };
     //--Update in Mongodb
     const updatedDoc = await Employee.findByIdAndUpdate(id, updateData, opts);
@@ -205,11 +209,12 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
       return;
     }
     //Check having email in updateData, and update into collection Logins
-    if (updateData.email) {
+    if (req.body.oldEmail) {
+      const oldEmail= req.body.oldEmail
       const newEmail = updateData.email;
       //Find the login have the email
       try {
-        const findDoc = await Login.findOne({ email: newEmail });
+        const findDoc = await Login.findOne({ email: oldEmail });
         if (!findDoc) {
           res.json({
             ok: true,
