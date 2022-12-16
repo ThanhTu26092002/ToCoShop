@@ -1,0 +1,32 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+.Sort{
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: right;
+}
+.Sort_title,.Sort_Latest,.Sort_selling{
+    margin: 10px;
+}
+.Sort_title{
+    color: #958f8f;
+}
+.Sort_Latest,.Sort_selling{
+    border: 1px solid #958f8f;
+}
+h3{
+    padding: 10px 20px;
+}
+.listproducts_title{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.listproducts_main{
+    width: 100%;
+    margin-top: 20px;
+} 
