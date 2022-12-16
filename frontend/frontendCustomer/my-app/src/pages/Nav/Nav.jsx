@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import "./Nav.css"
 import { AiOutlineUser, AiOutlineShopping, AiOutlineSearch, AiOutlineHeart } from "react-icons/ai";
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
-import Home from "../Newfashion/Newfashion"
-import Menclothes from "../Menclothes/Menclothes"
-import Productdetal from "../productdetails/productdetails"
+import Home from "../Home/Home"
+import ProductFolowingCategories from "../ProductFolowingCategories/ProductFolowingCategories"
+import Productdetal from "../ProductDetail/ProductDetail"
 import Modal from "../../components/Modal/Modal";
-import Cartdetall from "../Cartdetall/Cartdetall";
-import Cartdetall2 from "../Cartdetall2/Cartdetall2";
-import Cartdetall3 from "../Cartdetall3/Cartdetall3";
+import CartDetail from "../CartInfo/CartDetail1/CartDetail1";
+import CartDetail2 from "../CartInfo/CartDetail2/CartDetail2";
+import CartDetail3 from "../CartInfo/CartDetail3/CartDetail3";
 import axios from 'axios';
 function Nav() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -58,7 +58,8 @@ function Nav() {
             {
                 categories.map((item, index)=>{
                     return(
-                      <li key= {index} className='menu_item'><Link to={`/Menclothes/${item._id}`}>{item.name}</Link></li>
+                       <li key= {index} className='menu_item'><Link to={`/ProductFolowingCategories/${item._id}`}>{item.name}</Link></li>
+                      // <li key= {index} className='menu_item'><Link to={`/ProductFolowingCategories?product=${item._id}&&atttribute=`}>{item.name}</Link></li>
                     )
                 })
               }
@@ -94,11 +95,11 @@ function Nav() {
         
           <Routes>
             <Route path='/' element={<Home categorieId={categoryId}/>} />
-            <Route path='/Menclothes/:id' element={<Menclothes />} />
-            <Route path='/productDetail/:id' element={<Productdetal />} />
-            <Route path='/Thanhtoan' element={<Cartdetall />} />
-            <Route path='/Thanhtoan2' element={<Cartdetall2 />} />
-            <Route path='/Thanhtoan3' element={<Cartdetall3 />} />
+            <Route path='/ProductFolowingCategories/:id' element={<ProductFolowingCategories />} />
+            <Route path='/productDetail' element={<Productdetal />} />
+            <Route path='/Thanhtoan' element={<CartDetail />} />
+            <Route path='/Thanhtoan2' element={<CartDetail2 />} />
+            <Route path='/Thanhtoan3' element={<CartDetail3 />} />
           </Routes>
 
         </div>
