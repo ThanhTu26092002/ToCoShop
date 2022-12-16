@@ -31,6 +31,7 @@ import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
 import Qllogin from "./pages/Qllogin";
 import { ICON_NoImage } from "./config/constants";
+import Transportations from "./pages/Transportations";
 const { Content, Sider } = Layout;
 
 function ToCoShopV1() {
@@ -67,19 +68,6 @@ function ToCoShopV1() {
       <UserOutlined />,
       <MyProfile />
     ),
-    getItem("Nhân viên", "/employees", <UsergroupAddOutlined />, <Employees />),
-    getItem(
-      "Danh mục sản phẩm",
-      "/categories",
-      <UnorderedListOutlined />,
-      <Categories />
-    ),
-    getItem(
-      "Nhà phân phối",
-      "/suppliers",
-      <UnorderedListOutlined />,
-      <Suppliers />
-    ),
     getItem("Sản phẩm", "/products", <UnorderedListOutlined />, <Products />),
     getItem("Đơn hàng", "/orderList", <UnorderedListOutlined />, <Orders />, [
       getItem(
@@ -101,8 +89,22 @@ function ToCoShopV1() {
         <Statistics />
       ),
     ]),
-    getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
+    getItem("Nhân viên", "/employees", <UsergroupAddOutlined />, <Employees />),
     getItem("Tài khoản đăng nhập", "/Qllogin", <UnorderedListOutlined />, <Qllogin />),
+    getItem(
+      "Danh mục sản phẩm",
+      "/categories",
+      <UnorderedListOutlined />,
+      <Categories />
+    ),
+    getItem(
+      "Nhà phân phối",
+      "/suppliers",
+      <UnorderedListOutlined />,
+      <Suppliers />
+    ),
+    getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
+    getItem("Phương thức vận chuyển", "/transportation", <UnorderedListOutlined />, <Transportations />),
     getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
   return (

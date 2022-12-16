@@ -28,7 +28,6 @@ import {
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
-
 import LabelCustomization, {
   ImgIcon,
   BoldText,
@@ -360,6 +359,7 @@ function Employees() {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    formUpdate.resetFields();
     setFile(null);
   };
   //
@@ -381,16 +381,15 @@ function Employees() {
     setIsChangeValueUpload(false);
     let fieldsValues = { file: record.imageUrl ? savedUrl : [] };
     for (let key in record) {
-        fieldsValues[key] = record[key];
+      fieldsValues[key] = record[key];
     }
-    if(record.birthday){
-      fieldsValues.birthday = moment(record.birthday )
+    if (record.birthday) {
+      fieldsValues.birthday = moment(record.birthday);
+    } else {
+      fieldsValues.birthday = undefined;
     }
-    else{
-       fieldsValues.birthday =undefined
-    }
-    
-    console.log(fieldsValues)
+
+    console.log(fieldsValues);
     formUpdate.setFieldsValue(fieldsValues);
   };
   //
@@ -453,12 +452,11 @@ function Employees() {
             : error
         );
       })
-      .finally(() => {
-      });
+      .finally(() => {});
   };
   //
   const handleFinishUpdate = (values) => {
-    console.log('values', values)
+    console.log("values", values);
     //SUBMIT
 
     let URL = URLEmployee + "/updateOne/" + selectedId;
@@ -488,8 +486,7 @@ function Employees() {
             : error
         );
       })
-      .finally(() => {
-      });
+      .finally(() => {});
   };
   //
   const handleConfirmDelete = (_id) => {
@@ -531,47 +528,47 @@ function Employees() {
     <Layout>
       <Content style={{ padding: 24 }}>
         {/* <ConfigProvider locale={locale}> */}
-          <Form
-            {...PropsForm}
-            form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formCreate");
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-          >
-            <Form.Item {...PropsFormItemFirstName}>
-              <Input placeholder="First name" />
-            </Form.Item>
+        <Form
+          {...PropsForm}
+          form={formCreate}
+          name="formCreate"
+          onFinish={handleFinishCreate}
+          onFinishFailed={() => {
+            // message.info("Error at onFinishFailed at formCreate");
+            console.error("Error at onFinishFailed at formCreate");
+          }}
+        >
+          <Form.Item {...PropsFormItemFirstName}>
+            <Input placeholder="First name" />
+          </Form.Item>
 
-            <Form.Item {...PropsFormItemLastName}>
-              <Input placeholder="Last name" />
-            </Form.Item>
+          <Form.Item {...PropsFormItemLastName}>
+            <Input placeholder="Last name" />
+          </Form.Item>
 
-            <Form.Item {...PropsFormItemEmail}>
-              <Input placeholder="Email" />
-            </Form.Item>
+          <Form.Item {...PropsFormItemEmail}>
+            <Input placeholder="Email" />
+          </Form.Item>
 
-            <Form.Item {...PropsFormItemPhoneNumber}>
-              <Input placeholder="Số điện thoại của nhan vien" />
-            </Form.Item>
-            <Form.Item {...PropsFormItemBirthday}>
-              <DatePicker
-                allowClear={false}
-                showToday={false}
-                disabledDate={disabledDate}
-                placeholder="dd/mm/yyyy"
-                format={dateFormatList}
-                locale={locale}
-                renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
-              />
-            </Form.Item>
-            <Form.Item {...PropsFormItemAddress}>
-              <TextArea rows={3} placeholder="Dia chi nhan vien" />
-            </Form.Item>
+          <Form.Item {...PropsFormItemPhoneNumber}>
+            <Input placeholder="Số điện thoại của nhan vien" />
+          </Form.Item>
+          <Form.Item {...PropsFormItemBirthday}>
+            <DatePicker
+              allowClear={false}
+              showToday={false}
+              disabledDate={disabledDate}
+              placeholder="dd/mm/yyyy"
+              format={dateFormatList}
+              locale={locale}
+              renderExtraFooter={() => "Nhân viên đủ 18 tuổi trở lên"}
+            />
+          </Form.Item>
+          <Form.Item {...PropsFormItemAddress}>
+            <TextArea rows={3} placeholder="Dia chi nhan vien" />
+          </Form.Item>
 
-            {/* <Form.Item
+          {/* <Form.Item
               {...PropsFormItemUpload}
               //Handling update fileList
               getValueFromEvent={normFile}
@@ -593,17 +590,17 @@ function Employees() {
               </Upload>
             </Form.Item> */}
 
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Button type="primary" htmlType="submit">
-                Tạo mới
-              </Button>
-            </Form.Item>
-          </Form>
+          <Form.Item
+            wrapperCol={{
+              offset: 8,
+              span: 16,
+            }}
+          >
+            <Button type="primary" htmlType="submit">
+              Tạo mới
+            </Button>
+          </Form.Item>
+        </Form>
         {/* </ConfigProvider> */}
 
         <Table

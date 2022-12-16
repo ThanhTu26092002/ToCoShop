@@ -336,6 +336,7 @@ function Products() {
     formEdit.submit();
   };
   const handleCancel = () => {
+    formEdit.resetFields();
     setIsModalOpen(false);
   };
 

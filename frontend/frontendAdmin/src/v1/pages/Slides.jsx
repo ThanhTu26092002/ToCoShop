@@ -129,6 +129,7 @@ notification.info({
     formEdit.submit();
   };
   const handleCancel = () => {
+    formEdit.resetFields();
     setIsModalOpen(false);
   };
   const handleUploadImage = (options, record) => {

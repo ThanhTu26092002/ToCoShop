@@ -319,6 +319,7 @@ function Suppliers() {
   //
 
   const handleCancel = () => {
+    formUpdate.resetFields();
     setIsModalOpen(false);
   };
   //
