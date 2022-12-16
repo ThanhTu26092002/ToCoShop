@@ -26,6 +26,7 @@ import LabelCustomization, {
   TitleTable,
 } from "../components/subComponents";
 import axiosClient from "../config/axios";
+import { objCompare } from "../config/helperFuncs";
 
 function Categories() {
   const [isCreate, setIsCreate] = useState(false);
@@ -300,20 +301,19 @@ function Categories() {
   //
   const handleFinishUpdate = (values) => {
     //The same values so don't need to update
-    const beforeChangedData = {
-      name: selectedRecord.name,
-      description: selectedRecord.description,
-    };
-    if (JSON.stringify(values) === JSON.stringify(beforeChangedData)) {
+    const checkChangedData = objCompare(values, selectedRecord);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
       setIsModalOpen(false);
       formUpdate.resetFields();
       setSelectedId(null);
       return;
     }
+    console.log('get', checkChangedData)
     setLoadingBtn(true);
     //POST
     axiosClient
-      .patch(`${URLCategory}/updateOne/${selectedId}`, values)
+      .patch(`${URLCategory}/updateOne/${selectedId}`, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -469,7 +469,6 @@ function Categories() {
             {...PropsForm}
             form={formUpdate}
             name="formUpdate"
-            onValuesChange={() => console.log("change data")}
             onFinish={handleFinishUpdate}
             onFinishFailed={() => {
               // message.info("Error at onFinishFailed at formUpdate");

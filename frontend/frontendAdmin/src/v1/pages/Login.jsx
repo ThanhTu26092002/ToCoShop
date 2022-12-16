@@ -3,8 +3,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Form, Input, Button, Divider, message } from "antd";
-import axios from "axios";
 import useAuth from "../hooks/useZustand";
+import { PropsFormItemEmail, PropsFormItem_Label_Name } from "../config/props";
+import axiosClient from "../config/axios";
 
 const markdown = ``;
 
@@ -15,13 +16,17 @@ const Login = () => {
   const onFinish = (values) => {
     const { email, password } = values;
 
-    axios
+    axiosClient
       .post("http://localhost:9000/v1/login", { email, password })
       .then((response) => {
         // localStorage.setItem("employeeInfo", JSON.stringify(response.data.employeeInfo));
         // Zustand: method
-        console.log(response)
-        signIn({ payload: response.data.payload, token: response.data.token, employeeInfo: response.data.employeeInfo });
+        console.log(response);
+        signIn({
+          payload: response.data.payload,
+          token: response.data.token,
+          employeeInfo: response.data.employeeInfo,
+        });
         message.success("Login success");
         navigate("/home");
       })
@@ -45,7 +50,7 @@ const Login = () => {
 
   return (
     <React.Fragment>
-      <h3 style={{textAlign: 'center'}}>Login</h3>
+      <h3 style={{ textAlign: "center" }}>Login</h3>
       <Divider />
       <Form
         name="login-form"
@@ -61,29 +66,37 @@ const Login = () => {
         autoComplete="off"
       >
         <Form.Item
-          label="Email"
-          name="email"
+          {...PropsFormItemEmail}
           rules={[
-            { required: true, message: "Email không được để trống" },
-            { type: "email", message: "Email không hợp lệ" },
-          ]}
-        >
-          <Input placeholder="Nhập email" />
-        </Form.Item>
-
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[
-            { required: true, message: "Mật khẩu không được để trống" },
+            ...PropsFormItemEmail.rules,
             {
-              min: 6,
-              max: 10,
-              message: "Độ dài mật khẩu phải nằm trong khoảng 6 đến 10 ký tự",
+              required: true,
+              message: "Vui lòng nhập email",
             },
           ]}
+          hasFeedback
         >
-          <Input.Password placeholder="Nhập mật khẩu" />
+          <Input placeholder="Email" />
+        </Form.Item>
+        <Form.Item
+          {...PropsFormItem_Label_Name({
+            label: "Mật khẩu",
+            name: "password",
+          })}
+          rules={[
+            {
+              required: true,
+              message: "Please nhập mật khẩu!",
+            },
+            {
+              pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+              message:
+                "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
+            },
+          ]}
+          hasFeedback
+        >
+          <Input.Password />
         </Form.Item>
 
         {/* <Form.Item

@@ -17,12 +17,12 @@ const {
 router.post("/", validateSchema(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log({ ...req.body });
     const login = await Login.findOne({ email, password });
-    if (!login) {
+    if (!login || (login.status === 'INACTIVE')) {
       res.status(401).json({ message: "UnAuthorized" });
       return;
     }
+    console.log('get:', login)
     // Get info of the employee who has just login
     const employeeInfo = await Employee.findOne({ email });
     if (!employeeInfo) {
@@ -149,6 +149,10 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
+    //oldEmail chính là email cũ, lưu lại để truy vấn tìm bên Employees và cập nhật email mới
+    if(updateData.oldEmail){
+      delete updateData.oldEmail
+    }
     const opts = { runValidators: true };
     //--Update in Mongodb
     const updatedDoc = await Login.findByIdAndUpdate(id, updateData, opts);
@@ -164,13 +168,21 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
     }
 
  //Check having email in updateData, and update into collection Employees
- if (updateData.email) {
+ if (req.body.oldEmail) {
+ const oldEmail= req.body.oldEmail
   const newEmail = updateData.email;
   //Find the employee have the email
   try {
-    const findDoc = await Employee.findOne({ email: newEmail });
+    const findDoc = await Employee.findOne({ email:oldEmail });
     if (!findDoc) {
       res.json({
+        ok: true,
+        message: "Update the Id successfully",
+        result: updatedDoc,
+        other:
+          "Don't have the document having the email in the collection Employees",
+      });
+      console.log({
         ok: true,
         message: "Update the Id successfully",
         result: updatedDoc,
