@@ -75,7 +75,7 @@ function Nav() {
               <div className='container_hotline'>
                 <a href='#'>
                   <img src='image11.png' alt=''></img>
-                  <span>0 9 6 7 1 1 6 8 0 1</span>
+                  <span>0 9 0 5 9 0 5 9 9 9 </span>
                 </a>
               </div>
 
