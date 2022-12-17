@@ -230,7 +230,7 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
         ok: true,
         error: {
           name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_ORDERS}`,
         },
       });
       return;
@@ -290,7 +290,7 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
 // //
 
 //Just update array products
-router.patch("/updateOne/:id", validateId, async (req, res, next) => {
+router.patch("/updateOne_Products/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;

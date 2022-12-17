@@ -53,7 +53,6 @@ function Products() {
   const [products, setProducts] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
-  const [visible, setVisible] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -61,7 +60,7 @@ function Products() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [selectedPMItems, setSelectedPMItems] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
-  const [compare, setCompare] = useState({});
+
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm();
 
@@ -174,12 +173,8 @@ function Products() {
               icon={<EditOutlined />}
               style={{ fontWeight: "600" }}
               onClick={() => {
-                setVisible(true);
                 setSelectedRow(record);
                 handleClick_EditBtn(record);
-                // NGHIA
-                // formEdit.setFieldValue("categoryId", record.categoryId._id);
-                // formEdit.setFieldValue("supplierId", record.supplierId._id);
               }}
             ></Button>
             <Popconfirm
@@ -238,9 +233,9 @@ function Products() {
     let URL = URLProduct + "/productImage/" + record._id;
     //If containing an image <=> file !== null
     if (!record.coverImage) {
-      console.log(record.coverImage);
       formData.append("currentImgUrl", null);
     } else {
+      console.log(record.coverImage);
       formData.append("currentImgUrl", record.coverImage);
     }
     formData.append("file", file);
