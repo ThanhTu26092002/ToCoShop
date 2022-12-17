@@ -13,7 +13,7 @@ const URLQLLogin = "http://localhost:9000/v1/login";
 const ICON_NoImage = "./images/logo_toCoShop.png";
 const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 const sizeList = ["S", "M", "L", "XL", "XXL"];
-const colorList = ["Xanh Navy", "Vang", "Xam", "Den", "Hong", "Trang"];
+const colorList = ["Xanh Navy", "Vàng", "Xám", "Đen", "Hồng", "Trắng"];
 
 const promotionPositionOptions = [
   {

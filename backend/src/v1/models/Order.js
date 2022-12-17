@@ -172,7 +172,7 @@ const paymentInfoSchema = new Schema(
 
 const orderDetailSchema = new Schema(
   {
-    producAttributetId: {
+    productAttributeId: {
       type: Schema.Types.ObjectId,
       required: true,
     },

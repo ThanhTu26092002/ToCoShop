@@ -75,11 +75,9 @@ const { Text } = Typography;
 const { Option } = Select;
 
 function OrderDetail() {
-  const { hookTransportationData } = useTransportations((state) => state);
   const { hookSetOrderDetail, hookOrderDetailData } = useOrderDetail(
     (state) => state
   );
-  const { hookProductData } = useProducts((state) => state);
   //If params id = :id
   const navigate = useNavigate();
   const { id } = useParams();
@@ -90,6 +88,8 @@ function OrderDetail() {
   // const [isCreate, setIsCreate] = useState(false);
   const [selectedPaymentCreditCard, setSelectedPaymentCreditCard] =
     useState(null);
+  const [transportations, setTransportations] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -154,7 +154,7 @@ function OrderDetail() {
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
     getOrderDetails.map((product) => {
-      let tmpProduct = hookProductData.find((e) => (e._id = product.productId));
+      let tmpProduct = products.find((e) => (e._id = product.productId));
       configOrderDetails.push({
         productId: product.productId,
         size: product.size,
@@ -300,6 +300,17 @@ function OrderDetail() {
         setLoadingBtn(false);
       });
   };
+  useEffect(() => {
+    axiosClient.get(`${URLTransportation}`).then((response) => {
+      setTransportations(response.data.results);
+    });
+  }, []);
+  useEffect(() => {
+    axiosClient.get(`${URLProduct}/getAll`).then((response) => {
+      setProducts(response.data.results);
+    });
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     // Is not existing OrderDetail or orderDetail._id # id in params?
@@ -809,11 +820,11 @@ function OrderDetail() {
                     >
                       <Select
                         style={{ width: 450 }}
-                        loading={!hookTransportationData}
+                        loading={!transportations}
                         placeholder="Chọn"
                       >
-                        {hookTransportationData &&
-                          hookTransportationData.map((t) => {
+                        {transportations &&
+                          transportations.map((t) => {
                             const customPrice = numeral(t.price).format("0,0");
                             return (
                               <Select.Option key={t._id} value={t._id}>
@@ -1124,7 +1135,7 @@ function OrderDetail() {
                                         noStyle
                                       >
                                         <Select
-                                          loading={!hookProductData}
+                                          loading={!products}
                                           placeholder="Mã số"
                                           style={{ width: 100 }}
                                           showSearch
@@ -1135,8 +1146,8 @@ function OrderDetail() {
                                               .includes(input.toLowerCase())
                                           }
                                           options={
-                                            hookProductData &&
-                                            hookProductData.map((e) => {
+                                            products &&
+                                            products.map((e) => {
                                               const tmp = {
                                                 value: e._id,
                                                 label: e.productCode,
@@ -1145,7 +1156,7 @@ function OrderDetail() {
                                             })
                                           }
                                           onChange={(value) => {
-                                            const found = hookProductData.find(
+                                            const found = products.find(
                                               (e) => e._id === value
                                             );
                                             const fields =

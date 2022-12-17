@@ -45,6 +45,7 @@ import {
   URLTransportation,
   URLProduct,
   sizeList,
+  colorList,
 } from "../../config/constants";
 import LabelCustomization, {
   NumberFormatter,
@@ -70,29 +71,23 @@ import {
   customDisabledDate,
   handleOpenNewPage,
 } from "../../config/helperFuncs";
-import {
-  useTransportations,
-  useProducts,
-  useOrderDetail,
-} from "../../hooks/useZustand";
+import { useOrderDetail } from "../../hooks/useZustand";
 
 const { Text } = Typography;
-const { Option } = Select;
 
 function Orders() {
-  const { hookSetOrderDetail, hookOrderDetailData } = useOrderDetail(
-    (state) => state
-  );
-  const { hookSetTransportation, hookTransportationData } = useTransportations(
-    (state) => state
-  );
-  const { hookSetProduct, hookProductData } = useProducts((state) => state);
+  const { hookSetOrderDetail } = useOrderDetail((state) => state);
+  // const { hookSetTransportation, hookTransportationData } = useTransportations(
+  //   (state) => state
+  // );
   const paymentMethodList = ["CREDIT CARD", "COD"];
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 
   // const [isCreate, setIsCreate] = useState(false);
   const [selectedPaymentCreditCard, setSelectedPaymentCreditCard] =
     useState(null);
+  const [transportations, setTransportations] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [orders, setOrders] = useState(null);
@@ -105,6 +100,7 @@ function Orders() {
   const [cityListShippingInfo, setCityListShippingInfo] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [detailCreatingStatus, setDetailCreatingStatus] = useState(false);
+  const [createdDateState, setCreatedDateState] = useState(null);
   const [sendingDateState, setSendingDateState] = useState(null);
   const [receivedDateState, setReceivedDateState] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,9 +112,7 @@ function Orders() {
 
   const columns = [
     {
-      title: () => {
-        return <BoldText title={"Mã đơn hàng "} />;
-      },
+      title: "Mã đơn hàng ",
       key: "_id",
       dataIndex: "orderCode",
       width: "9%",
@@ -129,18 +123,14 @@ function Orders() {
     },
 
     {
-      title: () => {
-        return <BoldText title={"Ngày đặt hàng"} />;
-      },
+      title: "Ngày đặt hàng",
       width: "8%",
       key: "formattedCreatedDate",
       dataIndex: "formattedCreatedDate",
     },
 
     {
-      title: () => {
-        return <BoldText title={"Trạng thái"} />;
-      },
+      title: "Trạng thái",
       width: "7%",
       key: "status",
       dataIndex: "status",
@@ -150,18 +140,14 @@ function Orders() {
     },
 
     {
-      title: () => {
-        return <BoldText title={"Ngày gửi hàng"} />;
-      },
+      title: "Ngày gửi hàng",
       width: "8%",
       key: "formattedSendingDate",
       dataIndex: "formattedSendingDate",
     },
 
     {
-      title: () => {
-        return <BoldText title={"Tổng tiền"} />;
-      },
+      title: "Tổng tiền",
       key: "totalPrice",
       dataIndex: "totalPrice",
       width: "6%",
@@ -171,18 +157,14 @@ function Orders() {
     },
 
     {
-      title: () => {
-        return <BoldText title={"Ngày nhận hàng"} />;
-      },
+      title: "Ngày nhận hàng",
       width: "8%",
       key: "formattedReceivedDate",
       dataIndex: "formattedReceivedDate",
     },
 
     {
-      title: () => {
-        return <BoldText title={"Thao tác"} />;
-      },
+      title: "Thao tác",
       key: "actions",
       width: "5%",
       fixed: "right",
@@ -225,13 +207,6 @@ function Orders() {
       },
     },
   ];
-
-  //
-  //Func redicrect page to orderDetail
-  // const  handleClick_DetailBtn = (id)=>{
-  //   // let path = `/orderDetail/${id}`;
-  //   navigate("/home")
-  // }
   const handleOk = () => {
     formUpdate.submit();
   };
@@ -249,6 +224,7 @@ function Orders() {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
+    setCreatedDateState(moment(record.createdDate).format("YYYY-MM-DD"));
     setSendingDateState(
       record.sendingDate
         ? moment(record.sendingDate).format("YYYY-MM-DD")
@@ -278,13 +254,19 @@ function Orders() {
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
     getOrderDetails.map((product) => {
-      let tmpProduct = hookProductData.find((e) => (e._id = product.productId));
-      configOrderDetails.push({
-        productId: product.productId,
-        size: product.size,
-        quantity: product.quantity,
-        price: tmpProduct.price,
-        discount: tmpProduct.discount,
+      let tmpProduct = products.find((e) => (e._id = product.productId));
+      tmpProduct.attributes.map((attribute) => {
+        if (
+          attribute.color === product.color &&
+          attribute.size === product.size
+        ) {
+          configOrderDetails.push({
+            productAttributeId: attribute._id,
+            quantity: product.quantity,
+            price: product.price,
+            discount: product.discount,
+          });
+        }
       });
     });
     //Add new handler
@@ -509,10 +491,8 @@ function Orders() {
     axiosClient
       .delete(URLOrder + "/deleteOne/" + _id)
       .then((response) => {
-        console.log(response);
         if (response.status === 200) {
           if (response.data?.noneExist) {
-            console.log("test error");
             message.warning(response.data.noneExist);
           } else {
             message.info("Xóa thành công");
@@ -579,15 +559,15 @@ function Orders() {
 
   useEffect(() => {
     axiosClient.get(`${URLTransportation}`).then((response) => {
-      hookSetTransportation(response.data.results);
+      setTransportations(response.data.results);
+    });
+  }, []);
+  useEffect(() => {
+    axiosClient.get(`${URLProduct}/09GetAllBestDiscount`).then((response) => {
+      setProducts(response.data.results);
     });
   }, []);
 
-  useEffect(() => {
-    axiosClient.get(`${URLProduct}`).then((response) => {
-      hookSetProduct(response.data);
-    });
-  }, []);
   return (
     <Layout>
       <Content style={{ padding: 24 }}>
@@ -602,6 +582,7 @@ function Orders() {
             console.error("Error at onFinishFailed at formCreate");
           }}
           initialValues={{
+            createdDate: moment(new Date()).format("DD-MM-YYYY"),
             sendingDate: null,
             receivedDate: null,
             status: "WAITING",
@@ -618,7 +599,7 @@ function Orders() {
               name: "createdDate",
             })}
           >
-            <Text strong>{moment(new Date()).format("DD-MM-YYYY")}</Text>
+            <Input bordered={false} disabled style={{ fontWeight: 700 }} />
           </Form.Item>
 
           {/* When click more detail create form */}
@@ -816,11 +797,11 @@ function Orders() {
                 >
                   <Select
                     style={{ width: 450 }}
-                    loading={!hookTransportationData}
+                    loading={!transportations}
                     placeholder="Chọn"
                   >
-                    {hookTransportationData &&
-                      hookTransportationData.map((t) => {
+                    {transportations &&
+                      transportations.map((t) => {
                         const customPrice = numeral(t.price).format("0,0");
                         return (
                           <Select.Option key={t._id} value={t._id}>
@@ -1100,7 +1081,6 @@ function Orders() {
                 {fields.map(({ key, name, ...restField }, index) => (
                   <Fragment key={key}>
                     <Space
-                      // key={key}
                       style={{
                         display: "flex",
                         marginBottom: 8,
@@ -1115,23 +1095,21 @@ function Orders() {
                               title={`Tên sản phẩm ${name + 1}`}
                             />
                             name={[name, "productName"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn sản phẩm",
+                              },
+                            ]}
                           >
                             <Input
+                              style={{ minWidth: 400, maxWidth: 800 }}
                               placeholder="Tên sản phẩm"
                               disabled
                               addonBefore={
-                                <Form.Item
-                                  name={[name, "productId"]}
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Chưa chọn mã sản phẩm",
-                                    },
-                                  ]}
-                                  noStyle
-                                >
+                                <Form.Item name={[name, "productId"]} noStyle>
                                   <Select
-                                    loading={!hookProductData}
+                                    loading={!products}
                                     placeholder="Mã số"
                                     style={{ width: 100 }}
                                     showSearch
@@ -1142,8 +1120,8 @@ function Orders() {
                                         .includes(input.toLowerCase())
                                     }
                                     options={
-                                      hookProductData &&
-                                      hookProductData.map((e) => {
+                                      products &&
+                                      products.map((e) => {
                                         const tmp = {
                                           value: e._id,
                                           label: e.productCode,
@@ -1152,16 +1130,31 @@ function Orders() {
                                       })
                                     }
                                     onChange={(value) => {
-                                      const found = hookProductData.find(
+                                      const found = products.find(
                                         (e) => e._id === value
                                       );
+                                      let defaultSize = null;
+                                      let defaultColor = null;
+                                      let defaultPrice = null;
+                                      let defaultDiscount = null;
+                                      found.attributes.map((a) => {
+                                        if (a.discount === found.maxDiscount) {
+                                          defaultColor = a.color;
+                                          defaultSize = a.size;
+                                          defaultPrice = a.price;
+                                          defaultDiscount = a.discount;
+                                        }
+                                      });
                                       const fields =
                                         formCreate.getFieldsValue();
                                       const { orderDetails } = fields;
                                       Object.assign(orderDetails[name], {
                                         productName: found.name,
-                                        price: found.price,
-                                        discount: found.discount,
+                                        color: defaultColor,
+                                        size: defaultSize,
+                                        quantity: 1,
+                                        price: defaultPrice,
+                                        discount: defaultDiscount,
                                       });
                                       formCreate.setFieldsValue({
                                         orderDetails,
@@ -1172,6 +1165,144 @@ function Orders() {
                               }
                             />
                           </Form.Item>
+                          <Form.Item
+                            label=<LabelCustomization title={`Size`} />
+                            name={[name, "size"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn Size",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Size"
+                              style={{
+                                width: 70,
+                              }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                sizeList &&
+                                sizeList.map((s) => {
+                                  const tmp = {
+                                    value: s,
+                                    label: s,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                              onChange={() => {
+                                const fields = formCreate.getFieldsValue();
+                                const { orderDetails } = fields;
+                                Object.assign(orderDetails[name], {
+                                  color: null,
+                                });
+                                formCreate.setFieldsValue({
+                                  orderDetails,
+                                });
+                              }}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            label=<LabelCustomization title={`Màu sắc`} />
+                            name={[name, "color"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Chưa chọn màu",
+                              },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Màu sắc"
+                              style={{
+                                width: 160,
+                              }}
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              options={
+                                colorList &&
+                                colorList.map((s) => {
+                                  const tmp = {
+                                    value: s,
+                                    label: s,
+                                  };
+                                  return tmp;
+                                })
+                              }
+                              onChange={() => {
+                                const fields = formCreate.getFieldsValue();
+                                const { orderDetails } = fields;
+                                const tmpSize = orderDetails[name].size;
+                                const tmpColor = orderDetails[name].color;
+                                const tmpProductId =
+                                  orderDetails[name].productId;
+                                const found = products.find(
+                                  (e) => e._id === tmpProductId
+                                );
+                                let resetSize = tmpSize;
+                                let resetColor = tmpColor;
+                                let resetPrice, resetDiscount;
+                                let checkExisting = false;
+                                let listSize_Color =
+                                  "Sản phẩm này chỉ còn các loại( Màu- Size): ";
+                                found.attributes.map((a) => {
+                                  if (
+                                    a.size === tmpSize &&
+                                    a.color === tmpColor
+                                  ) {
+                                    checkExisting = true;
+                                    Object.assign(orderDetails[name], {
+                                      price: a.price,
+                                      discount: a.discount,
+                                    });
+                                    formCreate.setFieldsValue({
+                                      orderDetails,
+                                    });
+                                    return;
+                                  } else if (a.discount === found.maxDiscount) {
+                                    listSize_Color += `${a.color}- ${a.size} ; `;
+                                    resetColor = a.color;
+                                    resetSize = a.size;
+                                    resetPrice = a.price;
+                                    resetDiscount = a.discount;
+                                  } else {
+                                    listSize_Color += ` ${a.size} - ${a.color} ; `;
+                                  }
+                                });
+
+                                if (!checkExisting) {
+                                  Object.assign(orderDetails[name], {
+                                    color: resetColor,
+                                    size: resetSize,
+                                    price: resetColor,
+                                    quantity: null,
+                                    discount: resetDiscount,
+                                  });
+                                  formCreate.setFieldsValue({
+                                    orderDetails,
+                                  });
+                                  notification.error({
+                                    message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
+                                    description: listSize_Color,
+                                    duration: 0,
+                                  });
+                                }
+                              }}
+                            />
+                          </Form.Item>
+
                           <Form.Item
                             label=<LabelCustomization title={`Số lượng`} />
                             {...restField}
@@ -1184,45 +1315,43 @@ function Orders() {
                             ]}
                           >
                             <InputNumber
-                              addonBefore={
-                                <Form.Item
-                                  name={[name, "size"]}
-                                  noStyle
-                                  rules={[
-                                    {
-                                      required: true,
-                                      message: "Chưa chọn Size",
-                                    },
-                                  ]}
-                                >
-                                  <Select
-                                    placeholder="Size"
-                                    style={{
-                                      width: 70,
-                                    }}
-                                    showSearch
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                      (option?.label ?? "")
-                                        .toLowerCase()
-                                        .includes(input.toLowerCase())
-                                    }
-                                    options={
-                                      sizeList &&
-                                      sizeList.map((s) => {
-                                        const tmp = {
-                                          value: s,
-                                          label: s,
-                                        };
-                                        return tmp;
-                                      })
-                                    }
-                                  />
-                                </Form.Item>
-                              }
                               style={{ minWidth: 120, maxWidth: 360 }}
                               min={0}
                               addonAfter="sản phẩm"
+                              onChange={(value) => {
+                                const fields = formCreate.getFieldsValue();
+                                const { orderDetails } = fields;
+                                const tmpSize = orderDetails[name].size;
+                                const tmpColor = orderDetails[name].color;
+                                const tmpProductId =
+                                  orderDetails[name].productId;
+                                if (tmpSize && tmpColor) {
+                                  console.log("1");
+                                  const found = products.find(
+                                    (e) => e._id === tmpProductId
+                                  );
+                                  found.attributes.map((a) => {
+                                    if (
+                                      a.size === tmpSize &&
+                                      a.color === tmpColor
+                                    ) {
+                                      if (value <= a.stock) {
+                                        return Promise.resolve();
+                                      }
+                                      Object.assign(orderDetails[name], {
+                                        quantity: null,
+                                      });
+                                      formCreate.setFieldsValue({
+                                        orderDetails,
+                                      });
+                                      return notification.error({
+                                        message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
+                                        description: `Kho hàng còn ${a.stock}`,
+                                      });
+                                    }
+                                  });
+                                }
+                              }}
                             />
                           </Form.Item>
                           <Form.Item
@@ -1300,7 +1429,7 @@ function Orders() {
           </Form.List>
           <Form.Item
             wrapperCol={{
-              offset: 8,
+              offset: 4,
               span: 16,
             }}
           >
@@ -1481,14 +1610,12 @@ function Orders() {
               >
                 <DatePicker
                   showToday={false}
-                  disabledDate={(current) =>
-                    customDisabledDate(
+                  disabledDate={(current) => {
+                    return customDisabledDate(
                       current,
-                      moment(
-                        formUpdate.getFieldsValue(["createdDate"]).createdDate
-                      ).format("YYYY-MM-DD")
-                    )
-                  }
+                      createdDateState
+                    );
+                  }}
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}
                   value={moment(sendingDateState)}
@@ -1502,7 +1629,7 @@ function Orders() {
                         message.error(
                           "Ngày chuyển hàng không thể sau ngày nhận hàng"
                         );
-                        formUpdate.setFieldsValue({ receivedDate: null });
+                        formUpdate.setFieldsValue({ receivedDate: null, status: "SHIPPING" });
                         setReceivedDateState(null);
                       }
                     } else {
