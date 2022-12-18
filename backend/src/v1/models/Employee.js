@@ -21,8 +21,8 @@ const employeeSchema = new Schema(
         gender: {
             type: String,
             trim: true,
-            enum: ["NAM", "NU", "KHONG_XAC_DINH"],
-            default: "KHONG_XAC_DINH",
+            enum: ["NAM", "NỮ", "KHÔNG XÁC ĐỊNH"],
+            default: "KHÔNG XÁC ĐỊNH",
             required: true,
           },
         phoneNumber: {

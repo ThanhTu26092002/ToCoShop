@@ -45,7 +45,8 @@ function MyProfile() {
   const [myProfile, setMyProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
-  const [authId, setAuthId] = useState(null);
+  const [savedPassword, setSavedPassword] = useState(null);
+  const [authId] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenPassword, setIsModalOpenPassword] = useState(false);
@@ -263,8 +264,7 @@ function MyProfile() {
       .get(`${URLQLLogin}/findById/${id}`)
       .then((response) => {
         setIsModalOpenPassword(true);
-
-        setAuthId(response.data.result._id);
+        setSavedPassword(response.data.result.password);
       })
       .catch((err) => {
         message.error("Lỗi hệ thống");
@@ -275,9 +275,28 @@ function MyProfile() {
   };
 
   const handleFinishUpdatePassword = (values) => {
-    console.log("get new values:", values);
-    console.log("get new values:", authId);
-    return
+    const id = auth.payload.uid;
+    axiosClient
+      .patch(`${URLQLLogin}/updateOne/${id}`, { password: values.password })
+      .then((response) => {
+        setIsModalOpenPassword(false);
+        notification.info({
+          message: "Thông báo",
+          description: "Cập nhật mật khẩu mới thành công, vui lòng đăng nhập lại",
+        });
+        setTimeout(() => {
+          signOut();
+          navigate("/login");
+        }, 3000);
+        return;
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      });
   };
 
   const handleOk = () => {
@@ -294,6 +313,7 @@ function MyProfile() {
     setIsModalOpenPassword(false);
   };
   //handleUpdatePassworkOk
+
   const handleUploadImage = (options, record) => {
     const { file } = options;
     let formData = new FormData();
@@ -338,9 +358,9 @@ function MyProfile() {
 
   return (
     <Layout>
-      {(!myProfile) && <Spin size="large"></Spin>}
-      {(loading) && <Spin size="large"></Spin>}
-      {(myProfile ) && !loading && (
+      {!myProfile && <Spin size="large"></Spin>}
+      {loading && <Spin size="large"></Spin>}
+      {myProfile && !loading && (
         <>
           <a>Thông Tin Cá Nhân</a>
           <Image
@@ -487,11 +507,14 @@ function MyProfile() {
                 required: true,
                 message: "Vui lòng nhập mật khẩu hiện tại!",
               },
-              {
-                pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
-                message:
-                  "Mật khẩu có ít nhất 8 kí tự bao gồm ít nhất một chữ thường, một chữ in hoa và một chữ số",
-              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || savedPassword === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Mật khẩu cũ không đúng!"));
+                },
+              }),
             ]}
             hasFeedback
           >
