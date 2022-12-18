@@ -6,55 +6,57 @@ const multer = require("multer");
 // const jwt = require("jsonwebtoken");
 const upload = require("../middleware/multerUpload");
 const Category = require("../models/Category");
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const {
   COLLECTION_CATEGORIES,
   PATH_FOLDER_PUBLIC_UPLOAD,
   PATH_FOLDER_IMAGES,
+  COLLECTION_LOGINS,
 } = require("../configs/constants");
 
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { loadCategory, validateId } = require("../validations/commonValidators");
 
-const { findDocuments } = require("../utils/MongodbHelper");
+const { findDocuments, findDocument } = require("../utils/MongodbHelper");
 
-//
-//CHECK ROLES
-// const allowRoles = (...roles) => {
-//   //return a middleware
-//   return (req, res, next) => {
-//     //GET BEARER TOKEN FROM HEADER
-//     const bearerToken = req.get("Authorization").replace("Bearer ", "");
-//     //DECODE TOKEN
-//     const payload = jwt.decode(bearerToken, { json: true });
-//     //AFTER DECODE: GET UID FROM PAYLOAD
-//     const { uid } = payload;
-//     // FINDING BY ID
-//     findDocument(uid, COLLECTION_USER).then((document) => {
-//       console.log(document);
-//       if (document && document.roles) {
-//         let ok = false;
-//         document.roles.forEach((role) => {
-//           if (roles.includes(role)) {
-//             ok = true;
-//             return;
-//           }
-//         });
-//         if (ok) {
-//           next();
-//         } else {
-//           res.status(403).json({ message: "Forbidden" });
-//         }
-//       } else {
-//         res.status(403).json({ message: "Forbidden" });
-//       }
-//     });
-//   };
-// };
+// CHECK ROLES
+const allowRoles = (...roles) => {
+  //return a middleware
+  return (req, res, next) => {
+    //GET BEARER TOKEN FROM HEADER
+    const bearerToken = req.get("Authorization").replace("Bearer ", "");
+    //DECODE TOKEN
+    const payload = jwt.decode(bearerToken, { json: true });
+    //AFTER DECODE: GET UID FROM PAYLOAD
+    const { uid } = payload;
+    // FINDING BY ID
+    findDocument(uid, COLLECTION_LOGINS).then((document) => {
+      console.log(document);
+      if (document && document.roles) {
+        let ok = false;
+        document.roles.forEach((role) => {
+          if (roles.includes(role)) {
+            ok = true;
+            return;
+          }
+        });
+        if (ok) {
+          next();
+        } else {
+          res.status(403).json({ message: "Forbidden" });
+        }
+      } else {
+        res.status(403).json({ message: "Forbidden" });
+      }
+    });
+  };
+};
 
 //Get all docs
-// router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("administrators"), async (req, res, next) => {
-router.get("/", async (req, res, next) => {
+router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async (req, res, next) => {
+// router.get("/", async (req, res, next) => {
   try {
     const docs = await Category.find().sort({ _id: -1 });
     // const docs = await Category.find();

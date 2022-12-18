@@ -18,6 +18,7 @@ const {
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
 const { LookupTransportation } = require("../configs/lookups");
+const Product = require("../models/Product");
 const aggregateLookup = [
   {
     $unwind: "$orderDetails",
@@ -102,7 +103,7 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
       { $match: { _id: id } },
       ...aggregateLookup,
     ]);
-    if (docs.length==0) {
+    if (docs.length == 0) {
       res.status(404).json({
         ok: true,
         error: {
@@ -125,6 +126,57 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
 router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
+    const { orderDetails } = data;
+    //Kiểm tra xem sản phẩm còn trong kho trước khi cập nhật
+    for (let i = 0; i < orderDetails.length; i++) {
+      const attributeQuantity = orderDetails[i].quantity;
+      const attributeName = orderDetails[i].productName;
+      const attributeColor = orderDetails[i].color;
+      const attributeSize = orderDetails[i].size;
+      //Nếu dữ liệu đầu vào mà số lượng <=0 thì báo lỗi
+      if (attributeQuantity <= 0) {
+        const errMsg = formatterErrorFunc(
+          {
+            name: "Lỗi dữ liệu",
+            message: `Số lượng sản phẩm  đặt mua phải lớn hơn 0`,
+          },
+          COLLECTION_ORDERS
+        );
+        res.status(400).json({ error: errMsg });
+        return;
+      }
+      const attributeId = new ObjectId(orderDetails[i].productAttributeId);
+      //1. Lấy danh sách sản phẩm đã unwind attributes.
+      const aggregateProduct = [
+        {
+          $unwind: "$attributes",
+        },
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $lt: [0, "$attributes.stock"] },
+                { $lte: [attributeQuantity, "$attributes.stock"] },
+                { $eq: [attributeId, "$attributes._id"] },
+              ],
+            },
+          },
+        },
+      ];
+      const products = await Product.aggregate(aggregateProduct);
+      if(products.length < 1){
+        const errMsg = formatterErrorFunc(
+          {
+            name: "Hết hàng",
+            message: `Sản phẩm ${attributeName} size ${attributeSize}-màu ${attributeColor} không còn hàng trong kho `,
+          },
+          COLLECTION_ORDERS
+        );
+        res.status(400).json({ error: errMsg });
+        return;
+      }
+      //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+    }
     //format date: YYYY-MM-DD => type of Date: string
     if (data.shippedDate) {
       data.shippedDate = moment(data.shippedDate)
@@ -158,7 +210,7 @@ router.post("/insertOne", async (req, res, next) => {
     await order.save();
     res.status(201).json(order);
   } catch (err) {
-    const errMsg = formatterErrorFunc(err);
+    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
     res.status(400).json({ error: errMsg });
   }
 });
@@ -242,7 +294,7 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
       result: updatedDoc,
     });
   } catch (err) {
-    const errMsg = formatterErrorFunc(err);
+    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
     res.status(400).json({ error: errMsg });
   }
 });
@@ -327,7 +379,7 @@ router.patch("/updateOne_Products/:id", validateId, async (req, res, next) => {
       result: updatedDoc,
     });
   } catch (err) {
-    const errMsg = formatterErrorFunc(err);
+    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
     res.status(400).json({ error: errMsg });
   }
 });
