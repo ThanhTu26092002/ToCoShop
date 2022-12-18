@@ -5,7 +5,11 @@ import moment from "moment";
 import "moment/locale/vi";
 import locale from "antd/es/locale/vi_VN";
 import axiosClient from "../config/axios";
-import { URLEmployee, WEB_SERVER_UPLOAD_URL } from "../config/constants";
+import {
+  genderList,
+  URLEmployee,
+  WEB_SERVER_UPLOAD_URL,
+} from "../config/constants";
 
 import {
   Button,
@@ -19,6 +23,7 @@ import {
   Modal,
   Upload,
   DatePicker,
+  Select,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
@@ -34,11 +39,13 @@ import LabelCustomization, {
   TitleTable,
 } from "../components/subComponents";
 import ConfigProvider from "antd/es/config-provider";
+import { objCompare } from "../config/helperFuncs";
 
 function Employees() {
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
+  const [selectedRecord, setSelectedRecord] = useState({});
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,6 +157,11 @@ function Employees() {
       },
       key: "email",
       dataIndex: "email",
+    },
+    {
+      title: "Giới tính",
+      key: "gender",
+      dataIndex: "gender",
     },
     {
       title: () => {
@@ -364,44 +376,16 @@ function Employees() {
   };
   //
   const handleClick_EditBtn = (record) => {
-    const savedUrl = [
-      {
-        uid: "-1",
-        // name: 'IMG_0693.JPG',
-        status: "done",
-        url: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
-        thumbUrl: `${WEB_SERVER_UPLOAD_URL}${record.imageUrl}`,
-      },
-    ];
-
     setIsModalOpen(true);
+    setSelectedRecord(record)
     setSelectedId(record._id);
-    setCurrentImageUrl(record.imageUrl ? record.imageUrl : null);
-    setIsChangedImage(false);
-    setIsChangeValueUpload(false);
-    let fieldsValues = { file: record.imageUrl ? savedUrl : [] };
-    for (let key in record) {
-      fieldsValues[key] = record[key];
-    }
+    const  fieldsValues = {...record}
     if (record.birthday) {
       fieldsValues.birthday = moment(record.birthday);
     } else {
       fieldsValues.birthday = undefined;
     }
-
-    console.log(fieldsValues);
     formUpdate.setFieldsValue(fieldsValues);
-  };
-  //
-  const handleChange_UploadOnlyImage = (info) => {
-    if (info.file.status !== "uploading") {
-    }
-    if (info.file.status === "done") {
-      setRefresh((e) => !e);
-      message.success(`${info.file.name} được cập nhật thành công!`);
-    } else if (info.file.status === "error") {
-      message.error(`${info.file.name} file cập nhật thất bại.`);
-    }
   };
   //
   const handleFinishCreate = (values) => {
@@ -458,7 +442,32 @@ function Employees() {
   const handleFinishUpdate = (values) => {
     console.log("values", values);
     //SUBMIT
-
+    const oldData = {
+      ...selectedRecord,
+      birthday: moment(selectedRecord.birthday).format("YYYY-MM-DD"),
+    };
+    const newData = {
+      ...values,
+      birthday: moment(values.birthday).format("YYYY-MM-DD"),
+    };
+    delete newData.currentBirthday;
+    const checkChangedData = objCompare(newData, oldData);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
+      setIsModalOpen(false);
+      formUpdate.resetFields();
+      return;
+    }
+    //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
+    if (checkChangedData.email) {
+      checkChangedData.oldEmail = selectedRecord.email;
+    }
+    //Nếu thay đổi ngày sinh thì cần chuyển format ngày sinh trước khi gửi cập nhật
+    if (checkChangedData.birthday) {
+      checkChangedData.birthday = moment(checkChangedData.birthday);
+    }
+    console.log('test', checkChangedData)
+    //
     let URL = URLEmployee + "/updateOne/" + selectedId;
     //POST
     axiosClient
@@ -553,6 +562,40 @@ function Employees() {
           <Form.Item {...PropsFormItemPhoneNumber}>
             <Input placeholder="Số điện thoại của nhan vien" />
           </Form.Item>
+          <Form.Item
+            label=<LabelCustomization title={`Giới tính`} />
+            name={"gender"}
+            rules={[
+              {
+                required: true,
+                message: "Chưa chọn giới tính",
+              },
+            ]}
+          >
+            <Select
+              placeholder="Giới tính"
+              style={{
+                width: 200,
+              }}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={
+                genderList &&
+                genderList.map((s) => {
+                  const tmp = {
+                    value: s,
+                    label: s,
+                  };
+                  return tmp;
+                })
+              }
+            />
+          </Form.Item>
           <Form.Item {...PropsFormItemBirthday}>
             <DatePicker
               allowClear={false}
@@ -565,30 +608,8 @@ function Employees() {
             />
           </Form.Item>
           <Form.Item {...PropsFormItemAddress}>
-            <TextArea rows={3} placeholder="Dia chi nhan vien" />
+            <TextArea rows={3} placeholder="Địa chỉ nhân viên" />
           </Form.Item>
-
-          {/* <Form.Item
-              {...PropsFormItemUpload}
-              //Handling update fileList
-              getValueFromEvent={normFile}
-            >
-              <Upload
-                listType="picture"
-                showUploadList={true}
-                beforeUpload={(file) => {
-                  setFile(file);
-                  return false;
-                }}
-                onRemove={() => {
-                  setFile(null);
-                }}
-              >
-                <Button icon={<UploadOutlined />} loading={uploading}>
-                  Tải ảnh
-                </Button>
-              </Upload>
-            </Form.Item> */}
 
           <Form.Item
             wrapperCol={{
@@ -601,7 +622,6 @@ function Employees() {
             </Button>
           </Form.Item>
         </Form>
-        {/* </ConfigProvider> */}
 
         <Table
           {...PropsTable}
@@ -647,6 +667,40 @@ function Employees() {
             <Form.Item {...PropsFormItemPhoneNumber}>
               <Input placeholder="Số điện thoại của nhan vien" />
             </Form.Item>
+            <Form.Item
+              label=<LabelCustomization title={`Giới tính`} />
+              name={"gender"}
+              rules={[
+                {
+                  required: true,
+                  message: "Chưa chọn giới tính",
+                },
+              ]}
+            >
+              <Select
+                placeholder="Giới tính"
+                style={{
+                  width: 200,
+                }}
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={
+                  genderList &&
+                  genderList.map((s) => {
+                    const tmp = {
+                      value: s,
+                      label: s,
+                    };
+                    return tmp;
+                  })
+                }
+              />
+            </Form.Item>
             <Form.Item {...PropsFormItemBirthday}>
               <DatePicker
                 allowClear={false}
@@ -659,7 +713,7 @@ function Employees() {
               />
             </Form.Item>
             <Form.Item {...PropsFormItemAddress}>
-              <TextArea rows={3} placeholder="Dia chi nhan vien" />
+              <TextArea rows={3} placeholder="Địa chỉ nhân viên" />
             </Form.Item>
           </Form>
         </Modal>

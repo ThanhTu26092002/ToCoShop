@@ -13,6 +13,7 @@ const URLQLLogin = "http://localhost:9000/v1/login";
 const ICON_NoImage = "./images/logo_toCoShop.png";
 const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 const sizeList = ["S", "M", "L", "XL", "XXL"];
+const genderList = ["NAM", "NỮ", "KHÔNG XÁC ĐỊNH"];
 const colorList = ["Xanh Navy", "Vàng", "Xám", "Đen", "Hồng", "Trắng"];
 
 const promotionPositionOptions = [
@@ -38,33 +39,6 @@ const promotionPositionOptions = [
   },
 ];
 
-// const promotionPositionOptions = [
-//     {
-//         label: "Mẫu hot nhất năm 2022",
-//         value: "hot2022",
-//       },
-//       {
-//         label: "Outfit Mùa Hè",
-//         value: "muahe",
-//       },
-//       {
-//         label: "Outfit Mùa thu",
-//         value: "muathu",
-//       },
-//       {
-//         label: "Outfit Mùa xuân",
-//         value: "muaxuan",
-//       },
-//       {
-//         label: "Outfit Mùa đông",
-//         value: "muadong",
-//       },
-//       {
-//         label: "Couple",
-//         value: "couple",
-//       }
-// ]
-
 module.exports = {
   URLCategory,
   URLSupplier,
@@ -81,6 +55,7 @@ module.exports = {
   dateFormatList,
   sizeList,
   colorList,
+  genderList,
   URLQLLogin,
   promotionPositionOptions,
 };
