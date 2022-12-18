@@ -179,6 +179,7 @@ const orderDetailSchema = new Schema(
     quantity: {
       type: Number,
       required: true,
+      min: [1, "Số lượng sản phẩm chọn mua phải lớn hơn 0"]
     },
     price: {
       type: Number,
