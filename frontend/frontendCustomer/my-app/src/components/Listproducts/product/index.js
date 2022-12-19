@@ -8,9 +8,9 @@ function index({imgproduct}) {
     <div className='product'>
         <div className='product_img'>
             <img src={"http://localhost:9000/uploads"+imgproduct.coverImage} alt=''></img>
-            <div className='addToCart cart1'>
+            {/* <div className='addToCart cart1'>
                     <a  href='#'>Add to Cart</a>
-                </div>
+                </div> */}
         </div>
         <div className='product_title'>
             <div className='product_price'>

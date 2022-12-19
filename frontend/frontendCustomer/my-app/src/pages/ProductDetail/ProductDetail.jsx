@@ -4,7 +4,7 @@ import Images from "../../components/Listproducts/images";
 import Footer from "../../components/Footer/Footer";
 import Search_cart from "../../components/SearchCart/index";
 import { useParams } from "react-router-dom";
-
+import { useCart } from '../../hooks/useCart'
 import axios from "axios";
 import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
@@ -42,6 +42,8 @@ function productdetails() {
   const [selectedSize_Click, setSelectedSize_Click] = useState(atttributeId);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [categoryId, setCategoryId] = useState(null); //danhmuc
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+  const {add}=useCart((state)=>state)
   const fetchProduct = async () => {
     try {
       const res = await axios.get(
@@ -49,6 +51,7 @@ function productdetails() {
       );
       setProduct(res.data.results[0]);
       res.data.results[0].attributes.map((item) => {
+      console.log("get data1:", res.data.results[0]);
         
 
         if (item._id === atttributeId) {
@@ -68,6 +71,7 @@ function productdetails() {
       console.log("err:", error);
     }
   };
+  
   // eslint-disable-next-line react-hooks/rules-of-hooks
 useEffect(()=>{
   if (selectedColor_Click === selectedSize_Click) {
@@ -88,7 +92,9 @@ useEffect(()=>{
   }, []);
 
   return (
+    
     product && (
+
       <div className="main_product_detall">
         <Slider />
         <Search_cart />
@@ -242,7 +248,10 @@ useEffect(()=>{
                   <p>{product.stockTotal} sản phẩm có sẵn</p>
                 </div>
                 <div className="btn_cart_buy">
-                  <a href="#" className="btncart">
+                  <a href="#" className="btncart" onClick={()=>{
+                     console.log("selectedColor_Click",selectedColor_Click)
+                    add({product:product,quantity:1,attributeId:selectedColor_Click})
+                  }}>
                     THÊM VÀO GIỎ HÀNG
                   </a>
                   <a href="#" className="btnbuy">
