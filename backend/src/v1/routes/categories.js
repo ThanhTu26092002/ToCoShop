@@ -54,8 +54,8 @@ const allowRoles = (...roles) => {
   };
 };
 
-//Get all docs
-router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async (req, res, next) => {
+//1.Get all docs
+router.get("/", async (req, res, next) => {
 // router.get("/", async (req, res, next) => {
   try {
     const docs = await Category.find().sort({ _id: -1 });
@@ -68,8 +68,8 @@ router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("ADM
 });
 //
 
-// Update categoryImage
-router.post("/categoryImage/:id", loadCategory, function (req, res) {
+// 2. Update categoryImage
+router.post("/categoryImage/:id", passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), loadCategory, function (req, res) {
   upload.single("file")(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       res.status(500).json({ type: "MulterError", err: err });
@@ -172,8 +172,8 @@ router.post("/categoryImage/:id", loadCategory, function (req, res) {
   });
 });
 
-// Insert One WITHOUT An Image
-router.post("/insertOne", async (req, res) => {
+//3. Insert One WITHOUT An Image
+router.post("/insertOne",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async (req, res) => {
   try {
     const data = req.body;
     //Create a new blog post object
@@ -188,8 +188,8 @@ router.post("/insertOne", async (req, res) => {
 });
 //
 
-//--Update One with _Id WITHOUT image
-router.patch("/updateOne/:id", validateId, async (req, res) => {
+//4. --Update One with _Id WITHOUT image
+router.patch("/updateOne/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
@@ -219,8 +219,8 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
 });
 //
 
-//Delete ONE with ID
-router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
+//5. Delete ONE with ID
+router.delete("/deleteOne/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const deleteDoc = await Category.findByIdAndDelete(id);
@@ -288,82 +288,11 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
 });
 //
 
-// //FUNCTION NOT STILL USE----------------------------------------------------------------------------------------------------------------------------------
-
-// router.get('/search-many', validateSchema(search_deleteManyCategoriesSchema), function(req, res, next) {
-//   const query= req.query;
-//   findDocuments({query: query}, COLLECTION_CATEGORIES)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({findFunction: "failed", err: err}))
-// })
-//
-
-//Insert Many  -- haven't validation yet
-//  router.post('/insert-many', validateSchema(insertManyCategoriesSchema), function (req, res, next){
-//   const list = req.body;
-//   insertDocuments(list, COLLECTION_CATEGORIES)
-//   .then(result => {
-//     res.status(201).json({ok: true, result})
-//   })
-//   .catch(err =>{
-//     res.json(500).json({ok:false})
-//   })
-//  })
-
-// Update MANY
-// router.patch('/update-many',validateSchema(updateManyCategorySchema), function(req, res, next){
-//   const query = req.query;
-//   const newValues = req.body;
-//   updateDocuments(query, newValues, COLLECTION_CATEGORIES)
-//     .then(result => {
-//       res.status(201).json({update: true, result: result})
-//     })
-//     .catch(err => res.json({update: false}))
-//  })
-//
-
-//Delete file from DiskStorage
-// router.delete('/delete-file/:id', async (req, res, next) => {
-//   // router.delete('/delete-file/:id',  (req, res, next) => {
-//   try{
-//     const {id} = req.params;
-//     const category = await Category.findById(id);
-//     console.log({status: true, message: 'we have got data of a category with id from req.params'})
-//     const directoryPath ='./public' +( category.imageUrl ? category.imageUrl: '');
-//     try{
-//       //delete file image Synchronously
-//       fs.unlinkSync(directoryPath);
-//       console.log({message: 'File Image is delete from DiskStorage '})
-
-//       //handling remove the field imageUrl after delete the picture of this id
-//       removeFieldById(ObjectId(id), {imageUrl: ''}, COLLECTION_CATEGORIES)
-//       .then(result => {
-//         res.status(201).json({removing : true, message: 'Remove field imageUrl successful', result: result})
-//       })
-//       .catch(err => res.json({update: false}))
-
-//     }catch(err){
-//       res.status(500).json({ message: "Could not delete the file. " + err})
-//     }
-//   }catch(err) {
-//     res.status(400).json({ errMsgMongoDB: { name: err.name, message: err.message } })
-//   }
-// })
-//
-
-//Delete MANY
-// router.delete('/delete-many',validateSchema(search_deleteManyCategoriesSchema), function(req, res, next) {
-//   const query= req.query;
-
-//   deleteMany(query, COLLECTION_CATEGORIES)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({deleteFunction: "failed", err: err}))
-// })
 
 //HAVEN'T USED YET------------------------------------------------------------------------------------
 
 // Get categories with all products  --- task 18
-router.get("/products", function (req, res) {
+router.get("/products",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), function (req, res) {
   const aggregate = [
     {
       $lookup: {
@@ -403,7 +332,7 @@ router.get("/products", function (req, res) {
 
 // TASK 30
 //Show categories with totalPrice from products have sold in each Category
-router.get("/totalPrice", function (req, res) {
+router.get("/totalPrice",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), function (req, res) {
   const aggregate = [
     {
       $lookup: {
