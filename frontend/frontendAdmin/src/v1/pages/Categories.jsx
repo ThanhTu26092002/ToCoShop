@@ -468,7 +468,7 @@ function Categories() {
           <Form
             {...PropsForm}
             form={formUpdate}
-            name="formUpdate"
+            name=" "
             onFinish={handleFinishUpdate}
             onFinishFailed={() => {
               // message.info("Error at onFinishFailed at formUpdate");

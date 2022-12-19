@@ -198,6 +198,8 @@ function MyProfile() {
     if (checkChangedData.birthday) {
       checkChangedData.birthday = moment(checkChangedData.birthday);
     }
+    //Thêm trường uid vào trước khi gửi đi, nhằm giúp xác minh người gửi cập nhật tài khoản chính họ
+    checkChangedData.uid= myProfile._id
     let URL = URLEmployee + "/updateOne/" + myProfile._id;
     //POST
     axios
@@ -277,7 +279,7 @@ function MyProfile() {
   const handleFinishUpdatePassword = (values) => {
     const id = auth.payload.uid;
     axiosClient
-      .patch(`${URLQLLogin}/updateOne/${id}`, { password: values.password })
+      .patch(`${URLQLLogin}/updateOne/${id}`, { password: values.password, uid: id })
       .then((response) => {
         setIsModalOpenPassword(false);
         notification.info({

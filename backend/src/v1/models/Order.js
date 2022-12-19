@@ -79,6 +79,10 @@ const shippingInfoSchema = new Schema(
       ref: "Transportation",
       required: true,
     },
+      transportationPrice: {
+        type: Number,
+        required: true,
+      },
     firstName: {
       type: String,
       trim: true,
