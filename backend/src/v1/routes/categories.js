@@ -54,7 +54,7 @@ const allowRoles = (...roles) => {
   };
 };
 
-//1.Get all docs
+//Get all docs
 router.get("/", async (req, res, next) => {
 // router.get("/", async (req, res, next) => {
   try {
