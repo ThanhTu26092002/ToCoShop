@@ -161,7 +161,8 @@ function AdminManagers() {
     if (checkChangedData.email) {
       checkChangedData.oldEmail = selectedRecord.email;
     }
-
+    //Thêm trường uid chứa id người đăng nhập nhằm xác định quyền chỉnh sửa tài khoản đăng nhập chính mình
+     checkChangedData.uid = auth.payload.uid;
     setLoadingBtn(true);
     axiosClient
       .patch(`${URLQLLogin}/updateOne/${selectedId}`, checkChangedData)

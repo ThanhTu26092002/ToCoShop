@@ -2,31 +2,16 @@
 const { json } = require("express");
 var express = require("express");
 var moment = require("moment");
-const { join } = require("lodash");
 const upload = require("../middleware/multerUpload");
 const multer = require("multer");
 const fs = require("fs");
-
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 var router = express.Router();
 
 const {
-  insertDocument,
-  insertDocuments,
-  updateDocument,
-  updateDocuments,
-  findDocuments,
-  deleteOneWithId,
-  deleteMany,
+  findDocuments, findDocument,
 } = require("../utils/MongodbHelper");
-// const {
-//   validateSchema,
-//   search_deleteWithId,
-//   search_deleteManyEmployeesSchema,
-//   insertOneEmployeeSchema,
-//   insertManyEmployeesSchema,
-//   updateOneEmployeeSchema,
-//   updateManyEmployeesSchema,
-// } = require("../models/schemas/schemasEmployeesOnlineShop.yup");
 const Employee = require("../models/Employee");
 const Login = require("../models/Login");
 
@@ -39,9 +24,40 @@ const {
 } = require("../configs/constants");
 const { validate } = require("../models/Employee");
 const { validateId, loadEmployee } = require("../validations/commonValidators");
-
+// CHECK ROLES
+const allowRoles = (...roles) => {
+  //return a middleware
+  return (req, res, next) => {
+    //GET BEARER TOKEN FROM HEADER
+    const bearerToken = req.get("Authorization").replace("Bearer ", "");
+    //DECODE TOKEN
+    const payload = jwt.decode(bearerToken, { json: true });
+    //AFTER DECODE: GET UID FROM PAYLOAD
+    const { uid } = payload;
+    // FINDING BY ID
+    findDocument(uid, COLLECTION_LOGINS).then((document) => {
+      console.log(document);
+      if (document && document.roles) {
+        let ok = false;
+        document.roles.forEach((role) => {
+          if (roles.includes(role)) {
+            ok = true;
+            return;
+          }
+        });
+        if (ok) {
+          next();
+        } else {
+          res.status(403).json({ message: "Forbidden" });
+        }
+      } else {
+        res.status(403).json({ message: "Forbidden" });
+      }
+    });
+  };
+};
 //Get all employees
-router.get("/", async function (req, res, next) {
+router.get("/",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async function (req, res, next) {
   try {
     const docs = await Employee.find().sort({ _id: -1 });
     res.json({ ok: true, results: docs });
@@ -52,8 +68,7 @@ router.get("/", async function (req, res, next) {
 });
 
 // Find One Document Following ID
-// http://localhost:9000/categoriesOnlineShop/search/ how to response a message error
-router.get("/findById/:id", validateId, async (req, res, next) => {
+router.get("/findById/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const doc = await Employee.findById(id);
@@ -64,7 +79,7 @@ router.get("/findById/:id", validateId, async (req, res, next) => {
   }
 });
 
-router.post("/employeeImage/:id", loadEmployee, function (req, res) {
+router.post("/employeeImage/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), loadEmployee, function (req, res) {
   upload.single("file")(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       res.status(500).json({ type: "MulterError", err: err });
@@ -168,7 +183,7 @@ router.post("/employeeImage/:id", loadEmployee, function (req, res) {
   });
 });
 
-router.post("/insertOne", async function (req, res, next) {
+router.post("/insertOne",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async function (req, res, next) {
   try {
     const data = req.body;
     if (data.birthday) {
@@ -187,7 +202,7 @@ router.post("/insertOne", async function (req, res, next) {
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
-router.patch("/updateOne/:id", validateId, async (req, res) => {
+router.patch("/updateOne/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = { ...req.body };
@@ -279,7 +294,7 @@ router.patch("/updateOne/:id", validateId, async (req, res) => {
   }
 });
 
-router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
+router.delete("/deleteOne/:id",passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { email } = req.body;
@@ -371,88 +386,6 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
     });
   }
 });
-//  //Insert Many  -- haven't validation yet
-//  router.post('/insert-many', validateSchema(insertManyEmployeesSchema), function (req, res, next){
-//   const listBirthdays = req.body;
-//  //convert type of birthday from STRING to DATE with formatting 'YYYY-MM-DD
-//  listBirthdays.map(customer => {
-//   if(customer.birthday) {
-//     customer.birthday = new Date(moment(customer.birthday).utc().local().format('YYYY-MM-DD'))
-//   }
-// })
-//   insertDocuments(listBirthdays, COLLECTION_NAME)
-//   .then(result => {
-//     res.status(200).json({ok: true, result: result})
-//   })
-//   .catch(err =>{
-//     res.json(500).json({ok:false})
-//   })
-//  })
-// //
-// //dsfhsdfsdsdfsdiufhsdif
-//  //Update One with _Id
-//  router.patch('/update-one/:id',validateSchema(updateOneEmployeeSchema), function(req, res, next){
-//   const {id} = req.params;
-//   const paramId = {_id : ObjectId(id)}
-//   const data = req.body
-
-//   if(data.birthday)
-//    {
-//      //format date: YYYY-MM-Đ => type of Date: string
-//     data.birthday= moment(data.birthday).utc().local().format('YYYY-MM-DD')
-//     //converting type of date from String to Date
-//     data.birthday= new Date(data.birthday)
-//   }
-
-//   updateDocument(paramId, data, COLLECTION_NAME)
-//     .then(result => {
-//       res.status(201).json({update: true, result: result})
-//     })
-//     .catch(err => res.json({update: false}))
-//  })
-// //
-
-//  //Update MANY
-//  router.patch('/update-many',validateSchema(updateManyEmployeesSchema), function(req, res, next){
-//   const query = req.query;
-//   const newValues = req.body;
-
-//   if(newValues.birthday)
-//    {
-//      //format date: YYYY-MM-Đ => type of Date: string
-//     newValues.birthday= moment(newValues.birthday).utc().local().format('YYYY-MM-DD')
-//     //converting type of date from String to Date
-//     newValues.birthday= new Date(newValues.birthday)
-//   }
-
-//   updateDocuments(query, newValues, COLLECTION_NAME)
-//     .then(result => {
-//       res.status(201).json({update: true, result: result})
-//     })
-//     .catch(err => res.json({update: false}))
-//  })
-// //
-
-// //Delete ONE with ID
-// router.delete('/delete-id/:_id',validateSchema(search_deleteWithId), function(req, res, next) {
-//   const {_id}= req.params;
-
-//   deleteOneWithId({_id: ObjectId(_id)}, COLLECTION_NAME)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({deleteFunction: "failed", err: err}))
-// })
-// //
-
-// //Delete MANY
-// router.delete('/delete-many',validateSchema(search_deleteManyEmployeesSchema), function(req, res, next) {
-//   const query= req.query;
-
-//   deleteMany(query, COLLECTION_NAME)
-//     .then(result => res.status(200).json(result))
-//     .catch(err => res.status(500).json({deleteFunction: "failed", err: err}))
-// })
-
-// //TASK 24
 // //Get all employees with total Price they have sold
 // router.get('/revenue', function(req, res, next) {
 

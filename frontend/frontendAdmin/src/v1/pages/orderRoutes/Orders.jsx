@@ -249,7 +249,6 @@ function Orders() {
   };
 
   const handleFinishCreate = (values) => {
-    console.log("values:", values);
     //Config orderDetails before send to backend
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
@@ -264,7 +263,10 @@ function Orders() {
             productAttributeId: attribute._id,
             quantity: product.quantity,
             price: product.price,
+            size: product.size,
+            color: product.color,
             discount: product.discount,
+            productName: product.productName,
           });
         }
       });
@@ -324,6 +326,7 @@ function Orders() {
       shippingInfo = {
         address: addressShipping,
         transportationId: values.transportationId,
+        transportationPrice: values.transportationPrice
       };
 
       if (values.emailShippingInfo) {
@@ -783,10 +786,11 @@ function Orders() {
                 >
                   Thông tin nhận hàng
                 </Text>
+
                 <Form.Item
                   {...PropsFormItem_Label_Name({
                     label: "Phương tiện vận chuyển",
-                    name: "transportationId",
+                    name: "transportationPrice",
                   })}
                   rules={[
                     {
@@ -795,23 +799,56 @@ function Orders() {
                     },
                   ]}
                 >
-                  <Select
-                    style={{ width: 450 }}
-                    loading={!transportations}
-                    placeholder="Chọn"
-                  >
-                    {transportations &&
-                      transportations.map((t) => {
-                        const customPrice = numeral(t.price).format("0,0");
-                        return (
-                          <Select.Option key={t._id} value={t._id}>
-                            {`${t.name}- giá: ${customPrice} VNĐ `}
-                          </Select.Option>
-                        );
-                      })}
-                  </Select>
+                  <Input
+                    style={{ width: 400 }}
+                    disabled
+                    addonAfter={"VNĐ"}
+                    addonBefore={
+                      <Form.Item
+                        {...PropsFormItem_Label_Name({
+                          label: "Phương tiện vận chuyển",
+                          name: "transportationId",
+                        })}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Trường dữ liệu không thể bỏ trống",
+                          },
+                        ]}
+                        noStyle
+                      >
+                        <Select
+                          style={{ width: 250 }}
+                          loading={!transportations}
+                          placeholder="Chọn"
+                          onChange={(value) => {
+                            const found = transportations.find(
+                              (e) => e._id === value
+                            );
+                            const priceText = numeral(found.price).format(
+                              "0,0"
+                            );
+                            formCreate.setFieldsValue({
+                              transportationPrice: priceText,
+                            });
+                          }}
+                        >
+                          {transportations &&
+                            transportations.map((t) => {
+                              const customPrice = numeral(t.price).format(
+                                "0,0"
+                              );
+                              return (
+                                <Select.Option key={t._id} value={t._id}>
+                                  {`${t.name}`}
+                                </Select.Option>
+                              );
+                            })}
+                        </Select>
+                      </Form.Item>
+                    }
+                  />
                 </Form.Item>
-
                 <Form.Item
                   {...PropsFormItemFirstName}
                   name="firstNameShippingInfo"
@@ -1611,10 +1648,7 @@ function Orders() {
                 <DatePicker
                   showToday={false}
                   disabledDate={(current) => {
-                    return customDisabledDate(
-                      current,
-                      createdDateState
-                    );
+                    return customDisabledDate(current, createdDateState);
                   }}
                   placeholder="dd-mm-yyyy"
                   format={dateFormatList}
@@ -1629,7 +1663,10 @@ function Orders() {
                         message.error(
                           "Ngày chuyển hàng không thể sau ngày nhận hàng"
                         );
-                        formUpdate.setFieldsValue({ receivedDate: null, status: "SHIPPING" });
+                        formUpdate.setFieldsValue({
+                          receivedDate: null,
+                          status: "SHIPPING",
+                        });
                         setReceivedDateState(null);
                       }
                     } else {

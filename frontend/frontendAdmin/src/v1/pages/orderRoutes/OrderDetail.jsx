@@ -377,25 +377,32 @@ function OrderDetail() {
       : null;
     //Fields about shippingInfo
     const detailAddressShippingInfo =
-      orderDetail.shippingInfo.address.detailAddress;
-    const countryShippingInfo = orderDetail.shippingInfo.address.country
-      ? orderDetail.shippingInfo.address.country
+      orderDetail.shippingInfo?.address?.detailAddress? orderDetail.shippingInfo?.address?.detailAddress : null;
+    const countryShippingInfo = orderDetail.shippingInfo?.address?.country
+      ? orderDetail.shippingInfo?.address.country
       : null;
-    const stateShippingInfo = orderDetail.shippingInfo.address.state
-      ? orderDetail.shippingInfo.address.state
+    const stateShippingInfo = orderDetail.shippingInfo?.address?.state
+      ? orderDetail.shippingInfo?.address.state
       : null;
-    const cityShippingInfo = orderDetail.shippingInfo.address.city
+    const cityShippingInfo = orderDetail.shippingInfo?.address?.city
       ? orderDetail.shippingInfo.address.city
       : null;
-    const transportationId = orderDetail.shippingInfo.transportationId;
-    const note = orderDetail.shippingInfo.note;
+    const transportationId = orderDetail.shippingInfo?.transportationId;
+    const transportationPrice = orderDetail.shippingInfo?.transportationPrice;
+    const note = orderDetail.shippingInfo?.note;
 
-    const phoneNumberShippingInfo = orderDetail.shippingInfo.phoneNumber;
-    const firstNameShippingInfo = orderDetail.shippingInfo.firstName;
-    const lastNameShippingInfo = orderDetail.shippingInfo.lastName;
-    const emailShippingInfo = orderDetail.shippingInfo.email
-      ? orderDetail.shippingInfo.email
+    const phoneNumberShippingInfo = orderDetail.shippingInfo?.phoneNumber;
+    const firstNameShippingInfo = orderDetail.shippingInfo?.firstName;
+    const lastNameShippingInfo = orderDetail.shippingInfo?.lastName;
+    const emailShippingInfo = orderDetail.shippingInfo?.email
+      ? orderDetail.shippingInfo?.email
       : null;
+//Custom orderDetails
+const orderDetailsRaw = orderDetail;
+console.log("order:", orderDetail)
+
+
+
     let customOrderDetail = {
       orderDetails: orderDetail.orderDetails,
       totalPrice: orderDetail.totalPrice,
@@ -440,9 +447,8 @@ function OrderDetail() {
     console.log("custom:", customHandlersToString);
     form.setFieldsValue(customOrderDetail);
     setLoading(false);
-  }, []);
+  }, [products]);
 
-  console.log("test:", typeof handlerToString);
   return (
     <Layout>
       {notFound ? (
@@ -808,33 +814,67 @@ function OrderDetail() {
                       Thông tin nhận hàng
                     </Text>
                     <Form.Item
-                      {...PropsFormItem_Label_Name({
-                        label: "Phương tiện vận chuyển",
-                        name: "transportationId",
-                      })}
-                      rules={[
-                        {
-                          required: true,
-                          message: "Trường dữ liệu không thể bỏ trống",
-                        },
-                      ]}
-                    >
-                      <Select
-                        style={{ width: 450 }}
-                        loading={!transportations}
-                        placeholder="Chọn"
+                  {...PropsFormItem_Label_Name({
+                    label: "Phương tiện vận chuyển",
+                    name: "transportationPrice",
+                  })}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Trường dữ liệu không thể bỏ trống",
+                    },
+                  ]}
+                >
+                  <Input
+                    style={{ width: 400 }}
+                    disabled
+                    addonAfter={"VNĐ"}
+                    addonBefore={
+                      <Form.Item
+                        {...PropsFormItem_Label_Name({
+                          label: "Phương tiện vận chuyển",
+                          name: "transportationId",
+                        })}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Trường dữ liệu không thể bỏ trống",
+                          },
+                        ]}
+                        noStyle
                       >
-                        {transportations &&
-                          transportations.map((t) => {
-                            const customPrice = numeral(t.price).format("0,0");
-                            return (
-                              <Select.Option key={t._id} value={t._id}>
-                                {`${t.name}- giá: ${customPrice} VNĐ `}
-                              </Select.Option>
+                        <Select
+                          style={{ width: 250 }}
+                          loading={!transportations}
+                          placeholder="Chọn"
+                          onChange={(value) => {
+                            const found = transportations.find(
+                              (e) => e._id === value
                             );
-                          })}
-                      </Select>
-                    </Form.Item>
+                            const priceText = numeral(found.price).format(
+                              "0,0"
+                            );
+                            form.setFieldsValue({
+                              transportationPrice: priceText,
+                            });
+                          }}
+                        >
+                          {transportations &&
+                            transportations.map((t) => {
+                              const customPrice = numeral(t.price).format(
+                                "0,0"
+                              );
+                              return (
+                                <Select.Option key={t._id} value={t._id}>
+                                  {`${t.name}`}
+                                </Select.Option>
+                              );
+                            })}
+                        </Select>
+                      </Form.Item>
+                    }
+                  />
+                </Form.Item>
 
                     <Form.Item
                       {...PropsFormItemFirstName}

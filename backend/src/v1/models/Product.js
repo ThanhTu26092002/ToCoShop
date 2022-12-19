@@ -10,7 +10,7 @@ const attributeSchema = new Schema(
     },
     color: {
       type: String,
-      enum: ["Xanh Navy", "Vang", "Xam", "Den", "Hong", "Trang"],
+      enum: ["Xanh Navy", "Vàng", "Xám", "Đen", "Hồng", "Trắng"],
       required: true,
     },
     price: {

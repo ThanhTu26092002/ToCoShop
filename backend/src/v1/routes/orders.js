@@ -126,7 +126,8 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
 router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
-    const { orderDetails } = data;
+    const { orderDetails } = req.body;
+    console.log('demo:', data)
     //Kiểm tra xem sản phẩm còn trong kho trước khi cập nhật
     for (let i = 0; i < orderDetails.length; i++) {
       const attributeQuantity = orderDetails[i].quantity;
@@ -218,10 +219,15 @@ router.post("/insertOne", async (req, res, next) => {
     orderCode += (now.getHours < 10 ? "0" : "") + now.getHours().toString();
     orderCode += (now.getMinutes < 10 ? "0" : "") + now.getMinutes().toString();
     orderCode += (now.getSeconds < 10 ? "0" : "") + now.getSeconds().toString();
+    console.log('data:dfasdf', data)
 
-    data = { createdDate, ...data, orderCode };
+   let newData = { createdDate, ...data, orderCode };
+    delete newData.size
+    delete newData.color
+    delete newData.productName
+console.log('data:', newData)
     //Create a new blog post object
-    const order = new Order(data);
+    const order = new Order(newData);
     //Insert the product in our MongoDB database
     await order.save();
     //Sau khi đã cập nhật thì tương ứng trừ đi số sản phẩm đã mua trong collection Products
@@ -256,7 +262,7 @@ router.post("/insertOne", async (req, res, next) => {
         //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
       }
     }
-    res.json({
+    res.status(201).json({
       ok: true,
       result: order,
       other: "Update stock in collection products successfully!",
@@ -388,14 +394,31 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
-
+    const aggregateProduct = [
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: [id, "$_id"] },
+              {
+                $or: [
+                  { $eq: ["$status", "CANCELED"] },
+                  { $eq: ["$status", "COMPLETED"] },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    ];
     // const deleteDoc = await Order.findByIdAndDelete(id);
-    const filter = { _id: new ObjectId(id), status: "CANCELED" };
+    const filter = { _id: new ObjectId(id), status: {$in: ["CANCELED", "COMPLETED" ]}};
     const deleteDoc = await Order.findOneAndDelete(filter);
+    // const deleteDoc = await Order.findOneAndDelete(a);
     if (!deleteDoc) {
       res.status(200).json({
         ok: true,
-        noneExist: `Không tồn tại đơn hàng với trạng thái CANCELED trong cơ sở dữ liệu ${COLLECTION_ORDERS}`,
+        noneExist: `Không tồn tại đơn hàng với trạng thái CANCELED hoặc COMPLETED trong cơ sở dữ liệu ${COLLECTION_ORDERS}`,
       });
       return;
     }
