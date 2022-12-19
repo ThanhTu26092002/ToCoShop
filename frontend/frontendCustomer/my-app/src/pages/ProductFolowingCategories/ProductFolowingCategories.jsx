@@ -37,7 +37,7 @@ function Menclothes() {
       </div>
       <div className='listproducts'>
         <div className="listproducts_title">
-          <h1>Demo</h1>
+          <i><h1>O U T F I T S U M M E R</h1></i>
           {/* <h1>{id}</h1> */}
         </div>
         <div className='listproducts_main'>
