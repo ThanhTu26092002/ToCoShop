@@ -55,7 +55,7 @@ const allowRoles = (...roles) => {
 };
 
 //Get all docs
-router.get("/", passport.authenticate("jwt", { session: false }),allowRoles("ADMINISTRATORS"), async (req, res, next) => {
+router.get("/", async (req, res, next) => {
 // router.get("/", async (req, res, next) => {
   try {
     const docs = await Category.find().sort({ _id: -1 });
