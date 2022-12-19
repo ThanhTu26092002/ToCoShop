@@ -12,8 +12,6 @@ import {
 function images(props) {
   // function images(props) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  console.log("get demo count:", props.count);
-  console.log("get demo props:", props.data);
   const { data } = props;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [currentItems, setCurrentItems] = useState([]);
@@ -26,7 +24,6 @@ function images(props) {
   if (props.count) {
     itemsPerPage = props.count;
   }
-  console.log("get demo itemsPerPage:", itemsPerPage);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -42,7 +39,6 @@ function images(props) {
   };
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const navigate = useNavigate();
-  console.log('get:', window.location.pathname)
   const url=window.location.pathname
   return (
     <div>
@@ -59,13 +55,15 @@ function images(props) {
               <div
                 onClick={() => {
                   if(url==="/productDetail"){
+                    navigate(
+                      `/productDetail?product=${image._id}&&attribute=${image.attributeId}`
+                    );
                     window.location.reload();
                   }else{
                     navigate(
                       `/productDetail?product=${image._id}&&attribute=${image.attributeId}`
                     );
                   }
-                 
                 }}
               >
                 <Product imgproduct={image} />
