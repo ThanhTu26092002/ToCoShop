@@ -130,12 +130,59 @@ router.get("/", async function (req, res, next) {
 });
 
 //Get the product following Id
-router.get("/findById/:id", async (req, res, next) => {
+router.get("/findById/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
-    // const product = await Product.findOne({ _id: id });
-    res.json(product);
+    const formattedId = new ObjectId(id);
+    console.log("get:", id);
+    const aggregate = [
+      { $match: { _id: formattedId } },
+      // Thêm field stockTotal
+      unWindAttribute,
+      addFieldTotalPriceEachType,
+      groupBeforeFinish,
+      //Lấy thêm thông tin category và supplier
+      lookupCategory,
+      lookupSupplier,
+      {
+        $project: {
+          categoryId: 0,
+          supplierId: 0,
+        },
+      },
+    ];
+    const docs = await Product.aggregate(aggregate);
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
+
+//Lấy ra sản phẩm dựa vào attributeId
+router.get("/findByAttributeId/:id", validateId, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const formattedId = new ObjectId(id);
+    console.log("get:", id);
+    const aggregate = [
+      unWindAttribute,
+      { $match: { "attributes._id": formattedId } },
+      // Thêm field stockTotal
+      addFieldTotalPriceEachType,
+      groupBeforeFinish,
+      //Lấy thêm thông tin category và supplier
+      lookupCategory,
+      lookupSupplier,
+      {
+        $project: {
+          categoryId: 0,
+          supplierId: 0,
+        },
+      },
+    ];
+    const docs = await Product.aggregate(aggregate);
+    res.json({ ok: true, results: docs });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
     res.status(400).json({ ok: false, error: errMsgMongoDB });
@@ -570,6 +617,37 @@ router.get("/08getStockTotalMoreThan0", async function (req, res, next) {
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
+
+// ---09---Liệt kê danh sách sản phẩm thêm trường minDiscount chứa discount của mẫu attribute giảm giá lớn nhất
+router.get("/09GetAllBestDiscount", async function (req, res, next) {
+  const aggregate = [
+    unWindAttribute,
+    //Loại trừ những attribute có stock = 0
+    {
+      $match: {
+        $expr: {
+          $lt: [0, "$attributes.stock"],
+        },
+      },
+    },
+    addFieldTotalPriceEachType,
+    {
+      $group: {
+        ...groupBeforeFinish.$group,
+        maxDiscount: { $max: "$attributes.discount" },
+      },
+    },
+    stockTotalMoreThanZero,
+  ];
+  try {
+    const docs = await Product.aggregate(aggregate);
+    res.json({ ok: true, results: docs });
+  } catch (err) {
+    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_PRODUCTS);
+    res.status(400).json({ ok: false, error: errMsgMongoDB });
+  }
+});
+
 // router.get('/producttype/Assort/:id', async (req, res, next) => {
 //   try {
 //     const { id } = req.params;

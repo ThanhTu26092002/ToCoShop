@@ -7,10 +7,10 @@ function ColorStatus({ status }) {
   let color = '#182747';
   if(status === 'SHIPPING'){
     color ='#332FD0'
-  }else if( status === 'COMPLETED'){
+  }else if( status === 'COMPLETED' || status === 'ACTIVE'){
     color ='#38E54D'
   }
-  else if( status === 'CANCELED'){
+  else if( status === 'CANCELED' || status === 'INACTIVE'){
     color ='#FF1E1E'
   }
   return <div style={{ fontWeight: 600, color }}>{status}</div>;

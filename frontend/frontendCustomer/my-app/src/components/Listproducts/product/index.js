@@ -2,7 +2,7 @@ import React from 'react'
 import "./style.css";
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import { AiOutlineHeart } from "react-icons/ai"
-import Productdetal from "../../../pages/productdetails/productdetails"
+import Productdetal from "../../../pages/ProductDetail/ProductDetail"
 function index({imgproduct}) {
   return (
     <div className='product'>

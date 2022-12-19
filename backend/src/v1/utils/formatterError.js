@@ -48,6 +48,12 @@ const formatterErrorFunc = (err, collection) => {
     errors.message = `Trường ${err.path} chưa được khai báo trong DB`;
     return errors;
   }
+
+  if (errName === "BSONTypeError") {
+    errors.name = "Lỗi định dạng ";
+    errors.message = `Lỗi định dạng trường dữ liệu ObjectId`;
+    return errors;
+  }
   // Error about formatter ObjectId
   if (errKind === "ObjectId" && errName === "CastError") {
     errors.name = "Mã ID";

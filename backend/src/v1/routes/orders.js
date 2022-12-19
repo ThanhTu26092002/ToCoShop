@@ -18,6 +18,7 @@ const {
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
 const { LookupTransportation } = require("../configs/lookups");
+const Product = require("../models/Product");
 const aggregateLookup = [
   {
     $unwind: "$orderDetails",
@@ -102,7 +103,7 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
       { $match: { _id: id } },
       ...aggregateLookup,
     ]);
-    if (docs.length==0) {
+    if (docs.length == 0) {
       res.status(404).json({
         ok: true,
         error: {
@@ -125,6 +126,74 @@ router.get("/orderDetail/:id", validateId, async (req, res, next) => {
 router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
+    const { orderDetails } = data;
+    //Kiểm tra xem sản phẩm còn trong kho trước khi cập nhật
+    for (let i = 0; i < orderDetails.length; i++) {
+      const attributeQuantity = orderDetails[i].quantity;
+      const attributeName = orderDetails[i].productName;
+      const attributeColor = orderDetails[i].color;
+      const attributeSize = orderDetails[i].size;
+      //Nếu dữ liệu đầu vào mà số lượng <=0 thì báo lỗi
+      //Nếu không có đủ các field trong orderDetail thì báo lỗi dữ liệu
+      if (
+        !attributeQuantity ||
+        !attributeName ||
+        !attributeColor ||
+        !attributeSize
+      ) {
+        const errMsg = formatterErrorFunc(
+          {
+            name: "Lỗi dữ liệu",
+            message: `Vui lòng nhập đủ trường dữ liệu trong OrderDetails`,
+          },
+          COLLECTION_ORDERS
+        );
+        res.status(400).json({ error: errMsg });
+        return;
+      }
+      if (attributeQuantity <= 0) {
+        const errMsg = formatterErrorFunc(
+          {
+            name: "Lỗi dữ liệu",
+            message: `Số lượng sản phẩm  đặt mua phải lớn hơn 0`,
+          },
+          COLLECTION_ORDERS
+        );
+        res.status(400).json({ error: errMsg });
+        return;
+      }
+      const attributeId = new ObjectId(orderDetails[i].productAttributeId);
+      //1. Lấy danh sách sản phẩm đã unwind attributes.
+      const aggregateProduct = [
+        {
+          $unwind: "$attributes",
+        },
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $lt: [0, "$attributes.stock"] },
+                { $lte: [attributeQuantity, "$attributes.stock"] },
+                { $eq: [attributeId, "$attributes._id"] },
+              ],
+            },
+          },
+        },
+      ];
+      const products = await Product.aggregate(aggregateProduct);
+      if (products.length < 1) {
+        const errMsg = formatterErrorFunc(
+          {
+            name: "Hết hàng",
+            message: `Sản phẩm ${attributeName} size ${attributeSize}-màu ${attributeColor} không còn hàng trong kho `,
+          },
+          COLLECTION_ORDERS
+        );
+        res.status(400).json({ error: errMsg });
+        return;
+      }
+      //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+    }
     //format date: YYYY-MM-DD => type of Date: string
     if (data.shippedDate) {
       data.shippedDate = moment(data.shippedDate)
@@ -149,16 +218,51 @@ router.post("/insertOne", async (req, res, next) => {
     orderCode += (now.getHours < 10 ? "0" : "") + now.getHours().toString();
     orderCode += (now.getMinutes < 10 ? "0" : "") + now.getMinutes().toString();
     orderCode += (now.getSeconds < 10 ? "0" : "") + now.getSeconds().toString();
-    console.log("show string time:", orderCode);
 
     data = { createdDate, ...data, orderCode };
     //Create a new blog post object
     const order = new Order(data);
     //Insert the product in our MongoDB database
     await order.save();
-    res.status(201).json(order);
+    //Sau khi đã cập nhật thì tương ứng trừ đi số sản phẩm đã mua trong collection Products
+    for (let i = 0; i < orderDetails.length; i++) {
+      const attributeQuantity = parseInt(orderDetails[i].quantity);
+      const attributeId = new ObjectId(orderDetails[i].productAttributeId);
+      //1. Unwin danh sách sản phẩm theo attributes
+      const aggregateProduct = [
+        {
+          $unwind: "$attributes",
+        },
+        {
+          $match: {
+            $expr: {
+              $and: [{ $eq: [attributeId, "$attributes._id"] }],
+            },
+          },
+        },
+      ];
+      //Tìm thấy rồi tiến hành cập nhật
+      const unWindProducts = await Product.aggregate(aggregateProduct);
+      const newStock = unWindProducts[0].attributes.stock - attributeQuantity;
+      for (let j = 0; j < unWindProducts.length; j++) {
+        const filter = { "attributes._id": attributeId };
+        const update = { $set: { "attributes.$.stock": newStock } };
+        const updateProductAttributeQuantity = await Product.findOneAndUpdate(
+          filter,
+          update,
+          { new: true, safe: true, upsert: true }
+        );
+        break;
+        //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+      }
+    }
+    res.json({
+      ok: true,
+      result: order,
+      other: "Update stock in collection products successfully!",
+    });
   } catch (err) {
-    const errMsg = formatterErrorFunc(err);
+    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
     res.status(400).json({ error: errMsg });
   }
 });
@@ -178,37 +282,50 @@ router.post("/insertOne", async (req, res, next) => {
 // );
 // //
 
-// //Insert Many  -- haven't validation yet
-// router.post(
-//   "/insert-many",
-//   validateSchema(insertManyOrdersSchema),
-//   function (req, res, next) {
-//     const listData = req.body;
-
-//     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
-//     listData.map((order) => {
-//       order.shippedDate = new Date(
-//         moment(order.shippedDate).utc().local().format("YYYY-MM-DD")
-//       );
-//       order.createdDate = new Date(moment().utc().local().format("YYYY-MM-DD"));
-//     });
-
-//     insertDocuments(listData, COLLECTION_ORDERS)
-//       .then((result) => {
-//         res.status(200).json({ ok: true, result: result });
-//       })
-//       .catch((err) => {
-//         res.json(500).json({ ok: false });
-//       });
-//   }
-// );
-// //
-
-//Update One with _Id
+//Update One with _Id - ok
 router.patch("/updateOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+
+    //Nếu new status === CANCELED , thì tiến hành hoàn trả các sản phẩm đã có trước đó.
+    if (updateData.status && updateData.status === "CANCELED") {
+      //1. Lấy mảng các mặt hàng cần hoàn trả
+      const order = await Order.findById(id);
+      const orderDetails = [...order.orderDetails];
+      for (let i = 0; i < orderDetails.length; i++) {
+        const attributeQuantity = parseInt(orderDetails[i].quantity);
+        const attributeId = new ObjectId(orderDetails[i].productAttributeId);
+        //1. Unwin danh sách sản phẩm theo attributes
+        const aggregateProduct = [
+          {
+            $unwind: "$attributes",
+          },
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: [attributeId, "$attributes._id"] }],
+              },
+            },
+          },
+        ];
+        //Tìm thấy rồi tiến hành cập nhật
+        const unWindProducts = await Product.aggregate(aggregateProduct);
+        const newStock = unWindProducts[0].attributes.stock + attributeQuantity;
+        for (let j = 0; j < unWindProducts.length; j++) {
+          const filter = { "attributes._id": attributeId };
+          const update = { $set: { "attributes.$.stock": newStock } };
+          const updateProductAttributeQuantity = await Product.findOneAndUpdate(
+            filter,
+            update,
+            { new: true, safe: true, upsert: true }
+          );
+          break;
+          //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+        }
+      }
+    }
+    // Tiếp tục cập nhật Order
     //if updating [createdDate, shippedDate]
     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
     if (updateData.shippedDate) {
@@ -221,6 +338,10 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
         moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
       );
     }
+    // Chú ý nếu có người cố ý cập nhật orderDetails thì sẽ loại nó trước khi cập nhật
+    if (updateData.orderDetails) {
+      delete updateData.orderDetails;
+    }
 
     const opts = { runValidators: true };
 
@@ -230,7 +351,7 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
         ok: true,
         error: {
           name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+          message: `the document with following id doesn't exist in the collection ${COLLECTION_ORDERS}`,
         },
       });
       return;
@@ -242,7 +363,7 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
       result: updatedDoc,
     });
   } catch (err) {
-    const errMsg = formatterErrorFunc(err);
+    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
     res.status(400).json({ error: errMsg });
   }
 });
@@ -263,114 +384,18 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
 // );
 // //
 
-// //Insert Many  -- haven't validation yet
-// router.post(
-//   "/insert-many",
-//   validateSchema(insertManyOrdersSchema),
-//   function (req, res, next) {
-//     const listData = req.body;
-
-//     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
-//     listData.map((order) => {
-//       order.shippedDate = new Date(
-//         moment(order.shippedDate).utc().local().format("YYYY-MM-DD")
-//       );
-//       order.createdDate = new Date(moment().utc().local().format("YYYY-MM-DD"));
-//     });
-
-//     insertDocuments(listData, COLLECTION_ORDERS)
-//       .then((result) => {
-//         res.status(200).json({ ok: true, result: result });
-//       })
-//       .catch((err) => {
-//         res.json(500).json({ ok: false });
-//       });
-//   }
-// );
-// //
-
-//Just update array products
-router.patch("/updateOne/:id", validateId, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-    //if updating [createdDate, shippedDate]
-    //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
-    if (updateData.shippedDate) {
-      updateData.shippedDate = new Date(
-        moment(updateData.shippedDate).utc().local().format("YYYY-MM-DD")
-      );
-    }
-    if (updateData.createdDate) {
-      updateData.createdDate = new Date(
-        moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
-      );
-    }
-
-    const opts = { runValidators: true };
-
-    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
-    if (!updatedDoc) {
-      res.status(404).json({
-        ok: true,
-        error: {
-          name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
-        },
-      });
-      return;
-    }
-
-    res.json({
-      ok: true,
-      message: "Update the Id successfully",
-      result: updatedDoc,
-    });
-  } catch (err) {
-    const errMsg = formatterErrorFunc(err);
-    res.status(400).json({ error: errMsg });
-  }
-});
-//
-
-// //Update MANY
-// router.patch(
-//   "/update-many",
-//   validateSchema(updateManyOrderSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-//     const newValues = req.body;
-//     //if updating [createdDate, shippedDate]
-//     //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
-//     if (newValues.shippedDate) {
-//       newValues.shippedDate = new Date(
-//         moment(newValues.shippedDate).utc().local().format("YYYY-MM-DD")
-//       );
-//     }
-//     if (newValues.createdDate) {
-//       newValues.createdDate = new Date(
-//         moment(newValues.createdDate).utc().local().format("YYYY-MM-DD")
-//       );
-//     }
-//     updateDocuments(query, newValues, COLLECTION_ORDERS)
-//       .then((result) => {
-//         res.status(201).json({ update: true, result: result });
-//       })
-//       .catch((err) => res.json({ update: false }));
-//   }
-// );
-// //
-
-//Delete ONE with ID
+//Delete ONE with ID- OK
 router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const deleteDoc = await Order.findByIdAndDelete(id);
+    // const deleteDoc = await Order.findByIdAndDelete(id);
+    const filter = { _id: new ObjectId(id), status: "CANCELED" };
+    const deleteDoc = await Order.findOneAndDelete(filter);
     if (!deleteDoc) {
       res.status(200).json({
         ok: true,
-        noneExist: `the document doesn't exist in the collection ${COLLECTION_ORDERS}`,
+        noneExist: `Không tồn tại đơn hàng với trạng thái CANCELED trong cơ sở dữ liệu ${COLLECTION_ORDERS}`,
       });
       return;
     }
@@ -388,20 +413,6 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
   }
 });
 // //
-// //Delete MANY
-// router.delete(
-//   "/delete-many",
-//   validateSchema(search_deleteManyOrdersSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-
-//     deleteMany(query, COLLECTION_ORDERS)
-//       .then((result) => res.status(200).json(result))
-//       .catch((err) =>
-//         res.status(500).json({ deleteFunction: "failed", err: err })
-//       );
-//   }
-// );
 
 // TASK 23----Get all products with totalPrice
 // TASK 31----with totalPrice,Get all products that have shipped successfully- status:completed ; from date1 to date2

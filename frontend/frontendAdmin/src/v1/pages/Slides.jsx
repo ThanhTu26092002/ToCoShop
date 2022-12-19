@@ -1,13 +1,47 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, Space, Select, Layout, InputNumber, Modal, Table, notification, message, Popconfirm, Upload, Cascader, Radio } from 'antd'
-import Operation from 'antd/lib/transfer/operation'
-import { MinusCircleOutlined, PlusOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
-import { Content } from "antd/lib/layout/layout";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Space,
+  Select,
+  Layout,
+  InputNumber,
+  Modal,
+  Table,
+  notification,
+  message,
+  Popconfirm,
+  Upload,
+  Cascader,
+  Radio,
+} from "antd";
+import {
+  PropsForm,
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItemStatus,
+  PropsFormItem_Label_Name,
+  PropsTable,
+} from "../config/props";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 
-import TextArea from "antd/lib/input/TextArea";
 import axios from "axios";
 import { URLSlides, WEB_SERVER_UPLOAD_URL } from "../config/constants";
 import axiosClient from "../config/axios";
+import { Content } from "antd/lib/layout/layout";
+import TextArea from "antd/lib/input/TextArea";
+import { objCompare } from "../config/helperFuncs";
+import { ColorStatus } from "../components/subComponents";
 
 function Slides() {
   const [slides, setSlides] = useState(null);
@@ -21,46 +55,48 @@ function Slides() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [form] = Form.useForm();
-  const [formEdit] = Form.useForm()
-  
-  var detall=[1,2,3,4,5]
- 
+  const [formEdit] = Form.useForm();
 
-  Array.prototype.except = function(val) {
-    return this.filter(function(x) { return x !== val; });        
-}; 
+  var orderList = [1, 2, 3, 4, 5];
+
+  Array.prototype.except = function (val) {
+    return this.filter(function (x) {
+      return x !== val;
+    });
+  };
   slides &&
     slides.map((c) => {
-      
-      return (
-
-        detall=detall.except(c.sortOrder)
-      );
-    })
-    var list= detall.map(item=>{
-      return {
-        label: item,
-        value: item,
-      }
-    })
+      return (orderList = orderList.except(c.sortOrder));
+    });
+  orderList.unshift(0);
+  // Mọi slides dù active or inactive đều có thể có số thứ tự là O
+  var list = orderList.map((item) => {
+    return {
+      label: item,
+      value: item,
+    };
+  });
   const onChange = (e) => {
-    if(e.target.value==="INACTIVE"){
-      setCheck(true)
-      form.setFieldsValue({sortOrder:0})
-      formEdit.setFieldsValue({sortOrder:0})
-    }else{
-      setCheck(false)
-      form.setFieldsValue({sortOrder:[]})
-      formEdit.setFieldsValue({sortOrder:[]})
+    if (e.target.value === "INACTIVE") {
+      setCheck(true);
+      form.setFieldsValue({ sortOrder: 0 });
+      formEdit.setFieldsValue({ sortOrder: 0 });
+    } else {
+      setCheck(false);
+      form.setFieldsValue({ sortOrder: 0 });
+      formEdit.setFieldsValue({ sortOrder: 0 });
     }
   };
-
 
   const handleClick_EditBtn = (record) => {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
-
+if(record.status === 'INACTIVE'){
+setCheck(true)
+}else{
+  setCheck(false)
+}
     let fieldsValues = {};
     for (let key in record) {
       fieldsValues[key] = record[key];
@@ -68,26 +104,24 @@ function Slides() {
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
-    console.log(values)
-    if (
-      values.title === selectedRecord.title &&
-      values.description === selectedRecord.description &&
-      values.sortOrder === selectedRecord.sortOrder &&
-      values.status === selectedRecord.status
-
-    ) {
+    console.log(values);
+    const oldData = {
+      ...selectedRecord,
+    };
+    const newData = {
+      ...values,
+    };
+    const checkChangedData = objCompare(newData, oldData);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
       setIsModalOpen(false);
       formEdit.resetFields();
       setSelectedId(null);
-      console.log("test")
       return;
     }
     setLoadingBtn(true);
     axiosClient
-      .patch(
-        `${URLSlides}/${selectedId}`,
-        values
-      )
+      .patch(`${URLSlides}/${selectedId}`, values)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -95,7 +129,7 @@ function Slides() {
           setRefresh((e) => !e);
           formEdit.resetFields();
           setSelectedId(null);
-notification.info({
+          notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
           });
@@ -111,7 +145,10 @@ notification.info({
       .finally(() => {
         setLoadingBtn(false);
       });
-  }
+  };
+  const handleCancelCreate = () => {
+    form.resetFields();
+  };
   const beforeUpload = (file) => {
     const isImage =
       file.type === "image/jpg" ||
@@ -129,6 +166,7 @@ notification.info({
     formEdit.submit();
   };
   const handleCancel = () => {
+    formEdit.resetFields();
     setIsModalOpen(false);
   };
   const handleUploadImage = (options, record) => {
@@ -162,11 +200,11 @@ notification.info({
         message.error(`Cập nhật hình ảnh thất bại.`);
         setLoading(false);
       })
-      .finally(() => { });
+      .finally(() => {});
   };
   const columns = [
     {
-      title: "hình ảnh",
+      title: "Hình ảnh",
       key: "imageUrl",
       dataIndex: "imageUrl",
       width: "100px",
@@ -187,35 +225,30 @@ notification.info({
       },
     },
     {
-      title: "Tên sản phẩm ",
+      title: "Tiêu đề ",
       key: "title",
       dataIndex: "title",
-
-      // defaultSortOrder: 'ascend',
-      sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
-        return <span style={{ fontWeight: '600' }}>{Text}</span>
-      }
+        return <span style={{ fontWeight: "600" }}>{Text}</span>;
+      },
     },
     {
       title: () => {
-        return "thứ tự";
+        return "Thứ tự";
       },
+      width: "10%",
       key: "sortOrder",
       dataIndex: "sortOrder",
-      render: (text) => {
-        
-        return <span style={{ fontWeight: '600' }}>{text}</span>
-      },
     },
     {
       title: () => {
-        return "trạng thái";
+        return "Trạng thái";
       },
+      width: "10%",
       key: "status",
-dataIndex: "status",
+      dataIndex: "status",
       render: (text) => {
-        return <span style={{ fontWeight: '600' }}>{text}</span>
+        return <ColorStatus status={text}/>
       },
     },
     {
@@ -224,9 +257,9 @@ dataIndex: "status",
       dataIndex: "description",
     },
     {
-      title: 'Thao tác',
-      key: 'actions',
-      width: '10%',
+      title: "Thao tác",
+      key: "actions",
+      width: "10%",
       render: (record) => {
         return (
           <Space>
@@ -244,16 +277,20 @@ dataIndex: "status",
                 style={{ backgroundColor: "#1890ff" }}
               ></Button>
             </Upload>
-            <Button type='dashed' icon={<EditOutlined />} style={{ fontWeight: '600' }} onClick={() => {
-              setVisible(true)
-              setSelectedRow(record)
-              formEdit.setFieldValue('title', record.title)
-              formEdit.setFieldValue('description', record.description)
-              formEdit.setFieldValue('sortOrder', record.sortOrder)
-              formEdit.setFieldValue('status', record.status)
-              handleClick_EditBtn(record)
-
-            }}></Button>
+            <Button
+              type="dashed"
+              icon={<EditOutlined />}
+              style={{ fontWeight: "600" }}
+              onClick={() => {
+                setVisible(true);
+                setSelectedRow(record);
+                formEdit.setFieldValue("title", record.title);
+                formEdit.setFieldValue("description", record.description);
+                formEdit.setFieldValue("sortOrder", record.sortOrder);
+                formEdit.setFieldValue("status", record.status);
+                handleClick_EditBtn(record);
+              }}
+            ></Button>
             <Popconfirm
               overlayInnerStyle={{ width: 300 }}
               title="Bạn muốn xóa không ?"
@@ -265,20 +302,20 @@ dataIndex: "status",
                 icon={<DeleteOutlined />}
                 type="danger"
                 style={{ fontWeight: 600 }}
-                onClick={() => { }}
+                onClick={() => {}}
                 title="Xóa"
               ></Button>
             </Popconfirm>
           </Space>
-        )
-      }
-    }
-  ]
+        );
+      },
+    },
+  ];
   React.useEffect(() => {
     axios.get("http://localhost:9000/v1/slides").then((response) => {
       setSlides(response.data);
-    })
-  }, [refresh])
+    });
+  }, [refresh]);
   const handleConfirmDelete = (_id) => {
     axios.delete("http://localhost:9000/v1/slides/" + _id).then((response) => {
       if (response.status === 200) {
@@ -292,105 +329,178 @@ dataIndex: "status",
       <Layout>
         <Content>
           <Form
-            style={{ marginLeft: 400 }}
+            {...PropsForm}
             form={form}
             initialValues={{
-              title: '',
-              description: '',
-              sortOrder: '',
-              status: ''
+              title: "",
+              description: "",
+              sortOrder: "0",
             }}
             onFinish={(values) => {
-              axios.post('http://localhost:9000/v1/slides', values).then(response => {
-                if (response.status === 200) {
-                  setRefresh((f) => f + 1);
-                  form.resetFields();
-                  notification.info({ message: 'Thông báo', description: 'thêm mới thành công' })
-}
-              })
-              console.log(values);
+              axios
+                .post("http://localhost:9000/v1/slides", values)
+                .then((response) => {
+                  if (response.status === 200) {
+                    setRefresh((f) => f + 1);
+                    form.resetFields();
+                    notification.info({
+                      message: "Thông báo",
+                      description: "thêm mới thành công",
+                    });
+                  }
+                });
             }}
           >
-            <Form.Item rules={[{
-              required: true,
-              message: "nhập tiêu đề"
-            }]} name={"title"} label="tiêu đề" >
-              <Input placeholder='tiêu đề' />
+            <Form.Item
+              {...PropsFormItem_Label_Name({ label: "Tiêu đề", name: "title" })}
+              rules={[
+                {
+                  required: true,
+                  message: "Xin nhập tiêu đề",
+                },
+              ]}
+            >
+              <Input placeholder="Tiêu đề" />
             </Form.Item>
-            <Form.Item name={"description"} label="Mô tả" >
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Mô tả",
+                name: "description",
+              })}
+            >
               <TextArea rows={3} placeholder="Mô tả" />
             </Form.Item>
-            <Form.Item name={"sortOrder"} label="thứ tự" >
+
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Trạng thái",
+                name: "status",
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn trạng thái",
+                },
+              ]}
+            >
+              <Radio.Group onChange={onChange}>
+                <Radio value={"ACTIVE"}>Hiển thị</Radio>
+                <Radio value={"INACTIVE"}>Không hiển thị</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                label: "Thứ tự",
+                name: "sortOrder",
+              })}
+            >
               <Select
                 style={{ width: 120 }}
                 allowClear
                 options={list}
                 disabled={check}
-                
               />
             </Form.Item>
-            <Form.Item name={"status"} label="trạng thái">
-              <Radio.Group  onChange={onChange}>
-                <Radio value={"ACTIVE"}>hiển thị</Radio>
-                <Radio value={"INACTIVE"}>không hiển thị</Radio>
-              </Radio.Group>
+            <Form.Item
+              wrapperCol={{
+                offset: 8,
+                span: 16,
+              }}
+            >
+              <Space wrap>
+                <Button type="primary" danger onClick={handleCancelCreate}>
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" loading={loadingBtn}>
+                  Tạo mới
+                </Button>
+              </Space>
             </Form.Item>
-            <Button type="primary" htmlType="submit">
-              Lưu thông tin
-            </Button>
           </Form>
-          <Table rowKey='_id' columns={columns} dataSource={slides} pagination={false} />
-          <Modal title="chinh sua thong tin slides" open={isModalOpen}
+          <Table
+            rowKey="_id"
+            columns={columns}
+            dataSource={slides}
+            pagination={false}
+          />
+          <Modal
+            title="Chỉnh sửa thông tin Slides"
+            open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
-            footer={
-              [
-                <Button key="back" onClick={handleCancel}>
-                  Hủy
-                </Button>,
-                <Button
-                  key="submit"
-                  type="primary"
-                  loading={loadingBtn}
-                  onClick={handleOk}
-                >
-                  Sửa
-                </Button>
-              ]
-            }
+            footer={[
+              <Button key="back" onClick={handleCancel}>
+                Hủy
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                loading={loadingBtn}
+                onClick={handleOk}
+              >
+                Sửa
+              </Button>,
+            ]}
           >
-            <Form
-              form={formEdit}
-              onFinish={handleFinishUpdate}
-            >
-              <Form.Item rules={[{
-                required: true,
-                message: "nhập tiêu đề"
-              }]} name={"title"} label="tiêu đề" >
-                <Input placeholder='tiêu đề' />
+            <Form form={formEdit} onFinish={handleFinishUpdate}>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Tiêu đề",
+                  name: "title",
+                })}
+                rules={[
+                  {
+                    required: true,
+                    message: "Xin nhập tiêu đề",
+                  },
+                ]}
+              >
+                <Input placeholder="Tiêu đề" />
               </Form.Item>
-              <Form.Item name={"description"} label="Mô tả" >
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Mô tả",
+                  name: "description",
+                })}
+              >
                 <TextArea rows={3} placeholder="Mô tả" />
               </Form.Item>
-              <Form.Item name={"sortOrder"} label="thứ tự">
+
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Trạng thái",
+                  name: "status",
+                })}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn trạng thái",
+                  },
+                ]}
+              >
+                <Radio.Group onChange={onChange}>
+                  <Radio value={"ACTIVE"}>Hiển thị</Radio>
+                  <Radio value={"INACTIVE"}>Không hiển thị</Radio>
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item
+                {...PropsFormItem_Label_Name({
+                  label: "Thứ tự",
+                  name: "sortOrder",
+                })}
+              >
                 <Select
                   style={{ width: 120 }}
                   allowClear
                   options={list}
+                  disabled={check}
                 />
               </Form.Item>
-              <Form.Item name={"status"} label="trạng thái">
-                <Radio.Group  onChange={onChange}>
-                  <Radio value={"ACTIVE"}>hiển thị</Radio>
-                  <Radio value={"INACTIVE"}>không hiển thị</Radio>
-                </Radio.Group>
-              </Form.Item>
-
             </Form>
           </Modal>
         </Content>
       </Layout>
     </div>
-  )
+  );
 }
-export default Slides
+export default Slides;

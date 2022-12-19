@@ -172,18 +172,14 @@ const paymentInfoSchema = new Schema(
 
 const orderDetailSchema = new Schema(
   {
-    productId: {
+    productAttributeId: {
       type: Schema.Types.ObjectId,
       required: true,
-    },
-    size: {
-      type: String,
-      required: true,
-      enum: ["S", "M", "L", "XL", "XXL"],
     },
     quantity: {
       type: Number,
       required: true,
+      min: [1, "Số lượng sản phẩm chọn mua phải lớn hơn 0"]
     },
     price: {
       type: Number,

@@ -34,42 +34,42 @@ const useAuth = create(
   )
 );
 //
-export const useTransportations = create(
-  devtools(
-    persist(
-      (set) => ({
-        hookTransportationData: [],
-        hookSetTransportation: (payload) =>
-          set(
-            () => ({ hookTransportationData: payload }),
-            false,
-            "@transportation/hookSetTransportation"
-          ),
-      }),
-      {
-        name: "transportations-toCoShop",
-      }
-    )
-  )
-);
-export const useProducts = create(
-  devtools(
-    persist(
-      (set) => ({
-        hookProductData: [],
-        hookSetProduct: (payload) =>
-          set(
-            () => ({ hookProductData: payload }),
-            false,
-            "@product/hookSetProduct"
-          ),
-      }),
-      {
-        name: "product-toCoShop",
-      }
-    )
-  )
-);
+// export const useTransportations = create(
+//   devtools(
+//     persist(
+//       (set) => ({
+//         hookTransportationData: [],
+//         hookSetTransportation: (payload) =>
+//           set(
+//             () => ({ hookTransportationData: payload }),
+//             false,
+//             "@transportation/hookSetTransportation"
+//           ),
+//       }),
+//       {
+//         name: "transportations-toCoShop",
+//       }
+//     )
+//   )
+// );
+// export const useProducts = create(
+//   devtools(
+//     persist(
+//       (set) => ({
+//         hookProductData: [],
+//         hookSetProduct: (payload) =>
+//           set(
+//             () => ({ hookProductData: payload }),
+//             false,
+//             "@product/hookSetProduct"
+//           ),
+//       }),
+//       {
+//         name: "product-toCoShop",
+//       }
+//     )
+//   )
+// );
 export const useOrderDetail = create(
   devtools(
     persist(
