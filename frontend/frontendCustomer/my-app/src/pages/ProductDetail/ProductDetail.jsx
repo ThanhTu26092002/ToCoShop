@@ -234,13 +234,13 @@ useEffect(()=>{
                   Bảng qui đổi kích cở
                 </a>
                 <button
-                  id="cancelBtn"
+                  className="canclesizebtn"
                   onClick={() => {
                     setReFresh(false);
                     setReFresh1(false);
                   }}
                 >
-                  Chon lai
+                  Chọn lại
                 </button>
                 <div className="amount">  
                   <h4>Amount:</h4>

@@ -45,10 +45,10 @@ function Nav() {
               <a href='#'>
                 <li><AiOutlineHeart style={{ width: 25, height: 25 }} /></li>
               </a>
-              <a onClick={() => {
+              <a className="cart_a" onClick={() => {
                 setModalOpen(true);
               }}>
-                <li ><AiOutlineShopping style={{ width: 25, height: 25 }} /></li>
+                <li > <AiOutlineShopping style={{ width: 25, height: 25 }} /><div>0</div></li>
               </a>
             </div>
           </div>
