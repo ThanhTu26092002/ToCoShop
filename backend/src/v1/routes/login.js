@@ -13,40 +13,7 @@ const {
   COLLECTION_LOGINS,
   COLLECTION_EMPLOYEES,
 } = require("../configs/constants");
-const { findDocument } = require("../utils/MongodbHelper");
-
-// CHECK ROLES
-const allowRoles = (...roles) => {
-  //return a middleware
-  return (req, res, next) => {
-    //GET BEARER TOKEN FROM HEADER
-    const bearerToken = req.get("Authorization").replace("Bearer ", "");
-    //DECODE TOKEN
-    const payload = jwt.decode(bearerToken, { json: true });
-    //AFTER DECODE: GET UID FROM PAYLOAD
-    const { uid } = payload;
-    // FINDING BY ID
-    findDocument(uid, COLLECTION_LOGINS).then((document) => {
-      console.log(document);
-      if (document && document.roles) {
-        let ok = false;
-        document.roles.forEach((role) => {
-          if (roles.includes(role)) {
-            ok = true;
-            return;
-          }
-        });
-        if (ok) {
-          next();
-        } else {
-          res.status(403).json({ message: "Forbidden" });
-        }
-      } else {
-        res.status(403).json({ message: "Forbidden" });
-      }
-    });
-  };
-};
+const { exceptionAllowRoles, allowRoles, checkLogin } = require("../middleware/checkRoles");
 
 //Login with email and password
 //1. Đăng nhập hệ thống- email vs password , condition: ACTIVE
@@ -107,9 +74,9 @@ router.get(
 // 3.1 Find One Document Following ID
 router.get(
   "/findById/:id",
-  passport.authenticate("jwt", { session: false }),
-  allowRoles("ADMINISTRATORS"),
   validateId,
+  passport.authenticate("jwt", { session: false }),
+  checkLogin("ADMINISTRATORS"),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -210,9 +177,6 @@ router.patch(
       // console.log("id",typeof(id))
       const updateData = { ...req.body };
       const { uid } = updateData;
-      //     console.log("uid",typeof(uid))
-      //     res.json({ok: true})
-      // return
       //Tìm và lấy tài khoản đăng nhập dựa vào id
       //Nếu employee cập nhật cho chính mình thì ok, nếu không cần kiểm tra quyền administrators
       if (uid !== id) {

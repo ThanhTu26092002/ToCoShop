@@ -65,20 +65,12 @@ import {
 import {
   customCreateAHandler,
   customDisabledDate,
-  handleOpenNewPage,
+  formatterNumber,
+  objCompare,
 } from "../../config/helperFuncs";
-import {
-  useTransportations,
-  useProducts,
-  useOrderDetail,
-} from "../../hooks/useZustand";
 const { Text } = Typography;
-const { Option } = Select;
 
 function OrderDetail() {
-  const { hookSetOrderDetail, hookOrderDetailData } = useOrderDetail(
-    (state) => state
-  );
   //If params id = :id
   const navigate = useNavigate();
   const { id } = useParams();
@@ -94,6 +86,7 @@ function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [order, setOrder] = useState(null);
   const [customOrder, setCustomOrder] = useState(null);
   const [countryList, setCountryList] = useState(null);
   const [statesListContactInfo, setStatesListContactInfo] = useState(null);
@@ -131,7 +124,6 @@ function OrderDetail() {
   };
 
   const handleFinishUpdate = (values) => {
-    console.log("values:", values);
     //Show error the relative between status and sendingDate- receivedDate
     if (values.sendingDate === null) {
       if (values.status === "SHIPPING") {
@@ -152,18 +144,18 @@ function OrderDetail() {
     }
 
     //Config orderDetails before send to backend
-    const getOrderDetails = values.orderDetails;
-    const configOrderDetails = [];
-    getOrderDetails.map((product) => {
-      let tmpProduct = products.find((e) => (e._id = product.productId));
-      configOrderDetails.push({
-        productId: product.productId,
-        size: product.size,
-        quantity: product.quantity,
-        price: tmpProduct.price,
-        discount: tmpProduct.discount,
-      });
-    });
+    // const getOrderDetails = values.orderDetails;
+    // const configOrderDetails = [];
+    // getOrderDetails.map((product) => {
+    //   let tmpProduct = products.find((e) => (e._id = product.productId));
+    //   configOrderDetails.push({
+    //     productId: product.productId,
+    //     size: product.size,
+    //     quantity: product.quantity,
+    //     price: tmpProduct.price,
+    //     discount: tmpProduct.discount,
+    //   });
+    // });
 
     //Config contacInfo
     // before that, we need to config address in contactInfo
@@ -216,6 +208,7 @@ function OrderDetail() {
       shippingInfo = {
         address: addressShipping,
         transportationId: values.transportationId,
+        transportationPrice: values.transportationPrice
       };
 
       if (values.emailShippingInfo) {
@@ -260,8 +253,8 @@ function OrderDetail() {
     //Add a handler -update new status
     const actionContent = `Cập nhật thông tin đơn hàng `;
     const newHandler = customCreateAHandler(actionContent);
-    // let handlers = customOrderDetail.handlers;
-    // handlers.push(newHandler);
+    let handlers = order.handlers;
+    handlers.push(newHandler);
 
     const updateDetailOrder = {
       status: values.status,
@@ -270,23 +263,31 @@ function OrderDetail() {
       contactInfo,
       shippingInfo,
       paymentInfo,
-      orderDetails: configOrderDetails,
-      // handlers,
     };
+console.log("oldValue:", order)
+console.log("newValue:", updateDetailOrder)
+    const checkChangedData = objCompare(updateDetailOrder, order);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
+      return;
+    }
+    updateDetailOrder.handlers= handlers
+
+
+
     setLoadingBtn(true);
     //SUBMIT
     //POST
     axiosClient
-      .post(`${URLOrder}/insertOne`, updateDetailOrder)
+      .patch(`${URLOrder}/updateOne/${id}`, updateDetailOrder)
       .then((response) => {
-        if (response.status === 201) {
-          setLoading(true);
+        if (response.status === 200) {
           // setIsCreate(false);
-          setRefresh((e) => !e);
+          // setRefresh((e) => !e);
           setDetailCreatingStatus(false);
           notification.info({
             message: "Thông báo",
-            description: "Thêm mới thành công",
+            description: "Cập nhật thành công",
           });
         }
       })
@@ -315,137 +316,146 @@ function OrderDetail() {
   useEffect(() => {
     setLoading(true);
     // Is not existing OrderDetail or orderDetail._id # id in params?
-    if (!hookOrderDetailData || hookOrderDetailData._id !== id) {
-      axiosClient
-        .get(`${URLOrder}/orderDetail/${id}`)
-        .then((response) => {
-          if (response.data.results.length() === 0) {
-            setNotFound(true);
-          } else {
-            // Saved orderDetail with Zustand
-            hookSetOrderDetail(response.data.results[0]);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
+    axiosClient
+      .get(`${URLOrder}/orderDetail/${id}`)
+      .then((response) => {
+        if (response.data.results.length === 0) {
           setNotFound(true);
-        });
-    }
+        } else {
+          const order = response.data.results[0];
+          setOrder(response.data.results[0]);
+          //Custom values before setFieldsValues for form Update
+          setSendingDateState(
+            order.sendingDate
+              ? moment(order.sendingDate).format("YYYY-MM-DD")
+              : null
+          );
+          setReceivedDateState(
+            order.receivedDate
+              ? moment(order.receivedDate).format("YYYY-MM-DD")
+              : null
+          );
+          // Fields: orderCode-createdDate-sendingDate-receivedDate-status
+          const createdDate = formattedDate(order.createdDate);
+          const sendingDate = order.sendingDate
+            ? moment(order.sendingDate)
+            : null;
+          const receivedDate = order.receivedDate
+            ? moment(order.receivedDate)
+            : null;
 
-    const orderDetail = hookOrderDetailData;
-    console.log("show raw data:", orderDetail);
-    //Custom values before setFieldsValues for form Update
-    setSendingDateState(
-      orderDetail.sendingDate
-        ? moment(orderDetail.sendingDate).format("YYYY-MM-DD")
-        : null
-    );
-    setReceivedDateState(
-      orderDetail.receivedDate
-        ? moment(orderDetail.receivedDate).format("YYYY-MM-DD")
-        : null
-    );
-    // Fields: orderCode-createdDate-sendingDate-receivedDate-status
-    const createdDate = formattedDate(orderDetail.createdDate);
-    const sendingDate = orderDetail.sendingDate
-      ? moment(orderDetail.sendingDate)
-      : null;
-    const receivedDate = orderDetail.receivedDate
-      ? moment(orderDetail.receivedDate)
-      : null;
+          const orderCode = order.orderCode;
+          const status = order.status;
+          //Fields about ContactInfo
+          const detailAddressContactInfo =
+            order.contactInfo.address.detailAddress;
+          const countryContactInfo = order.contactInfo.address.country
+            ? order.contactInfo.address.country
+            : null;
+          const stateContactInfo = order.contactInfo.address.state
+            ? order.contactInfo.address.state
+            : null;
+          const cityContactInfo = order.contactInfo.address.city
+            ? order.contactInfo.address.city
+            : null;
 
-    const orderCode = orderDetail.orderCode;
-    const status = orderDetail.status;
-    //Fields about ContactInfo
-    const detailAddressContactInfo =
-      orderDetail.contactInfo.address.detailAddress;
-    const countryContactInfo = orderDetail.contactInfo.address.country
-      ? orderDetail.contactInfo.address.country
-      : null;
-    const stateContactInfo = orderDetail.contactInfo.address.state
-      ? orderDetail.contactInfo.address.state
-      : null;
-    const cityContactInfo = orderDetail.contactInfo.address.city
-      ? orderDetail.contactInfo.address.city
-      : null;
+          const phoneNumberContactInfo = order.contactInfo.phoneNumber;
+          const firstNameContactInfo = order.contactInfo.firstName;
+          const lastNameContactInfo = order.contactInfo.lastName;
+          const emailContactInfo = order.contactInfo.email
+            ? order.contactInfo.email
+            : null;
+          //Fields about shippingInfo
+          const detailAddressShippingInfo = order.shippingInfo?.address
+            ?.detailAddress
+            ? order.shippingInfo?.address?.detailAddress
+            : null;
+          const countryShippingInfo = order.shippingInfo?.address?.country
+            ? order.shippingInfo?.address.country
+            : null;
+          const stateShippingInfo = order.shippingInfo?.address?.state
+            ? order.shippingInfo?.address.state
+            : null;
+          const cityShippingInfo = order.shippingInfo?.address?.city
+            ? order.shippingInfo.address.city
+            : null;
+          const transportationId = order.shippingInfo?.transportationId;
+          const transportationPrice = order.shippingInfo?.transportationPrice;
+          const note = order.shippingInfo?.note;
 
-    const phoneNumberContactInfo = orderDetail.contactInfo.phoneNumber;
-    const firstNameContactInfo = orderDetail.contactInfo.firstName;
-    const lastNameContactInfo = orderDetail.contactInfo.lastName;
-    const emailContactInfo = orderDetail.contactInfo.email
-      ? orderDetail.contactInfo.email
-      : null;
-    //Fields about shippingInfo
-    const detailAddressShippingInfo =
-      orderDetail.shippingInfo?.address?.detailAddress? orderDetail.shippingInfo?.address?.detailAddress : null;
-    const countryShippingInfo = orderDetail.shippingInfo?.address?.country
-      ? orderDetail.shippingInfo?.address.country
-      : null;
-    const stateShippingInfo = orderDetail.shippingInfo?.address?.state
-      ? orderDetail.shippingInfo?.address.state
-      : null;
-    const cityShippingInfo = orderDetail.shippingInfo?.address?.city
-      ? orderDetail.shippingInfo.address.city
-      : null;
-    const transportationId = orderDetail.shippingInfo?.transportationId;
-    const transportationPrice = orderDetail.shippingInfo?.transportationPrice;
-    const note = orderDetail.shippingInfo?.note;
+          const phoneNumberShippingInfo = order.shippingInfo?.phoneNumber;
+          const firstNameShippingInfo = order.shippingInfo?.firstName;
+          const lastNameShippingInfo = order.shippingInfo?.lastName;
+          const emailShippingInfo = order.shippingInfo?.email
+            ? order.shippingInfo?.email
+            : null;
+          //Custom orderDetails
+          const orderDetailsRaw = order.orderDetails;
+          let orderDetails = [];
+          orderDetailsRaw.map((o) => {
+            orderDetails.push({
+              discount: o.discount,
+              price: o.price,
+              quantity: o.quantity,
+              productId: o.productInfo?.productCode,
+              productName: o.productInfo?.name,
+              size: o.productInfo?.attributes.size,
+              color: o.productInfo?.attributes.color,
+            });
+          });
+          let customOrder = {
+            orderDetails: orderDetails,
+            totalPrice: order.totalPrice,
+            orderCode,
+            createdDate,
+            sendingDate,
+            receivedDate,
+            status,
+            phoneNumberContactInfo,
+            firstNameContactInfo,
+            lastNameContactInfo,
+            detailAddressContactInfo,
+            countryContactInfo,
+            stateContactInfo,
+            cityContactInfo,
+            emailContactInfo,
+            phoneNumberShippingInfo,
+            firstNameShippingInfo,
+            lastNameShippingInfo,
+            detailAddressShippingInfo,
+            countryShippingInfo,
+            stateShippingInfo,
+            cityShippingInfo,
+            emailShippingInfo,
+            transportationId,
+            transportationPrice,
+            note,
+          };
+          if (order.paymentInfo) {
+            customOrder = {
+              ...customOrder,
+              paymentMethod: order.paymentInfo.paymentMethod,
+            };
+          }
+          setCustomOrder({
+            ...customOrder,
+            handlers: order.handlers,
+          });
+          let customHandlersToString = [];
+          order.handlers.map((handler) => {
+            customHandlersToString.push(
+              `- ${handler.action} --- ${handler.userName}---${handler.userId} `
+            );
+          });
+          setHandlerToString(customHandlersToString);
+          form.setFieldsValue(customOrder);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        setNotFound(true);
+      });
 
-    const phoneNumberShippingInfo = orderDetail.shippingInfo?.phoneNumber;
-    const firstNameShippingInfo = orderDetail.shippingInfo?.firstName;
-    const lastNameShippingInfo = orderDetail.shippingInfo?.lastName;
-    const emailShippingInfo = orderDetail.shippingInfo?.email
-      ? orderDetail.shippingInfo?.email
-      : null;
-//Custom orderDetails
-const orderDetailsRaw = orderDetail;
-console.log("order:", orderDetail)
-
-
-
-    let customOrderDetail = {
-      orderDetails: orderDetail.orderDetails,
-      totalPrice: orderDetail.totalPrice,
-      orderCode,
-      createdDate,
-      sendingDate,
-      receivedDate,
-      status,
-      phoneNumberContactInfo,
-      firstNameContactInfo,
-      lastNameContactInfo,
-      detailAddressContactInfo,
-      countryContactInfo,
-      stateContactInfo,
-      cityContactInfo,
-      emailContactInfo,
-      phoneNumberShippingInfo,
-      firstNameShippingInfo,
-      lastNameShippingInfo,
-      detailAddressShippingInfo,
-      countryShippingInfo,
-      stateShippingInfo,
-      cityShippingInfo,
-      emailShippingInfo,
-      transportationId,
-      note,
-    };
-    if (orderDetail.paymentInfo) {
-      customOrderDetail = {
-        ...customOrderDetail,
-        paymentMethod: orderDetail.paymentInfo.paymentMethod,
-      };
-    }
-    setCustomOrder({ ...customOrderDetail, handlers: orderDetail.handlers });
-    let customHandlersToString = [];
-    orderDetail.handlers.map((handler) => {
-      customHandlersToString.push(
-        `- ${handler.action} --- ${handler.userName}---${handler.userId} `
-      );
-    });
-    setHandlerToString(customHandlersToString);
-    console.log("custom:", customHandlersToString);
-    form.setFieldsValue(customOrderDetail);
     setLoading(false);
   }, [products]);
 
@@ -476,16 +486,7 @@ console.log("order:", orderDetail)
                 onFinishFailed={() => {
                   console.error("Error at onFinishFailed at form");
                 }}
-                // initialValues={{
-                //   sendingDate: null,
-                //   receivedDate: null,
-                //   status: "WAITING",
-                //   country: null,
-                //   state: null,
-                //   city: null,
-                //   cardNumber: "5105105105105100",
-                //   orderDetails: [{ quantity: 1 }],
-                // }}
+                initialValues={{ paymentMethod: "COD" }}
               >
                 <Form.Item
                   {...PropsFormItem_Label_Name({
@@ -814,67 +815,66 @@ console.log("order:", orderDetail)
                       Thông tin nhận hàng
                     </Text>
                     <Form.Item
-                  {...PropsFormItem_Label_Name({
-                    label: "Phương tiện vận chuyển",
-                    name: "transportationPrice",
-                  })}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Trường dữ liệu không thể bỏ trống",
-                    },
-                  ]}
-                >
-                  <Input
-                    style={{ width: 400 }}
-                    disabled
-                    addonAfter={"VNĐ"}
-                    addonBefore={
-                      <Form.Item
-                        {...PropsFormItem_Label_Name({
-                          label: "Phương tiện vận chuyển",
-                          name: "transportationId",
-                        })}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Trường dữ liệu không thể bỏ trống",
-                          },
-                        ]}
-                        noStyle
-                      >
-                        <Select
-                          style={{ width: 250 }}
-                          loading={!transportations}
-                          placeholder="Chọn"
-                          onChange={(value) => {
-                            const found = transportations.find(
-                              (e) => e._id === value
-                            );
-                            const priceText = numeral(found.price).format(
-                              "0,0"
-                            );
-                            form.setFieldsValue({
-                              transportationPrice: priceText,
-                            });
-                          }}
-                        >
-                          {transportations &&
-                            transportations.map((t) => {
-                              const customPrice = numeral(t.price).format(
-                                "0,0"
-                              );
-                              return (
-                                <Select.Option key={t._id} value={t._id}>
-                                  {`${t.name}`}
-                                </Select.Option>
-                              );
+                      {...PropsFormItem_Label_Name({
+                        label: "Phương tiện vận chuyển",
+                        name: "transportationPrice",
+                      })}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Trường dữ liệu không thể bỏ trống",
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        style={{ width: 400 }}
+                        disabled
+                        addonAfter={"VNĐ"}
+                        formatter={formatterNumber}
+                        addonBefore={
+                          <Form.Item
+                            {...PropsFormItem_Label_Name({
+                              label: "Phương tiện vận chuyển",
+                              name: "transportationId",
                             })}
-                        </Select>
-                      </Form.Item>
-                    }
-                  />
-                </Form.Item>
+                            rules={[
+                              {
+                                required: true,
+                                message: "Trường dữ liệu không thể bỏ trống",
+                              },
+                            ]}
+                            noStyle
+                          >
+                            <Select
+                              style={{ width: 250 }}
+                              loading={!transportations}
+                              placeholder="Chọn"
+                              onChange={(value) => {
+                                const found = transportations.find(
+                                  (e) => e._id === value
+                                );
+                                const priceText = found.price;
+                                const resetTotalPrice =
+                                  found.price + order.totalPrice;
+                                form.setFieldsValue({
+                                  transportationPrice: priceText,
+                                  totalPrice: resetTotalPrice,
+                                });
+                              }}
+                            >
+                              {transportations &&
+                                transportations.map((t) => {
+                                  return (
+                                    <Select.Option key={t._id} value={t._id}>
+                                      {`${t.name}`}
+                                    </Select.Option>
+                                  );
+                                })}
+                            </Select>
+                          </Form.Item>
+                        }
+                      />
+                    </Form.Item>
 
                     <Form.Item
                       {...PropsFormItemFirstName}
@@ -1037,6 +1037,7 @@ console.log("order:", orderDetail)
                       ]}
                     >
                       <Select
+                        disabled
                         placeholder="Chọn"
                         style={{ width: 200 }}
                         onChange={(value) => {
@@ -1141,367 +1142,360 @@ console.log("order:", orderDetail)
                 </Fragment>
 
                 <Form.List name="orderDetails">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }, index) => (
-                  <Fragment key={key}>
-                    <Space
-                      style={{
-                        display: "flex",
-                        marginBottom: 8,
-                      }}
-                      align="baseline"
-                    >
-                      <div style={{ display: "flex", gap: 24 }}>
-                        <div>
-                          <Form.Item
-                            {...restField}
-                            label=<LabelCustomization
-                              title={`Tên sản phẩm ${name + 1}`}
-                            />
-                            name={[name, "productName"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa chọn sản phẩm",
-                              },
-                            ]}
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }, index) => (
+                        <Fragment key={key}>
+                          <Space
+                            style={{
+                              display: "flex",
+                              marginBottom: 8,
+                            }}
+                            align="baseline"
                           >
-                            <Input
-                              style={{ minWidth: 400, maxWidth: 800 }}
-                              placeholder="Tên sản phẩm"
-                              disabled
-                              addonBefore={
-                                <Form.Item name={[name, "productId"]} noStyle>
-                                  <Select
-                                    loading={!products}
-                                    placeholder="Mã số"
-                                    style={{ width: 100 }}
-                                    showSearch
-                                    optionFilterProp="children"
-                                    filterOption={(input, option) =>
-                                      (option?.label ?? "")
-                                        .toLowerCase()
-                                        .includes(input.toLowerCase())
+                            <div style={{ display: "flex", gap: 24 }}>
+                              <div>
+                                <Form.Item
+                                  {...restField}
+                                  label=<LabelCustomization
+                                    title={`Tên sản phẩm ${name + 1}`}
+                                  />
+                                  name={[name, "productName"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn sản phẩm",
+                                    },
+                                  ]}
+                                >
+                                  <Input
+                                    style={{ minWidth: 400, maxWidth: 800 }}
+                                    placeholder="Tên sản phẩm"
+                                    disabled
+                                    addonBefore={
+                                      <Form.Item
+                                        name={[name, "productId"]}
+                                        noStyle
+                                      >
+                                        <Select
+                                          disabled
+                                          // loading={!products}
+                                          placeholder="Mã số"
+                                          style={{ width: 100 }}
+                                          // showSearch
+                                          // optionFilterProp="children"
+                                          // filterOption={(input, option) =>
+                                          //   (option?.label ?? "")
+                                          //     .toLowerCase()
+                                          //     .includes(input.toLowerCase())
+                                          // }
+                                          // options={
+                                          //   products &&
+                                          //   products.map((e) => {
+                                          //     const tmp = {
+                                          //       value: e._id,
+                                          //       label: e.productCode,
+                                          //     };
+                                          //     return tmp;
+                                          //   })
+                                          // }
+                                          // onChange={(value) => {
+                                          //   const found = products.find(
+                                          //     (e) => e._id === value
+                                          //   );
+                                          //   let defaultSize = null;
+                                          //   let defaultColor = null;
+                                          //   let defaultPrice = null;
+                                          //   let defaultDiscount = null;
+                                          //   found.attributes.map((a) => {
+                                          //     if (
+                                          //       a.discount === found.maxDiscount
+                                          //     ) {
+                                          //       defaultColor = a.color;
+                                          //       defaultSize = a.size;
+                                          //       defaultPrice = a.price;
+                                          //       defaultDiscount = a.discount;
+                                          //     }
+                                          //   });
+                                          //   const fields =
+                                          //     form.getFieldsValue();
+                                          //   const { orderDetails } = fields;
+                                          //   Object.assign(orderDetails[name], {
+                                          //     productName: found.name,
+                                          //     color: defaultColor,
+                                          //     size: defaultSize,
+                                          //     quantity: 1,
+                                          //     price: defaultPrice,
+                                          //     discount: defaultDiscount,
+                                          //   });
+                                          //   form.setFieldsValue({
+                                          //     orderDetails,
+                                          //   });
+                                          // }}
+                                        />
+                                      </Form.Item>
                                     }
-                                    options={
-                                      products &&
-                                      products.map((e) => {
-                                        const tmp = {
-                                          value: e._id,
-                                          label: e.productCode,
-                                        };
-                                        return tmp;
-                                      })
-                                    }
-                                    onChange={(value) => {
-                                      const found = products.find(
-                                        (e) => e._id === value
-                                      );
-                                      let defaultSize = null;
-                                      let defaultColor = null;
-                                      let defaultPrice = null;
-                                      let defaultDiscount = null;
-                                      found.attributes.map((a) => {
-                                        if (a.discount === found.maxDiscount) {
-                                          defaultColor = a.color;
-                                          defaultSize = a.size;
-                                          defaultPrice = a.price;
-                                          defaultDiscount = a.discount;
-                                        }
-                                      });
-                                      const fields =
-                                        form.getFieldsValue();
-                                      const { orderDetails } = fields;
-                                      Object.assign(orderDetails[name], {
-                                        productName: found.name,
-                                        color: defaultColor,
-                                        size: defaultSize,
-                                        quantity: 1,
-                                        price: defaultPrice,
-                                        discount: defaultDiscount,
-                                      });
-                                      form.setFieldsValue({
-                                        orderDetails,
-                                      });
-                                    }}
                                   />
                                 </Form.Item>
-                              }
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            label=<LabelCustomization title={`Size`} />
-                            name={[name, "size"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa chọn Size",
-                              },
-                            ]}
-                          >
-                            <Select
-                              placeholder="Size"
-                              style={{
-                                width: 70,
-                              }}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                (option?.label ?? "")
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                              options={
-                                sizeList &&
-                                sizeList.map((s) => {
-                                  const tmp = {
-                                    value: s,
-                                    label: s,
-                                  };
-                                  return tmp;
-                                })
-                              }
-                              onChange={() => {
-                                const fields = form.getFieldsValue();
-                                const { orderDetails } = fields;
-                                Object.assign(orderDetails[name], {
-                                  color: null,
-                                });
-                                form.setFieldsValue({
-                                  orderDetails,
-                                });
-                              }}
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            label=<LabelCustomization title={`Màu sắc`} />
-                            name={[name, "color"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa chọn màu",
-                              },
-                            ]}
-                          >
-                            <Select
-                              placeholder="Màu sắc"
-                              style={{
-                                width: 160,
-                              }}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                (option?.label ?? "")
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                              options={
-                                colorList &&
-                                colorList.map((s) => {
-                                  const tmp = {
-                                    value: s,
-                                    label: s,
-                                  };
-                                  return tmp;
-                                })
-                              }
-                              onChange={() => {
-                                const fields = form.getFieldsValue();
-                                const { orderDetails } = fields;
-                                const tmpSize = orderDetails[name].size;
-                                const tmpColor = orderDetails[name].color;
-                                const tmpProductId =
-                                  orderDetails[name].productId;
-                                const found = products.find(
-                                  (e) => e._id === tmpProductId
-                                );
-                                let resetSize = tmpSize;
-                                let resetColor = tmpColor;
-                                let resetPrice, resetDiscount;
-                                let checkExisting = false;
-                                let listSize_Color =
-                                  "Sản phẩm này chỉ còn các loại( Màu- Size): ";
-                                found.attributes.map((a) => {
-                                  if (
-                                    a.size === tmpSize &&
-                                    a.color === tmpColor
-                                  ) {
-                                    checkExisting = true;
-                                    Object.assign(orderDetails[name], {
-                                      price: a.price,
-                                      discount: a.discount,
-                                    });
-                                    form.setFieldsValue({
-                                      orderDetails,
-                                    });
-                                    return;
-                                  } else if (a.discount === found.maxDiscount) {
-                                    listSize_Color += `${a.color}- ${a.size} ; `;
-                                    resetColor = a.color;
-                                    resetSize = a.size;
-                                    resetPrice = a.price;
-                                    resetDiscount = a.discount;
-                                  } else {
-                                    listSize_Color += ` ${a.size} - ${a.color} ; `;
-                                  }
-                                });
+                                <Form.Item
+                                  label=<LabelCustomization title={`Size`} />
+                                  name={[name, "size"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn Size",
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    disabled
+                                    placeholder="Size"
+                                    style={{
+                                      width: 70,
+                                    }}
+                                    // showSearch
+                                    // optionFilterProp="children"
+                                    // filterOption={(input, option) =>
+                                    //   (option?.label ?? "")
+                                    //     .toLowerCase()
+                                    //     .includes(input.toLowerCase())
+                                    // }
+                                    // options={
+                                    //   sizeList &&
+                                    //   sizeList.map((s) => {
+                                    //     const tmp = {
+                                    //       value: s,
+                                    //       label: s,
+                                    //     };
+                                    //     return tmp;
+                                    //   })
+                                    // }
+                                    // onChange={() => {
+                                    //   const fields = form.getFieldsValue();
+                                    //   const { orderDetails } = fields;
+                                    //   Object.assign(orderDetails[name], {
+                                    //     color: null,
+                                    //   });
+                                    //   form.setFieldsValue({
+                                    //     orderDetails,
+                                    //   });
+                                    // }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label=<LabelCustomization title={`Màu sắc`} />
+                                  name={[name, "color"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa chọn màu",
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    disabled
+                                    placeholder="Màu sắc"
+                                    style={{
+                                      width: 160,
+                                    }}
+                                    // showSearch
+                                    // optionFilterProp="children"
+                                    // filterOption={(input, option) =>
+                                    //   (option?.label ?? "")
+                                    //     .toLowerCase()
+                                    //     .includes(input.toLowerCase())
+                                    // }
+                                    // options={
+                                    //   colorList &&
+                                    //   colorList.map((s) => {
+                                    //     const tmp = {
+                                    //       value: s,
+                                    //       label: s,
+                                    //     };
+                                    //     return tmp;
+                                    //   })
+                                    // }
+                                    // onChange={() => {
+                                    //   const fields = form.getFieldsValue();
+                                    //   const { orderDetails } = fields;
+                                    //   const tmpSize = orderDetails[name].size;
+                                    //   const tmpColor = orderDetails[name].color;
+                                    //   const tmpProductId =
+                                    //     orderDetails[name].productId;
+                                    //   const found = products.find(
+                                    //     (e) => e._id === tmpProductId
+                                    //   );
+                                    //   let resetSize = tmpSize;
+                                    //   let resetColor = tmpColor;
+                                    //   let resetPrice, resetDiscount;
+                                    //   let checkExisting = false;
+                                    //   let listSize_Color =
+                                    //     "Sản phẩm này chỉ còn các loại( Màu- Size): ";
+                                    //   found.attributes.map((a) => {
+                                    //     if (
+                                    //       a.size === tmpSize &&
+                                    //       a.color === tmpColor
+                                    //     ) {
+                                    //       checkExisting = true;
+                                    //       Object.assign(orderDetails[name], {
+                                    //         price: a.price,
+                                    //         discount: a.discount,
+                                    //       });
+                                    //       form.setFieldsValue({
+                                    //         orderDetails,
+                                    //       });
+                                    //       return;
+                                    //     } else if (
+                                    //       a.discount === found.maxDiscount
+                                    //     ) {
+                                    //       listSize_Color += `${a.color}- ${a.size} ; `;
+                                    //       resetColor = a.color;
+                                    //       resetSize = a.size;
+                                    //       resetPrice = a.price;
+                                    //       resetDiscount = a.discount;
+                                    //     } else {
+                                    //       listSize_Color += ` ${a.size} - ${a.color} ; `;
+                                    //     }
+                                    //   });
 
-                                if (!checkExisting) {
-                                  Object.assign(orderDetails[name], {
-                                    color: resetColor,
-                                    size: resetSize,
-                                    price: resetColor,
-                                    quantity: null,
-                                    discount: resetDiscount,
-                                  });
-                                  form.setFieldsValue({
-                                    orderDetails,
-                                  });
-                                  notification.error({
-                                    message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
-                                    description: listSize_Color,
-                                    duration: 0,
-                                  });
-                                }
-                              }}
-                            />
-                          </Form.Item>
+                                    //   if (!checkExisting) {
+                                    //     Object.assign(orderDetails[name], {
+                                    //       color: resetColor,
+                                    //       size: resetSize,
+                                    //       price: resetColor,
+                                    //       quantity: null,
+                                    //       discount: resetDiscount,
+                                    //     });
+                                    //     form.setFieldsValue({
+                                    //       orderDetails,
+                                    //     });
+                                    //     notification.error({
+                                    //       message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
+                                    //       description: listSize_Color,
+                                    //       duration: 0,
+                                    //     });
+                                    //   }
+                                    // }}
+                                  />
+                                </Form.Item>
 
-                          <Form.Item
-                            label=<LabelCustomization title={`Số lượng`} />
-                            {...restField}
-                            name={[name, "quantity"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa nhập số lượng",
-                              },
-                            ]}
-                          >
-                            <InputNumber
-                              style={{ minWidth: 120, maxWidth: 360 }}
-                              min={0}
-                              addonAfter="sản phẩm"
-                              onChange={(value) => {
-                                const fields = form.getFieldsValue();
-                                const { orderDetails } = fields;
-                                const tmpSize = orderDetails[name].size;
-                                const tmpColor = orderDetails[name].color;
-                                const tmpProductId =
-                                  orderDetails[name].productId;
-                                if (tmpSize && tmpColor) {
-                                  const found = products.find(
-                                    (e) => e._id === tmpProductId
-                                  );
-                                  found.attributes.map((a) => {
-                                    if (
-                                      a.size === tmpSize &&
-                                      a.color === tmpColor
-                                    ) {
-                                      if (value <= a.stock) {
-                                        return Promise.resolve();
-                                      }
-                                      Object.assign(orderDetails[name], {
-                                        quantity: null,
-                                      });
-                                      form.setFieldsValue({
-                                        orderDetails,
-                                      });
-                                      return notification.error({
-                                        message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
-                                        description: `Kho hàng còn ${a.stock}`,
-                                      });
+                                <Form.Item
+                                  label=<LabelCustomization
+                                    title={`Số lượng`}
+                                  />
+                                  {...restField}
+                                  name={[name, "quantity"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa nhập số lượng",
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    disabled
+                                    style={{ minWidth: 120, maxWidth: 360 }}
+                                    min={0}
+                                    addonAfter="sản phẩm"
+                                    // onChange={(value) => {
+                                    //   const fields = form.getFieldsValue();
+                                    //   const { orderDetails } = fields;
+                                    //   const tmpSize = orderDetails[name].size;
+                                    //   const tmpColor = orderDetails[name].color;
+                                    //   const tmpProductId =
+                                    //     orderDetails[name].productId;
+                                    //   if (tmpSize && tmpColor) {
+                                    //     const found = products.find(
+                                    //       (e) => e._id === tmpProductId
+                                    //     );
+                                    //     found.attributes.map((a) => {
+                                    //       if (
+                                    //         a.size === tmpSize &&
+                                    //         a.color === tmpColor
+                                    //       ) {
+                                    //         if (value <= a.stock) {
+                                    //           return Promise.resolve();
+                                    //         }
+                                    //         Object.assign(orderDetails[name], {
+                                    //           quantity: null,
+                                    //         });
+                                    //         form.setFieldsValue({
+                                    //           orderDetails,
+                                    //         });
+                                    //         return notification.error({
+                                    //           message: `Kho hàng không còn mẫu hàng với size ${tmpSize}- màu ${tmpColor} `,
+                                    //           description: `Kho hàng còn ${a.stock}`,
+                                    //         });
+                                    //       }
+                                    //     });
+                                    //   }
+                                    // }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label=<LabelCustomization
+                                    title={`Giá tiền`}
+                                  />
+                                  {...restField}
+                                  name={[name, "price"]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa nhập giá tiền",
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    disabled
+                                    defaultValue={0}
+                                    formatter={(value) =>
+                                      ` ${value}`.replace(
+                                        /\B(?=(\d{3})+(?!\d))/g,
+                                        ","
+                                      )
                                     }
-                                  });
-                                }
-                              }}
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            label=<LabelCustomization title={`Giá tiền`} />
-                            {...restField}
-                            name={[name, "price"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa nhập giá tiền",
-                              },
-                            ]}
-                          >
-                            <InputNumber
-                              defaultValue={0}
-                              formatter={(value) =>
-                                ` ${value}`.replace(
-                                  /\B(?=(\d{3})+(?!\d))/g,
-                                  ","
-                                )
-                              }
-                              style={{ minWidth: 120, maxWidth: 360 }}
-                              min={0}
-                              addonAfter="VNĐ"
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            label=<LabelCustomization title={`Giảm giá`} />
-                            {...restField}
-                            name={[name, "discount"]}
-                            defaultValue={0}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Chưa nhập mức giảm giá",
-                              },
-                            ]}
-                          >
-                            <InputNumber
-                              style={{ minWidth: 120, maxWidth: 150 }}
-                              min={0}
-                              max={100}
-                              addonAfter="%"
-                            />
-                          </Form.Item>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <MinusCircleOutlined
-                            style={{ fontSize: 24, color: "red" }}
-                            onClick={() => remove(name)}
-                          />
-                        </div>
-                      </div>
-                    </Space>
-                    <Divider style={{ backgroundColor: "#e3e6f2" }} />
-                  </Fragment>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Thêm sản phẩm
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
+                                    style={{ minWidth: 120, maxWidth: 360 }}
+                                    min={0}
+                                    addonAfter="VNĐ"
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  label=<LabelCustomization
+                                    title={`Giảm giá`}
+                                  />
+                                  {...restField}
+                                  name={[name, "discount"]}
+                                  defaultValue={0}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Chưa nhập mức giảm giá",
+                                    },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    disabled
+                                    style={{ minWidth: 120, maxWidth: 150 }}
+                                    min={0}
+                                    max={100}
+                                    addonAfter="%"
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                          </Space>
+                          <Divider style={{ backgroundColor: "#e3e6f2" }} />
+                        </Fragment>
+                      ))}
+                    </>
+                  )}
+                </Form.List>
                 <Form.Item
                   label=<LabelCustomization title={`Thành tiền`} />
                   name="totalPrice"
                 >
-                  <Input
-                    addonBefore={
-                      <ReloadOutlined
-                        onClick={() => handleCalSumCost()}
-                        style={{ cursor: "pointer" }}
-                      />
-                    }
+                  <InputNumber
+                    formatter={formatterNumber}
                     addonAfter="VNĐ"
                     disabled
                     style={{ width: 200 }}
@@ -1523,7 +1517,7 @@ console.log("order:", orderDetail)
                       htmlType="submit"
                       loading={loadingBtn}
                     >
-                      Tạo mới
+                      Cập nhật
                     </Button>
                   </Space>
                 </Form.Item>

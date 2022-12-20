@@ -53,8 +53,6 @@ function findDocuments(
       useUnifiedTopology: true,
     })
       .then((client) => {
-  console.log('test apiss')
-
         const dbo = client.db(DATABASE_NAME);
         const collection = dbo.collection(collectionName);
         let cursor = collection;

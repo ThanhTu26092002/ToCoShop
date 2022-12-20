@@ -5,7 +5,7 @@ const Supplier = require("../models/Supplier");
 const multer = require("multer");
 const fs = require("fs");
 const upload = require("../middleware/multerUpload");
-
+const passport = require("passport");
 const {
   PATH_FOLDER_PUBLIC_UPLOAD,
   PATH_FOLDER_IMAGES,
@@ -15,248 +15,279 @@ const { formatterErrorFunc } = require("../utils/formatterError");
 const { loadSupplier, validateId } = require("../validations/commonValidators");
 
 const { findDocuments } = require("../utils/MongodbHelper");
+const { allowRoles } = require("../middleware/checkRoles");
 // const passport = require("passport");
 
 //Get all docs
-// router.get("/",passport.authenticate("jwt", { session: false }), async (req, res, next) => {
 router.get("/", async (req, res, next) => {
   try {
     const docs = await Supplier.find().sort({ _id: -1 });
-    // const docs = await Supplier.find();
     res.json({ ok: true, results: docs });
   } catch (err) {
     const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_SUPPLIERS);
-
     res.status(400).json({ ok: false, error: errMsgMongoDB });
   }
 });
 //
 
 // Update supplierImage
-router.post("/supplierImage/:id", loadSupplier, (req, res) => {
-  upload.single("file")(req, res, async function (err) {
-    if (err instanceof multer.MulterError) {
-      res.status(500).json({ type: "MulterError", err: err });
-    } else if (err) {
-      let errMsg = { type: "UnknownError", error: err };
-      if (req.fileValidationError) {
-        errMsg.type = "fileValidationError";
-        errMsg.error = req.fileValidationError;
-      } else if (req.directoryError) {
-        errMsg.type = "directoryError";
-        errMsg.error = req.directoryError;
-      }
-      res.status(500).json(errMsg);
-    } else {
-      try {
-        // if doesn't exist file in form-data then res... and return
-        if (!req.file) {
-          res.status(400).json({
-            ok: false,
-            error: {
-              name: "file",
-              message: `doesn't have any files in form-data from client`,
-            },
-          });
-          return;
+router.post(
+  "/supplierImage/:id",
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  loadSupplier,
+  (req, res) => {
+    upload.single("file")(req, res, async function (err) {
+      if (err instanceof multer.MulterError) {
+        res.status(500).json({ type: "MulterError", err: err });
+      } else if (err) {
+        let errMsg = { type: "UnknownError", error: err };
+        if (req.fileValidationError) {
+          errMsg.type = "fileValidationError";
+          errMsg.error = req.fileValidationError;
+        } else if (req.directoryError) {
+          errMsg.type = "directoryError";
+          errMsg.error = req.directoryError;
         }
-
-        const supplierId = req.params.id;
-        const newImgUrl = req.file.filename
-          ? `${PATH_FOLDER_IMAGES}/${COLLECTION_SUPPLIERS}/${supplierId}/${req.file.filename}`
-          : null;
-        const currentImgUrl = req.body.currentImgUrl
-          ? req.body.currentImgUrl
-          : null;
-        const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
-
-        const opts = { runValidators: true };
-        const updatedDoc = await Supplier.findByIdAndUpdate(
-          supplierId,
-          { imageUrl: newImgUrl },
-          opts
-        );
-        //if currentImgUrl =null
-        if (!currentImgUrl) {
-          res.json({
-            ok: true,
-            more_detail: "The Supplier has the new image",
-            message: "Update imageUrl and other data successfully",
-            result: updatedDoc,
-          });
-          return;
-        }
-
-        //else, then...
+        res.status(500).json(errMsg);
+      } else {
         try {
-          if (fs.existsSync(currentDirPath)) {
-            //If existing, removing the former uploaded image from DiskStorage
-            try {
-              //delete file image Synchronously
-              fs.unlinkSync(currentDirPath);
+          // if doesn't exist file in form-data then res... and return
+          if (!req.file) {
+            res.status(400).json({
+              ok: false,
+              error: {
+                name: "file",
+                message: `doesn't have any files in form-data from client`,
+              },
+            });
+            return;
+          }
+
+          const supplierId = req.params.id;
+          const newImgUrl = req.file.filename
+            ? `${PATH_FOLDER_IMAGES}/${COLLECTION_SUPPLIERS}/${supplierId}/${req.file.filename}`
+            : null;
+          const currentImgUrl = req.body.currentImgUrl
+            ? req.body.currentImgUrl
+            : null;
+          const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
+
+          const opts = { runValidators: true };
+          const updatedDoc = await Supplier.findByIdAndUpdate(
+            supplierId,
+            { imageUrl: newImgUrl },
+            opts
+          );
+          //if currentImgUrl =null
+          if (!currentImgUrl) {
+            res.json({
+              ok: true,
+              more_detail: "The Supplier has the new image",
+              message: "Update imageUrl and other data successfully",
+              result: updatedDoc,
+            });
+            return;
+          }
+
+          //else, then...
+          try {
+            if (fs.existsSync(currentDirPath)) {
+              //If existing, removing the former uploaded image from DiskStorage
+              try {
+                //delete file image Synchronously
+                fs.unlinkSync(currentDirPath);
+                res.json({
+                  ok: true,
+                  message: "Update imageUrl and other data successfully",
+                  result: updatedDoc,
+                });
+              } catch (errRmvFile) {
+                res.json({
+                  ok: true,
+                  warning: "The old uploaded file cannot delete",
+                  message: "Update imageUrl and other data successfully",
+                  result: updatedDoc,
+                });
+              }
+            } else {
               res.json({
                 ok: true,
-                message: "Update imageUrl and other data successfully",
-                result: updatedDoc,
-              });
-            } catch (errRmvFile) {
-              res.json({
-                ok: true,
-                warning: "The old uploaded file cannot delete",
+                warning: "Not existing the old uploaded image in DiskStorage",
                 message: "Update imageUrl and other data successfully",
                 result: updatedDoc,
               });
             }
-          } else {
+          } catch (errCheckFile) {
             res.json({
               ok: true,
-              warning: "Not existing the old uploaded image in DiskStorage",
-              message: "Update imageUrl and other data successfully",
+              warning:
+                "Check the former uploaded image existing unsuccessfully, can not delete it",
+              message: "Update imageUrl and other data successfully.",
+              errCheckFile,
               result: updatedDoc,
             });
           }
-        } catch (errCheckFile) {
-          res.json({
-            ok: true,
-            warning:
-              "Check the former uploaded image existing unsuccessfully, can not delete it",
-            message: "Update imageUrl and other data successfully.",
-            errCheckFile,
-            result: updatedDoc,
+        } catch (errMongoDB) {
+          console.log("having error");
+          res.status(400).json({
+            status: false,
+            message: "Failed in upload file",
           });
         }
-      } catch (errMongoDB) {
-        console.log("having error");
-        res.status(400).json({
-          status: false,
-          message: "Failed in upload file",
-        });
       }
-    }
-  });
-});
+    });
+  }
+);
 //
 
 // Insert One WITHOUT An Image
-router.post("/insertOne", async (req, res) => {
-  try {
-    const data = req.body;
-    //Create a new blog post object
-    const newDoc = new Supplier(data);
-    //Insert the newDocument in our Mongodb database
-    await newDoc.save();
-    res.status(201).json({ ok: true, result: newDoc });
-  } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
-    res.status(400).json({ ok: false, error: errMsgMongoDB });
+router.post(
+  "/insertOne",
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  async (req, res) => {
+    try {
+      const data = req.body;
+      //Create a new blog post object
+      const newDoc = new Supplier(data);
+      //Insert the newDocument in our Mongodb database
+      await newDoc.save();
+      res.status(201).json({ ok: true, result: newDoc });
+    } catch (errMongoDB) {
+      const errMsgMongoDB = formatterErrorFunc(
+        errMongoDB,
+        COLLECTION_SUPPLIERS
+      );
+      res.status(400).json({ ok: false, error: errMsgMongoDB });
+    }
   }
-});
+);
 //
 
 //--Update One with _Id WITHOUT image
-router.patch("/updateOne/:id", validateId, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = { ...req.body };
-    const opts = { runValidators: true };
-    //--Update in Mongodb
-    const updatedDoc = await Supplier.findByIdAndUpdate(id, updateData, opts);
-    if (!updatedDoc) {
-      res.status(404).json({
-        ok: true,
-        error: {
-          name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
-        },
-      });
-      return;
-    }
+router.patch(
+  "/updateOne/:id",
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  validateId,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = { ...req.body };
+      const opts = { runValidators: true };
+      //--Update in Mongodb
+      const updatedDoc = await Supplier.findByIdAndUpdate(id, updateData, opts);
+      if (!updatedDoc) {
+        res.status(404).json({
+          ok: true,
+          error: {
+            name: "id",
+            message: `the document with following id doesn't exist in the collection ${COLLECTION_SUPPLIERS}`,
+          },
+        });
+        return;
+      }
 
-    res.json({
-      ok: true,
-      message: "Update the Id successfully",
-      result: updatedDoc,
-    });
-  } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
-    res.status(400).json({ ok: true, error: errMsgMongoDB });
+      res.json({
+        ok: true,
+        message: "Update the Id successfully",
+        result: updatedDoc,
+      });
+    } catch (errMongoDB) {
+      const errMsgMongoDB = formatterErrorFunc(
+        errMongoDB,
+        COLLECTION_SUPPLIERS
+      );
+      res.status(400).json({ ok: true, error: errMsgMongoDB });
+    }
   }
-});
+);
 //
 
 //Delete ONE with ID
-router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const deleteDoc = await Supplier.findByIdAndDelete(id);
-    //deleteDoc !== false, is mean, finding a document with the id in the collection
-    if (!deleteDoc) {
-      res.status(200).json({
-        ok: true,
-        noneExist: `the document doesn't exist in the collection ${COLLECTION_CATEGORIES}`
-      });
-      return;
-    }
-    //
-    //--Delete the folder containing image of the account
+router.delete(
+  "/deleteOne/:id",
+  validateId,
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  async (req, res, next) => {
     try {
-      const pathFolderImages =
-        PATH_FOLDER_PUBLIC_UPLOAD +
-        PATH_FOLDER_IMAGES +
-        "/" +
-        COLLECTION_SUPPLIERS +
-        "/" +
-        id;
-      if (fs.existsSync(pathFolderImages)) {
-        //--If existing, removing this folder from DiskStorage
-        try {
-          fs.rmSync(pathFolderImages, { recursive: true, force: true });
-          res.json({
-            ok: true,
-            message:
-              "Delete the document in MongoDB and DiskStorage successfully",
-          });
-        } catch (err) {
+      const { id } = req.params;
+      const deleteDoc = await Supplier.findByIdAndDelete(id);
+      //deleteDoc !== false, is mean, finding a document with the id in the collection
+      if (!deleteDoc) {
+        res.status(200).json({
+          ok: true,
+          noneExist: `the document doesn't exist in the collection ${COLLECTION_CATEGORIES}`,
+        });
+        return;
+      }
+      //
+      //--Delete the folder containing image of the account
+      try {
+        const pathFolderImages =
+          PATH_FOLDER_PUBLIC_UPLOAD +
+          PATH_FOLDER_IMAGES +
+          "/" +
+          COLLECTION_SUPPLIERS +
+          "/" +
+          id;
+        if (fs.existsSync(pathFolderImages)) {
+          //--If existing, removing this folder from DiskStorage
+          try {
+            fs.rmSync(pathFolderImages, { recursive: true, force: true });
+            res.json({
+              ok: true,
+              message:
+                "Delete the document in MongoDB and DiskStorage successfully",
+            });
+          } catch (err) {
+            res.json({
+              ok: true,
+              warning:
+                "Could not delete the folder containing image of the document.",
+              message: "Delete the document with ID successfully, in MongoDB",
+              err,
+            });
+          }
+        } else {
+          // console.log({ok: true, warning: 'Not existing the folder containing image for deleted document in DiskStorage', message: 'Delete the document with ID successfully, in MongoDB'})
           res.json({
             ok: true,
             warning:
-              "Could not delete the folder containing image of the document.",
+              "Not existing the folder containing image for deleted document in DiskStorage",
             message: "Delete the document with ID successfully, in MongoDB",
-            err,
           });
         }
-      } else {
-        // console.log({ok: true, warning: 'Not existing the folder containing image for deleted document in DiskStorage', message: 'Delete the document with ID successfully, in MongoDB'})
+      } catch (errCheckFile) {
         res.json({
-          ok: true,
+          ok: false,
           warning:
-            "Not existing the folder containing image for deleted document in DiskStorage",
+            "Check the existence of the folder containing image of the document unsuccessfully, can not delete it",
           message: "Delete the document with ID successfully, in MongoDB",
+          errCheckFile,
         });
       }
-    } catch (errCheckFile) {
-      res.json({
+    } catch (errMongoDB) {
+      const errMsgMongoDB = formatterErrorFunc(
+        errMongoDB,
+        COLLECTION_SUPPLIERS
+      );
+      res.status(400).json({
         ok: false,
-        warning:
-          "Check the existence of the folder containing image of the document unsuccessfully, can not delete it",
-        message: "Delete the document with ID successfully, in MongoDB",
-        errCheckFile,
+        message: "Failed to delete the document with ID",
+        error: errMsgMongoDB,
       });
     }
-  } catch (errMongoDB) {
-    const errMsgMongoDB = formatterErrorFunc(errMongoDB, COLLECTION_SUPPLIERS);
-    res.status(400).json({
-      ok: false,
-      message: "Failed to delete the document with ID",
-      error: errMsgMongoDB,
-    });
   }
-});
+);
 //
 
 //----------------------------------------
 
-router.get("/search/:id", async (req, res, next) => {
+router.get("/findById/:id",validateId, passport.authenticate("jwt", { session: false }),
+allowRoles("ADMINISTRATORS"), async (req, res, next) => {
   try {
     const { id } = req.params;
     const supplier = await Supplier.findById(id);
@@ -267,68 +298,6 @@ router.get("/search/:id", async (req, res, next) => {
   }
 });
 //
-
-// router.get(
-//   "/search-many",
-//   validateSchema(search_deleteManySuppliersSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-//     findDocuments({ query: query }, COLLECTION_SUPPLIERS)
-//       .then((result) => res.status(200).json(result))
-//       .catch((err) =>
-//         res.status(500).json({ findFunction: "failed", err: err })
-//       );
-//   }
-// );
-// //
-
-// //Insert Many  -- haven't validation yet
-// router.post(
-//   "/insert-many",
-//   validateSchema(insertManySuppliersSchema),
-//   function (req, res, next) {
-//     const list = req.body;
-//     insertDocuments(list, COLLECTION_SUPPLIERS)
-//       .then((result) => {
-//         res.status(200).json({ ok: true, result: result });
-//       })
-//       .catch((err) => {
-//         res.json(500).json({ ok: false });
-//       });
-//   }
-// );
-// //
-
-// //Update MANY
-// router.patch(
-//   "/update-many",
-//   validateSchema(updateManySupplierSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-//     const newValues = req.body;
-//     updateDocuments(query, newValues, COLLECTION_SUPPLIERS)
-//       .then((result) => {
-//         res.status(201).json({ update: true, result: result });
-//       })
-//       .catch((err) => res.json({ update: false }));
-//   }
-// );
-// //
-
-// //Delete MANY
-// router.delete(
-//   "/delete-many",
-//   validateSchema(search_deleteManySuppliersSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-
-//     deleteMany(query, COLLECTION_SUPPLIERS)
-//       .then((result) => res.status(200).json(result))
-//       .catch((err) =>
-//         res.status(500).json({ deleteFunction: "failed", err: err })
-//       );
-//   }
-// );
 
 //TASK 26  --- not finished
 //---get suppliers that not sale
