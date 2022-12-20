@@ -16,19 +16,24 @@ import {
   Space,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
-import {
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
 import { URLSupplier, WEB_SERVER_UPLOAD_URL } from "../config/constants";
-import LabelCustomization, {
+import {
   ImgIcon,
   BoldText,
   TitleTable,
 } from "../components/subComponents";
 import axiosClient from "../config/axios";
+import {
+  PropsForm,
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemName,
+  PropsFormItemPhoneNumber,
+} from "../config/props";
+import { beforeUpload } from "../config/helperFuncs";
 
 function Suppliers() {
   const [isCreate, setIsCreate] = useState(false);
@@ -171,114 +176,10 @@ function Suppliers() {
       return <TitleTable title="danh sách nhà phân phối" />;
     },
     footer: () =>
-      "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 002233442",
-  };
-
-
-  const PropsForm = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-    initialValues: {
-      name: "",
-      email: "",
-      phoneNumber: "",
-      address: "",
-      // file: null,
-    },
-    autoComplete: "off",
-  };
-  const PropsFormItemName = {
-    label: <LabelCustomization title={"Tên nhà phân phối"} />,
-    name: "name",
-    rules: [
-      {
-        required: true,
-        message: "Vui lòng nhập tên nhà phân phối!",
-      },
-      {
-        max: 100,
-        message: "Tên nhà phân phối không quá 100 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Tên nhà phân phối không thể là khoảng trống",
-      },
-    ],
-  };
-
-  const PropsFormItemEmail = {
-    label: <LabelCustomization title={"Email"} />,
-    name: "email",
-    rules: [
-      {
-        pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        message: "Bạn nhập chưa đúng định dạng email",
-      },
-      {
-        max: 50,
-        message: "Email không quá 50 kí tự!",
-      },
-      {
-        required: true,
-        message: "Vui lòng nhập email của nhà phân phối!",
-      },
-    ],
-  };
-
-  const PropsFormItemPhoneNumber = {
-    label: <LabelCustomization title={"Số điện thoại"} />,
-    name: "phoneNumber",
-    rules: [
-      {
-        pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
-        message: "Bạn chưa nhập đúng định dạng số điện thoại",
-      },
-      {
-        max: 50,
-        message: "Số điện thoại không quá 50 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Số điện thoại không thể là khoảng trống",
-      },
-    ],
-  };
-
-  const PropsFormItemAddress = {
-    label: <LabelCustomization title={"Địa chỉ"} />,
-    name: "address",
-    rules: [
-      {
-        required: true,
-        message: "Vui lòng nhập địa chỉ của nhà phân phối!",
-      },
-      {
-        max: 500,
-        message: "Địa chỉ không quá 500 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Địa chỉ không thể là khoảng trống",
-      },
-    ],
+      "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 094333777",
   };
 
   //End: Props for components
-
-  const beforeUpload = (file) => {
-    const isImage =
-      file.type === "image/jpg" ||
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/gif";
-    if (!isImage) {
-      message.error("You can only upload jpg-jpeg-png-gif file!");
-      return false;
-    } else {
-      return true;
-    }
-  };
-  //
 
   const handleUploadImage = (options, record) => {
     setLoading(true);
@@ -338,7 +239,7 @@ function Suppliers() {
     setLoadingBtn(true);
     //SUBMIT
     let newData = { ...values };
-
+    console.log(newData);
     //POST
     axiosClient
       .post(`${URLSupplier}/insertOne`, newData)
@@ -372,7 +273,7 @@ function Suppliers() {
       values.name === selectedRecord.name &&
       values.email === selectedRecord.email &&
       values.phoneNumber === selectedRecord.phoneNumber &&
-      values.address === selectedRecord.address 
+      values.address === selectedRecord.address
     ) {
       setIsModalOpen(false);
       formUpdate.resetFields();
@@ -382,10 +283,7 @@ function Suppliers() {
     setLoadingBtn(true);
     //POST
     axiosClient
-      .patch(
-        `${URLSupplier}/updateOne/${selectedId}`,
-        values
-      )
+      .patch(`${URLSupplier}/updateOne/${selectedId}`, values)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -477,21 +375,29 @@ function Suppliers() {
               console.error("Error at onFinishFailed at formCreate");
             }}
           >
-           <Form.Item {...PropsFormItemName}>
-            <Input placeholder="Tên nhà phân phối mới" />
-          </Form.Item>
+            <Form.Item
+              {...PropsFormItemName({
+                lableTitle: "Tên nhà phân phối",
+                nameTitle: "name",
+                max: 100,
+              })}
+            >
+              <Input placeholder="Tên nhà phân phối mới" />
+            </Form.Item>
 
-          <Form.Item {...PropsFormItemEmail}>
-            <Input placeholder="Email" />
-          </Form.Item>
+            <Form.Item {...PropsFormItemEmail({ require: true })}>
+              <Input placeholder="Email" />
+            </Form.Item>
 
-          <Form.Item {...PropsFormItemPhoneNumber}>
-            <Input placeholder="Số điện thoại của nhà phân phối" />
-          </Form.Item>
+            <Form.Item {...PropsFormItemPhoneNumber}>
+              <Input placeholder="Số điện thoại của nhà phân phối" />
+            </Form.Item>
 
-          <Form.Item {...PropsFormItemAddress}>
-            <TextArea rows={3} placeholder="Địa chỉ của nhà phân phối" />
-          </Form.Item>
+            <Form.Item
+              {...PropsFormItemDetailAddress({ nameTitle: "address" })}
+            >
+              <TextArea rows={3} placeholder="Địa chỉ của nhà phân phối" />
+            </Form.Item>
 
             <Form.Item
               wrapperCol={{
@@ -512,8 +418,8 @@ function Suppliers() {
         )}
         <Table
           {...PropsTable}
-          onRow={() =>{
-            return {onClick: handleMouseLeaveCreate}
+          onRow={() => {
+            return { onClick: handleMouseLeaveCreate };
           }}
           columns={columns}
           dataSource={categories}
@@ -555,11 +461,17 @@ function Suppliers() {
               console.error("Error at onFinishFailed at formUpdate");
             }}
           >
-           <Form.Item {...PropsFormItemName}>
+            <Form.Item
+              {...PropsFormItemName({
+                labelTitle: "Tên nhà phân phối",
+                nameTitle: "name",
+                max: 100,
+              })}
+            >
               <Input placeholder="Tên nhà phân phối " />
             </Form.Item>
 
-            <Form.Item {...PropsFormItemEmail}>
+            <Form.Item {...PropsFormItemEmail({ require: true })}>
               <Input placeholder="Email" />
             </Form.Item>
 
@@ -567,7 +479,9 @@ function Suppliers() {
               <Input placeholder="Số điện thoại của nhà phân phối" />
             </Form.Item>
 
-            <Form.Item {...PropsFormItemAddress}>
+            <Form.Item
+              {...PropsFormItemDetailAddress({ nameTitle: "address" })}
+            >
               <TextArea placeholder="Địa chỉ của nhà phân phối" />
             </Form.Item>
           </Form>

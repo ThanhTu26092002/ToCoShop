@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Image, Spin } from "antd";
 import "../css/CommonStyle.css";
-import axios from "axios";
 import moment from "moment";
 import "moment/locale/vi";
 import locale from "antd/es/locale/vi_VN";
@@ -10,7 +9,6 @@ import {
   Layout,
   Form,
   Input,
-  Popconfirm,
   message,
   notification,
   Modal,
@@ -18,114 +16,42 @@ import {
   DatePicker,
   Descriptions,
 } from "antd";
-import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 
 import {
   URLEmployee,
   WEB_SERVER_UPLOAD_URL,
   URLQLLogin,
+  dateFormatList,
 } from "../config/constants";
-import LabelCustomization, {
-  ImgIcon,
-  BoldText,
-  TitleTable,
-} from "../components/subComponents";
-import { Content } from "antd/lib/layout/layout";
 import useAuth from "../hooks/useZustand";
 import { beforeUpload, objCompare } from "../config/helperFuncs";
 import axiosClient from "../config/axios";
 import { useNavigate } from "react-router-dom";
-import { PropsFormItem_Label_Name } from "../config/props";
+import {
+  PropsForm,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItem_Label_Name,
+} from "../config/props";
+import LabelCustomization from "../components/subComponents";
 
 function MyProfile() {
   const navigate = useNavigate();
   const { setEmployee, signOut, auth } = useAuth((state) => state);
-
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [loadingPasswordBtn, setLoadingPasswordBtn] = useState(false);
+  const [loadingImg, setLoadingImg] = useState(false);
   const [myProfile, setMyProfile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState(null);
   const [savedPassword, setSavedPassword] = useState(null);
-  const [authId] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenPassword, setIsModalOpenPassword] = useState(false);
 
   const [formUpdate] = Form.useForm();
   const [formUpdatePassord] = Form.useForm();
-  const dateFormatList = ["DD/MM/YYYY", "DD/MM/YY"];
-
-  const disabledDate = (current) => {
-    // Can not select days after 18 years ago
-    return current >= moment().add(-18, "year");
-  };
-  //Begin: Props for components
-
-  const PropsForm = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-    initialValues: { name: "", description: "" },
-    autoComplete: "off",
-  };
-
-  const PropsFormItemFirstName = {
-    label: <LabelCustomization title={"Họ"} />,
-    name: "firstName",
-    rules: [
-      {
-        required: true,
-        message: "Vui lòng nhập họ và tên lót( nếu có) của nhân viên!",
-      },
-      {
-        max: 50,
-        message: "Trường dữ liệu không quá 50 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Trường dữ liệu không thể là khoảng trống",
-      },
-    ],
-  };
-  const PropsFormItemLastName = {
-    label: <LabelCustomization title={"Tên"} />,
-    name: "lastName",
-    rules: [
-      {
-        required: true,
-        message: "Vui lòng nhập tên nhân viên!",
-      },
-      {
-        max: 50,
-        message: "Trường dữ liệu không quá 50 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Trường dữ liệu không thể là khoảng trống",
-      },
-    ],
-  };
-
-  const PropsFormItemPhoneNumber = {
-    label: <LabelCustomization title={"Số điện thoại"} />,
-    name: "phoneNumber",
-    rules: [
-      {
-        pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
-        message: "Bạn chưa nhập đúng định dạng số điện thoại",
-      },
-      {
-        max: 50,
-        message: "Số điện thoại không quá 50 kí tự!",
-      },
-      {
-        whitespace: true,
-        message: "Số điện thoại không thể là khoảng trống",
-      },
-    ],
-    onChange: (value) => {
-      this.props.setValue(value);
-    },
-  };
 
   const PropsFormItemAddress = {
     label: <LabelCustomization title={"Địa chỉ"} />,
@@ -133,7 +59,7 @@ function MyProfile() {
     rules: [
       {
         required: true,
-        message: "Vui lòng nhập địa chỉ của nhân viên!",
+        message: "Vui lòng nhập địa chỉ!",
       },
       {
         max: 500,
@@ -145,33 +71,11 @@ function MyProfile() {
       },
     ],
   };
-
-  const PropsFormItemBirthday = {
-    label: <LabelCustomization title={"Ngày sinh"} />,
-    name: "birthday",
+  const disabledDate = (current) => {
+    // Can not select days after 18 years ago
+    return current >= moment().add(-18, "year");
   };
-
-  const PropsFormItemEmail = {
-    label: <LabelCustomization title={"Email"} />,
-    name: "email",
-    rules: [
-      {
-        pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        message: "Bạn nhập chưa đúng định dạng email",
-      },
-      {
-        max: 50,
-        message: "Email không quá 50 kí tự!",
-      },
-      {
-        required: true,
-        message: "Vui lòng nhập email của nhân viên",
-      },
-    ],
-    onChange: (value) => {
-      this.props.setValue(value);
-    },
-  };
+  //Begin: Props for components
 
   const handleFinishUpdate = (values) => {
     const oldData = {
@@ -190,6 +94,7 @@ function MyProfile() {
       formUpdate.resetFields();
       return;
     }
+    setLoadingBtn(true);
     //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
     if (checkChangedData.email) {
       checkChangedData.oldEmail = myProfile.email;
@@ -198,22 +103,16 @@ function MyProfile() {
     if (checkChangedData.birthday) {
       checkChangedData.birthday = moment(checkChangedData.birthday);
     }
-    //Thêm trường uid vào trước khi gửi đi, nhằm giúp xác minh người gửi cập nhật tài khoản chính họ
-    checkChangedData.uid= myProfile._id
     let URL = URLEmployee + "/updateOne/" + myProfile._id;
     //POST
-    axios
+    axiosClient
       .patch(URL, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
-          console.log("result:", response);
+          setLoadingBtn(false);
           setIsModalOpen(false);
           setEmployee(response.data.result);
           setRefresh((e) => !e);
-          if (file) {
-            setFile(null);
-          }
-
           //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
           if (checkChangedData.email) {
             notification.info({
@@ -239,7 +138,9 @@ function MyProfile() {
             : error
         );
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoadingBtn(false);
+      });
   };
 
   const handleClick_EditBtn = (record) => {
@@ -260,7 +161,7 @@ function MyProfile() {
   };
 
   const handleClick_EditPasswordBtn = () => {
-    setLoading(true);
+    setLoadingBtn(true);
     const id = auth.payload.uid;
     axiosClient
       .get(`${URLQLLogin}/findById/${id}`)
@@ -270,21 +171,27 @@ function MyProfile() {
       })
       .catch((err) => {
         message.error("Lỗi hệ thống");
-        setLoading(false);
         return;
+      })
+      .finally(() => {
+        setLoadingBtn(false);
       });
-    setLoading(false);
   };
 
   const handleFinishUpdatePassword = (values) => {
+    setLoadingPasswordBtn(true);
     const id = auth.payload.uid;
     axiosClient
-      .patch(`${URLQLLogin}/updateOne/${id}`, { password: values.password, uid: id })
+      .patch(`${URLQLLogin}/updateOne/${id}`, {
+        password: values.password,
+        uid: id,
+      })
       .then((response) => {
         setIsModalOpenPassword(false);
         notification.info({
           message: "Thông báo",
-          description: "Cập nhật mật khẩu mới thành công, vui lòng đăng nhập lại",
+          description:
+            "Cập nhật mật khẩu mới thành công, vui lòng đăng nhập lại",
         });
         setTimeout(() => {
           signOut();
@@ -298,6 +205,9 @@ function MyProfile() {
             ? error.response.data.error.message
             : error
         );
+      })
+      .finally(() => {
+        setLoadingPasswordBtn(false);
       });
   };
 
@@ -316,15 +226,16 @@ function MyProfile() {
   };
   //handleUpdatePassworkOk
 
-  const handleUploadImage = (options, record) => {
+  const handleUploadImage = (options, myProfile) => {
+    setLoadingImg(true);
     const { file } = options;
     let formData = new FormData();
-    let URL = URLEmployee + "/employeeImage/" + record._id;
+    let URL = URLEmployee + "/employeeImage/" + myProfile._id;
     //If containing an image <=> file !== null
-    if (!record.imageUrl) {
+    if (!myProfile.imageUrl) {
       formData.append("currentImgUrl", null);
     } else {
-      formData.append("currentImgUrl", record.imageUrl);
+      formData.append("currentImgUrl", myProfile.imageUrl);
     }
     formData.append("file", file);
 
@@ -346,7 +257,9 @@ function MyProfile() {
       .catch((error) => {
         message.error(`Cập nhật hình ảnh thất bại.`);
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoadingImg(false);
+      });
   };
 
   ///myinfo
@@ -361,36 +274,42 @@ function MyProfile() {
   return (
     <Layout>
       {!myProfile && <Spin size="large"></Spin>}
-      {loading && <Spin size="large"></Spin>}
-      {myProfile && !loading && (
+      {myProfile && (
         <>
           <a>Thông Tin Cá Nhân</a>
-          <Image
-            src={`${WEB_SERVER_UPLOAD_URL}/${myProfile.imageUrl}`}
-            width={100}
-            height={100}
-          />
-          <Upload
-            beforeUpload={(file) => beforeUpload(file)}
-            showUploadList={false}
-            name="file"
-            customRequest={(options) => {
-              handleUploadImage(options, myProfile);
-            }}
-          >
-            <button
-              title="Cập nhật ảnh"
-              style={{
-                cursor: "pointer",
-                width: 100,
-                backgroundColor: "#00cc99",
-                border: "none",
-                marginTop: "12px",
-              }}
-            >
-              Cập nhật ảnh
-            </button>
-          </Upload>
+          {loadingImg ? (
+            <Spin size="large"></Spin>
+          ) : (
+            <>
+              <Image
+                src={`${WEB_SERVER_UPLOAD_URL}/${myProfile.imageUrl}`}
+                width={100}
+                height={100}
+              />
+              <Upload
+                beforeUpload={(file) => beforeUpload(file)}
+                showUploadList={false}
+                name="file"
+                customRequest={(options) => {
+                  handleUploadImage(options, myProfile);
+                }}
+              >
+                <button
+                  title="Cập nhật ảnh"
+                  style={{
+                    cursor: "pointer",
+                    width: 100,
+                    backgroundColor: "#00cc99",
+                    border: "none",
+                    marginTop: "12px",
+                  }}
+                >
+                  Cập nhật ảnh
+                </button>
+              </Upload>
+            </>
+          )}
+
           <Descriptions style={{ marginTop: 24 }}>
             <Descriptions.Item label="Họ">
               {myProfile.firstName}
@@ -426,6 +345,7 @@ function MyProfile() {
             danger
             style={{ width: 200, marginTop: 12 }}
             onClick={() => handleClick_EditPasswordBtn()}
+            loading={loadingBtn}
           >
             Đổi mật khẩu
           </Button>
@@ -433,11 +353,24 @@ function MyProfile() {
       )}
       {/* Modal update data */}
       <Modal
-        title="Chỉnh sửa thông tin danh mục"
+        title="Chỉnh sửa thông tin cá nhân"
         open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
         width={800}
+        onOk={handleUpdatePassworkOk}
+        onCancel={handleUpdatePassworkCancel}
+        footer={[
+          <Button key="back" onClick={handleCancel}>
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={loadingBtn}
+            onClick={handleOk}
+          >
+            Sửa
+          </Button>,
+        ]}
       >
         <Form
           {...PropsForm}
@@ -457,14 +390,28 @@ function MyProfile() {
             <Input placeholder="Last name" />
           </Form.Item>
 
-          <Form.Item {...PropsFormItemEmail}>
+          <Form.Item
+            {...PropsFormItemEmail}
+            rules={[
+              ...PropsFormItemEmail.rules,
+              {
+                required: true,
+                message: "Vui lòng nhập email",
+              },
+            ]}
+          >
             <Input placeholder="Email" />
           </Form.Item>
 
           <Form.Item {...PropsFormItemPhoneNumber}>
-            <Input placeholder="Số điện thoại của nhan vien" />
+            <Input placeholder="Số điện thoại của nhân viên" />
           </Form.Item>
-          <Form.Item {...PropsFormItemBirthday} name={"currentBirthday"}>
+          <Form.Item
+            {...PropsFormItem_Label_Name({
+              label: "Ngày sinh",
+              name: "currentBirthday",
+            })}
+          >
             <DatePicker
               allowClear={false}
               showToday={false}
@@ -488,6 +435,19 @@ function MyProfile() {
         onOk={handleUpdatePassworkOk}
         onCancel={handleUpdatePassworkCancel}
         width={800}
+        footer={[
+          <Button key="back" onClick={handleCancel}>
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={loadingPasswordBtn}
+            onClick={handleOk}
+          >
+            Đồng ý
+          </Button>,
+        ]}
       >
         <Form
           {...PropsForm}

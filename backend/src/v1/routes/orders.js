@@ -98,10 +98,87 @@ router.get("/", async (req, res, next) => {
 
 router.get("/orderDetail/:id", validateId, async (req, res, next) => {
   try {
+    const aggregateDetail = [
+      {
+        $unwind: "$orderDetails",
+      },
+      {
+        $lookup: {
+          from: "products",
+          let: { attributeId: "$orderDetails.productAttributeId" },
+          pipeline: [
+            { $unwind: "$attributes" },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$attributes._id", "$$attributeId"] },
+                    // { $ne: ["$status", "CANCELED"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "products",
+        },
+      },
+      {
+        $addFields: {
+          "orderDetails.productInfo": { $first: "$products" },
+          "orderDetails.finalPrice": {
+            $divide: [
+              {
+                $multiply: [
+                  "$orderDetails.price",
+                  "$orderDetails.quantity",
+                  { $subtract: [100, "$orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          orderCode: { $first: "$orderCode" },
+          createdDate: { $first: "$createdDate" },
+          sendingDate: { $first: "$sendingDate" },
+          receivedDate: { $first: "$receivedDate" },
+          status: { $first: "$status" },
+          contactInfo: { $first: "$contactInfo" },
+          shippingInfo: { $first: "$shippingInfo" },
+          paymentInfo: { $first: "$paymentInfo" },
+          orderDetails: { $push: "$orderDetails" },
+          totalPrice: { $sum: "$orderDetails.finalPrice" },
+          handlers: { $first: "$handlers" },
+        },
+      },
+      {
+        $lookup: {
+          from: "transportations", // foreign collection name
+          localField: "shippingInfo.transportationId",
+          foreignField: "_id",
+          as: "transportation", // alias
+        },
+      },
+      {
+        $addFields: {
+          "shippingInfo.transportationName": { $first: "$transportation.name" },
+        },
+      },
+      {
+        $project: {
+          transportation: 0,
+          "orderDetails.finalPrice": 0,
+        },
+      },
+    ];
     const id = new ObjectId(req.params.id);
     const docs = await Order.aggregate([
       { $match: { _id: id } },
-      ...aggregateLookup,
+      ...aggregateDetail,
     ]);
     if (docs.length == 0) {
       res.status(404).json({
@@ -127,7 +204,6 @@ router.post("/insertOne", async (req, res, next) => {
   try {
     let data = req.body;
     const { orderDetails } = req.body;
-    console.log('demo:', data)
     //Kiểm tra xem sản phẩm còn trong kho trước khi cập nhật
     for (let i = 0; i < orderDetails.length; i++) {
       const attributeQuantity = orderDetails[i].quantity;
@@ -219,13 +295,13 @@ router.post("/insertOne", async (req, res, next) => {
     orderCode += (now.getHours < 10 ? "0" : "") + now.getHours().toString();
     orderCode += (now.getMinutes < 10 ? "0" : "") + now.getMinutes().toString();
     orderCode += (now.getSeconds < 10 ? "0" : "") + now.getSeconds().toString();
-    console.log('data:dfasdf', data)
+    console.log("data:dfasdf", data);
 
-   let newData = { createdDate, ...data, orderCode };
-    delete newData.size
-    delete newData.color
-    delete newData.productName
-console.log('data:', newData)
+    let newData = { createdDate, ...data, orderCode };
+    delete newData.size;
+    delete newData.color;
+    delete newData.productName;
+    console.log("data:", newData);
     //Create a new blog post object
     const order = new Order(newData);
     //Insert the product in our MongoDB database
@@ -412,7 +488,10 @@ router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
       },
     ];
     // const deleteDoc = await Order.findByIdAndDelete(id);
-    const filter = { _id: new ObjectId(id), status: {$in: ["CANCELED", "COMPLETED" ]}};
+    const filter = {
+      _id: new ObjectId(id),
+      status: { $in: ["CANCELED", "COMPLETED"] },
+    };
     const deleteDoc = await Order.findOneAndDelete(filter);
     // const deleteDoc = await Order.findOneAndDelete(a);
     if (!deleteDoc) {

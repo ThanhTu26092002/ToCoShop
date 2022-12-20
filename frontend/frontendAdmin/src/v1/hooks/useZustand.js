@@ -70,22 +70,22 @@ const useAuth = create(
 //     )
 //   )
 // );
-export const useOrderDetail = create(
-  devtools(
-    persist(
-      (set) => ({
-        hookOrderDetailData: null,
-        hookSetOrderDetail: (payload) =>
-          set(
-            () => ({ hookOrderDetailData: payload }),
-            false,
-            "@orderDetail/hookSetOrderDetail"
-          ),
-      }),
-      {
-        name: "orderDetail-toCoShop",
-      }
-    )
-  )
-);
+// export const useOrderDetail = create(
+//   devtools(
+//     persist(
+//       (set) => ({
+//         hookOrderDetailData: null,
+//         hookSetOrderDetail: (payload) =>
+//           set(
+//             () => ({ hookOrderDetailData: payload }),
+//             false,
+//             "@orderDetail/hookSetOrderDetail"
+//           ),
+//       }),
+//       {
+//         name: "orderDetail-toCoShop",
+//       }
+//     )
+//   )
+// );
 export default useAuth;

@@ -71,15 +71,10 @@ import {
   customDisabledDate,
   handleOpenNewPage,
 } from "../../config/helperFuncs";
-import { useOrderDetail } from "../../hooks/useZustand";
 
 const { Text } = Typography;
 
 function Orders() {
-  const { hookSetOrderDetail } = useOrderDetail((state) => state);
-  // const { hookSetTransportation, hookTransportationData } = useTransportations(
-  //   (state) => state
-  // );
   const paymentMethodList = ["CREDIT CARD", "COD"];
   const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 
@@ -182,7 +177,6 @@ function Orders() {
               type="primary"
               title="Chi tiết"
               onClick={() => {
-                hookSetOrderDetail(record);
                 handleOpenNewPage({ path: "/orderDetail", params: record._id });
               }}
             ></Button>
@@ -249,18 +243,20 @@ function Orders() {
   };
 
   const handleFinishCreate = (values) => {
+    
     //Config orderDetails before send to backend
     const getOrderDetails = values.orderDetails;
     const configOrderDetails = [];
     getOrderDetails.map((product) => {
-      let tmpProduct = products.find((e) => (e._id = product.productId));
-      tmpProduct.attributes.map((attribute) => {
+      let tmpProduct = products.find((e) => e._id === product.productId);
+      for (let i = 0; i < tmpProduct.attributes.length; i++) {
+
         if (
-          attribute.color === product.color &&
-          attribute.size === product.size
+          tmpProduct.attributes[i].color === product.color &&
+          tmpProduct.attributes[i].size === product.size
         ) {
           configOrderDetails.push({
-            productAttributeId: attribute._id,
+            productAttributeId:  tmpProduct.attributes[i]._id,
             quantity: product.quantity,
             price: product.price,
             size: product.size,
@@ -268,8 +264,9 @@ function Orders() {
             discount: product.discount,
             productName: product.productName,
           });
+          break;
         }
-      });
+      }
     });
     //Add new handler
     const actionContent = "Tạo nhanh đơn hàng mới";
@@ -326,7 +323,7 @@ function Orders() {
       shippingInfo = {
         address: addressShipping,
         transportationId: values.transportationId,
-        transportationPrice: values.transportationPrice
+        transportationPrice:  numeral(values.transportationPrice).value()
       };
 
       if (values.emailShippingInfo) {
@@ -360,7 +357,6 @@ function Orders() {
         },
       };
     }
-
     const newData = {
       contactInfo,
       shippingInfo,
@@ -368,6 +364,7 @@ function Orders() {
       orderDetails: configOrderDetails,
       handlers,
     };
+    console.log('new Data:', newData)
     setLoadingBtn(true);
     //SUBMIT
     //POST
@@ -592,6 +589,7 @@ function Orders() {
             country: null,
             state: null,
             city: null,
+            paymentMethod: "COD",
             cardNumber: "5105105105105100",
             orderDetails: [{ quantity: 1 }],
           }}
@@ -828,6 +826,7 @@ function Orders() {
                             const priceText = numeral(found.price).format(
                               "0,0"
                             );
+                            console.log('test type:', typeof(Number(priceText)))
                             formCreate.setFieldsValue({
                               transportationPrice: priceText,
                             });
@@ -1011,6 +1010,7 @@ function Orders() {
                 >
                   <Select
                     placeholder="Chọn"
+                    disabled
                     style={{ width: 200 }}
                     onChange={(value) => {
                       setSelectedPaymentCreditCard(value);

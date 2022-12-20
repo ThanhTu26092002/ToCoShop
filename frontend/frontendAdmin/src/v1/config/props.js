@@ -26,7 +26,7 @@ export const PropsTable = ({
     bordered: true,
     size: "small",
     scroll: { x: 1500, y: 400 },
-    title: () => {  
+    title: () => {
       return <TitleTable title={title} />;
     },
     footer: () => footer,
@@ -41,23 +41,28 @@ export const PropsForm = {
   autoComplete: "off",
 };
 
-export const PropsFormItemDetailAddress = {
-  label: <LabelCustomization title={"Địa chỉ"} />,
-  name: "detailAddress",
-  rules: [
-    {
-      required: true,
-      message: "Vui lòng nhập địa chỉ!",
-    },
-    {
-      max: 500,
-      message: "Địa chỉ không quá 500 kí tự!",
-    },
-    {
-      whitespace: true,
-      message: "Địa chỉ không thể là khoảng trống",
-    },
-  ],
+export const PropsFormItemDetailAddress = ({
+  label = "Địa chỉ",
+  nameTitle = "detailAddress",
+}) => {
+  return {
+    label: <LabelCustomization title={label} />,
+    name: nameTitle,
+    rules: [
+      {
+        required: true,
+        message: "Vui lòng nhập địa chỉ!",
+      },
+      {
+        max: 500,
+        message: "Địa chỉ không quá 500 kí tự!",
+      },
+      {
+        whitespace: true,
+        message: "Địa chỉ không thể là khoảng trống",
+      },
+    ],
+  };
 };
 
 export const PropsFormItem_Label_Name = ({ label, name }) => {
@@ -85,6 +90,26 @@ export const PropsFormItemFirstName = {
       message: "Trường dữ liệu không thể là khoảng trống",
     },
   ],
+};
+export const PropsFormItemName = ({labelTitle= "Họ", nameTitle= "firstName", max =50})=> {
+  return {
+    label: <LabelCustomization title={labelTitle} />,
+    name: nameTitle,
+    rules: [
+      {
+        required: true,
+        message: "Trường dữ liệu không thể bỏ trống",
+      },
+      {
+        max: max,
+        message: `Trường dữ liệu không quá ${max} kí tự!`,
+      },
+      {
+        whitespace: true,
+        message: "Trường dữ liệu không thể là khoảng trống",
+      },
+    ],
+  }
 };
 export const PropsFormItemLastName = {
   label: <LabelCustomization title={"Tên"} />,
@@ -127,21 +152,30 @@ export const PropsFormItemPhoneNumber = {
   },
 };
 
-export const PropsFormItemEmail = {
-  label: <LabelCustomization title={"Email"} />,
-  name: "email",
-  rules: [
-    {
-      pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      message: "Bạn nhập chưa đúng định dạng email",
+export const PropsFormItemEmail = ({ require = false }) => {
+ let IsRequire = {}
+  if(require) {
+    IsRequire= {
+      required: true,
+      message: "Vui lòng nhập email!",
+    }
+  }
+  return {
+    label: <LabelCustomization title={"Email"} />,
+    name: "email",
+    rules: [
+      {
+        pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        message: "Bạn nhập chưa đúng định dạng email",
+      },
+      {
+        max: 50,
+        message: "Email không quá 50 kí tự!",
+      },
+      IsRequire
+    ],
+    onChange: (value) => {
+      this.props.setValue(value);
     },
-    {
-      max: 50,
-      message: "Email không quá 50 kí tự!",
-    },
-  ],
-  onChange: (value) => {
-    this.props.setValue(value);
-  },
+  };
 };
-
