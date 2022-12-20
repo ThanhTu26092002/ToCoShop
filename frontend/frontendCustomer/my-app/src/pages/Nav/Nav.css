@@ -35,17 +35,29 @@
   
   text-align: center;
   height: 100%;
-  
+  display: flex;
+  justify-content: center;
   
   
 }
 .container_sldebar_extra a{
-  display: inline-block;
+  
   color: black;
   margin-inline:10px ;
   height: 100%;
   line-height: 80px;  
+  cursor: pointer;
   
+}
+.container_sldebar_extra .cart_a div{
+  position: relative;
+  top: -19px;
+  left: -10px;
+  background-color: orangered;
+  display: inline;
+  padding: 3px 10px;
+  border-radius: 50%;
+  color: white;
 }
 .container_sldebar_extra li,li{
   list-style: none;
