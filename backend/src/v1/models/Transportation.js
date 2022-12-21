@@ -26,7 +26,7 @@ const transportationSchema = new Schema(
       trim: true,
       match: [
         /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
-        "Please input the correct formatting of telephone number",
+        "Vui lòng nhập đúng định dạng số điện thoại",
       ],
       require: true,
     },
@@ -37,7 +37,7 @@ const transportationSchema = new Schema(
       maxLength: 50,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Please input the correct formatting email",
+        "Vui lòng nhập đúng định dạng email",
       ],
     },
     note: {

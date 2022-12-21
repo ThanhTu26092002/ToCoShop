@@ -169,27 +169,13 @@ router.post(
 //5. Chỉnh sửa thông tin, chú ý hoặc administrator hoặc là chính chủ cập nhật- uid===id
 router.patch(
   "/updateOne/:id",
-  passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),checkLogin("ADMINISTRATORS"),
   validateId,
   async (req, res) => {
     try {
       const { id } = req.params;
       // console.log("id",typeof(id))
       const updateData = { ...req.body };
-      const { uid } = updateData;
-      //Tìm và lấy tài khoản đăng nhập dựa vào id
-      //Nếu employee cập nhật cho chính mình thì ok, nếu không cần kiểm tra quyền administrators
-      if (uid !== id) {
-        const docFound = await Login.findById(uid);
-        if (docFound?.roles?.includes("ADMINISTRATORS")) {
-        } else {
-          res.status(403).json({ message: "Forbidden" });
-          return;
-        }
-      }
-      //Xóa uid khỏi updateDate trước khi cập nhật
-      delete updateData.uid;
-
       //oldEmail chính là email cũ, lưu lại để truy vấn tìm bên Employees và cập nhật email mới
       if (updateData.oldEmail) {
         delete updateData.oldEmail;
@@ -217,13 +203,6 @@ router.patch(
           const findDoc = await Employee.findOne({ email: oldEmail });
           if (!findDoc) {
             res.json({
-              ok: true,
-              message: "Update the Id successfully",
-              result: updatedDoc,
-              other:
-                "Don't have the document having the email in the collection Employees",
-            });
-            console.log({
               ok: true,
               message: "Update the Id successfully",
               result: updatedDoc,

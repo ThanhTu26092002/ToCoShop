@@ -13,10 +13,7 @@ import {
   Popconfirm,
   Radio,
 } from "antd";
-import {
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
 import {
   PropsForm,
@@ -24,7 +21,6 @@ import {
   PropsFormItem_Label_Name,
   PropsTable,
 } from "../config/props";
-import axios from "axios";
 import { URLQLLogin } from "../config/constants";
 import axiosClient from "../config/axios";
 import useAuth from "../hooks/useZustand";
@@ -94,10 +90,6 @@ function AdminManagers() {
               icon={<EditOutlined />}
               style={{ fontWeight: "600" }}
               onClick={() => {
-                formEdit.setFieldValue("email", record.email);
-                formEdit.setFieldValue("password", record.password);
-                formEdit.setFieldValue("roles", record.roles);
-                formEdit.setFieldValue("status", record.status);
                 handleClick_EditBtn(record);
               }}
             ></Button>
@@ -157,19 +149,22 @@ function AdminManagers() {
       setSelectedId(null);
       return;
     }
+    setLoadingBtn(true);
+    setLoading(true);
     //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
     if (checkChangedData.email) {
       checkChangedData.oldEmail = selectedRecord.email;
     }
     //Thêm trường uid chứa id người đăng nhập nhằm xác định quyền chỉnh sửa tài khoản đăng nhập chính mình
-     checkChangedData.uid = auth.payload.uid;
+    checkChangedData.uid = auth.payload.uid;
     setLoadingBtn(true);
     axiosClient
       .patch(`${URLQLLogin}/updateOne/${selectedId}`, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
-          setLoading(true);
+          setLoading(false);
+          setLoadingBtn(false);
           setRefresh((e) => !e);
           formEdit.resetFields();
           setSelectedId(null);
@@ -203,6 +198,7 @@ function AdminManagers() {
         );
       })
       .finally(() => {
+        setLoading(false);
         setLoadingBtn(false);
       });
   };
@@ -211,18 +207,58 @@ function AdminManagers() {
     form.resetFields();
   };
   const handleConfirmDelete = (_id) => {
-    axios
-      .delete("http://localhost:9000/v1/login/deleteOne/" + _id)
+    setLoadingBtn(true);
+    axiosClient
+      .delete(`${URLQLLogin}/deleteOne/` + _id)
       .then((response) => {
         if (response.status === 200) {
           setRefresh((f) => f + 1);
           message.info("Xóa thành công");
         }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
       });
   };
 
- useEffect(() => {
-    axios.get("http://localhost:9000/v1/login/all").then((response) => {
+  const handleFinishCreate = (values) => {
+    setLoadingBtn(true);
+    if (values.confirm) {
+      delete values.confirm;
+    }
+    axiosClient
+      .post(`${URLQLLogin}/insertOne`, values)
+      .then((response) => {
+        if (response.status === 201) {
+          setRefresh((f) => f + 1);
+          form.resetFields();
+          notification.info({
+            message: "Thông báo",
+            description: "thêm mới thành công",
+          });
+        }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
+      });
+  };
+
+  useEffect(() => {
+    axiosClient.get(`${URLQLLogin}/all`).then((response) => {
       let tmp = response.data.results;
       tmp.map((e) => {
         let formattedRoles = "";
@@ -246,32 +282,9 @@ function AdminManagers() {
             {...PropsForm}
             form={form}
             initialValues={{ status: "ACTIVE", roles: "MANAGERS" }}
-            onFinish={(values) => {
-              axios
-                .post("http://localhost:9000/v1/login/insertOne", values)
-                .then((response) => {
-                  if (response.status === 201) {
-                    setRefresh((f) => f + 1);
-                    form.resetFields();
-                    notification.info({
-                      message: "Thông báo",
-                      description: "thêm mới thành công",
-                    });
-                  }
-                });
-            }}
+            onFinish={handleFinishCreate}
           >
-            <Form.Item
-              {...PropsFormItemEmail}
-              rules={[
-                ...PropsFormItemEmail.rules,
-                {
-                  required: true,
-                  message: "Vui lòng nhập email",
-                },
-              ]}
-              hasFeedback
-            >
+            <Form.Item {...PropsFormItemEmail({ require: true })} hasFeedback>
               <Input placeholder="Email" />
             </Form.Item>
             <Form.Item
@@ -282,7 +295,7 @@ function AdminManagers() {
               rules={[
                 {
                   required: true,
-                  message: "Please nhập mật khẩu!",
+                  message: "Vui lòng nhập mật khẩu!",
                 },
                 {
                   pattern:
@@ -374,7 +387,7 @@ function AdminManagers() {
           </Form>
           <Table
             rowKey="_id"
-            {...PropsTable}
+            {...PropsTable({ isLoading: loading })}
             columns={columns}
             dataSource={login}
             pagination={{
@@ -386,7 +399,7 @@ function AdminManagers() {
             }}
           />
           <Modal
-            title="chinh sua thong tin slides"
+            title="Chỉnh sửa thông tin Slieds"
             open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
@@ -405,17 +418,7 @@ function AdminManagers() {
             ]}
           >
             <Form {...PropsForm} form={formEdit} onFinish={handleFinishUpdate}>
-              <Form.Item
-                {...PropsFormItemEmail}
-                rules={[
-                  ...PropsFormItemEmail.rules,
-                  {
-                    required: true,
-                    message: "Vui lòng nhập email",
-                  },
-                ]}
-                hasFeedback
-              >
+              <Form.Item {...PropsFormItemEmail({ require: true })} hasFeedback>
                 <Input placeholder="Email" />
               </Form.Item>
               <Form.Item
@@ -426,7 +429,7 @@ function AdminManagers() {
                 rules={[
                   {
                     required: true,
-                    message: "Please nhập mật khẩu!",
+                    message: "Vui òng nhập mật khẩu!",
                   },
                   {
                     pattern:

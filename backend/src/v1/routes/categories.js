@@ -2,11 +2,8 @@
 var express = require("express");
 var router = express.Router();
 const multer = require("multer");
-// const passport = require("passport");
-// const jwt = require("jsonwebtoken");
 const upload = require("../middleware/multerUpload");
 const Category = require("../models/Category");
-const passport = require("passport");
 const fs = require("fs");
 const {
   COLLECTION_CATEGORIES,
@@ -18,6 +15,7 @@ const { formatterErrorFunc } = require("../utils/formatterError");
 const { loadCategory, validateId } = require("../validations/commonValidators");
 
 const { findDocuments } = require("../utils/MongodbHelper");
+const passport = require("passport");
 const { allowRoles } = require("../middleware/checkRoles");
 
 //Get all docs

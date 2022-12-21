@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Form,
@@ -6,14 +6,12 @@ import {
   Space,
   Select,
   Layout,
-  InputNumber,
   Modal,
   Table,
   notification,
   message,
   Popconfirm,
   Upload,
-  Cascader,
   Radio,
 } from "antd";
 import {
@@ -22,32 +20,28 @@ import {
   PropsFormItemEmail,
   PropsFormItemFirstName,
   PropsFormItemLastName,
+  PropsFormItemName,
   PropsFormItemPhoneNumber,
   PropsFormItemStatus,
   PropsFormItem_Label_Name,
   PropsTable,
 } from "../config/props";
 import {
-  MinusCircleOutlined,
-  PlusOutlined,
   DeleteOutlined,
   EditOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 
-import axios from "axios";
 import { URLSlides, WEB_SERVER_UPLOAD_URL } from "../config/constants";
 import axiosClient from "../config/axios";
 import { Content } from "antd/lib/layout/layout";
 import TextArea from "antd/lib/input/TextArea";
-import { objCompare } from "../config/helperFuncs";
+import { beforeUpload, objCompare } from "../config/helperFuncs";
 import { ColorStatus } from "../components/subComponents";
 
 function Slides() {
   const [slides, setSlides] = useState(null);
   const [refresh, setRefresh] = useState(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
-  const [visible, setVisible] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const [check, setCheck] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
@@ -92,11 +86,11 @@ function Slides() {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
-if(record.status === 'INACTIVE'){
-setCheck(true)
-}else{
-  setCheck(false)
-}
+    if (record.status === "INACTIVE") {
+      setCheck(true);
+    } else {
+      setCheck(false);
+    }
     let fieldsValues = {};
     for (let key in record) {
       fieldsValues[key] = record[key];
@@ -104,7 +98,6 @@ setCheck(true)
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
-    console.log(values);
     const oldData = {
       ...selectedRecord,
     };
@@ -148,19 +141,6 @@ setCheck(true)
   };
   const handleCancelCreate = () => {
     form.resetFields();
-  };
-  const beforeUpload = (file) => {
-    const isImage =
-      file.type === "image/jpg" ||
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/gif";
-    if (!isImage) {
-      message.error("You can only upload jpg-jpeg-png-gif file!");
-      return false;
-    } else {
-      return true;
-    }
   };
   const handleOk = () => {
     formEdit.submit();
@@ -248,7 +228,7 @@ setCheck(true)
       key: "status",
       dataIndex: "status",
       render: (text) => {
-        return <ColorStatus status={text}/>
+        return <ColorStatus status={text} />;
       },
     },
     {
@@ -282,8 +262,6 @@ setCheck(true)
               icon={<EditOutlined />}
               style={{ fontWeight: "600" }}
               onClick={() => {
-                setVisible(true);
-                setSelectedRow(record);
                 formEdit.setFieldValue("title", record.title);
                 formEdit.setFieldValue("description", record.description);
                 formEdit.setFieldValue("sortOrder", record.sortOrder);
@@ -312,17 +290,19 @@ setCheck(true)
     },
   ];
   React.useEffect(() => {
-    axios.get("http://localhost:9000/v1/slides").then((response) => {
+    axiosClient.get("http://localhost:9000/v1/slides/all").then((response) => {
       setSlides(response.data);
     });
   }, [refresh]);
   const handleConfirmDelete = (_id) => {
-    axios.delete("http://localhost:9000/v1/slides/" + _id).then((response) => {
-      if (response.status === 200) {
-        setRefresh((f) => f + 1);
-        message.info("Xóa thành công");
-      }
-    });
+    axiosClient
+      .delete("http://localhost:9000/v1/slides/" + _id)
+      .then((response) => {
+        if (response.status === 200) {
+          setRefresh((f) => f + 1);
+          message.info("Xóa thành công");
+        }
+      });
   };
   return (
     <div>
@@ -337,7 +317,7 @@ setCheck(true)
               sortOrder: "0",
             }}
             onFinish={(values) => {
-              axios
+              axiosClient
                 .post("http://localhost:9000/v1/slides", values)
                 .then((response) => {
                   if (response.status === 200) {
@@ -352,13 +332,11 @@ setCheck(true)
             }}
           >
             <Form.Item
-              {...PropsFormItem_Label_Name({ label: "Tiêu đề", name: "title" })}
-              rules={[
-                {
-                  required: true,
-                  message: "Xin nhập tiêu đề",
-                },
-              ]}
+              {...PropsFormItemName({
+                labelTitle: "Tiêu đề",
+                nameTitle: "title",
+                max: 500,
+              })}
             >
               <Input placeholder="Tiêu đề" />
             </Form.Item>
@@ -418,6 +396,7 @@ setCheck(true)
             </Form.Item>
           </Form>
           <Table
+            {...PropsTable({ isLoading: loading })}
             rowKey="_id"
             columns={columns}
             dataSource={slides}
@@ -444,16 +423,11 @@ setCheck(true)
           >
             <Form form={formEdit} onFinish={handleFinishUpdate}>
               <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Tiêu đề",
-                  name: "title",
+                {...PropsFormItemName({
+                  labelTitle: "Tiêu đề",
+                  nameTitle: "title",
+                  max: 500,
                 })}
-                rules={[
-                  {
-                    required: true,
-                    message: "Xin nhập tiêu đề",
-                  },
-                ]}
               >
                 <Input placeholder="Tiêu đề" />
               </Form.Item>

@@ -15,7 +15,6 @@ import {
   Upload,
   Typography,
 } from "antd";
-import Operation from "antd/lib/transfer/operation";
 import {
   MinusCircleOutlined,
   PlusOutlined,
@@ -23,20 +22,9 @@ import {
   EditOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import {
-  PropsForm,
-  PropsFormItemDetailAddress,
-  PropsFormItemEmail,
-  PropsFormItemFirstName,
-  PropsFormItemLastName,
-  PropsFormItemPhoneNumber,
-  PropsFormItemStatus,
-  PropsFormItem_Label_Name,
-  PropsTable,
-} from "../config/props";
+import { PropsForm, PropsFormItem_Label_Name } from "../config/props";
 import { Content } from "antd/lib/layout/layout";
 import TextArea from "antd/lib/input/TextArea";
-import axios from "axios";
 import {
   colorList,
   promotionPositionOptions,
@@ -223,16 +211,16 @@ function Products() {
       .post(URL, formData, config)
       .then((response) => {
         if (response.status === 200) {
-          console.log("ok upload image");
           setRefresh((f) => f + 1);
           message.success(`Cập nhật hình ảnh thành công!`);
         }
       })
       .catch((error) => {
         message.error(`Cập nhật hình ảnh thất bại.`);
-        setLoading(false);
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleClick_EditBtn = (record) => {
@@ -247,30 +235,6 @@ function Products() {
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
-    // const tmp = {
-    //   productCode: selectedRecord.productCode, description: selectedRecord.description, name: selectedRecord.name, categoryId: selectedRecord.categoryId._id, supplierId: selectedRecord.supplierId._id, promotionPosition: selectedRecord.promotionPosition, sizes: selectedRecord.sizes
-    // }
-    // // console.log('show tmp:', tmp);
-    // // console.log('show values:', values);
-
-    // if (
-
-    //   // values.productCode === selectedRecord.productCode &&
-    //   // values.description === selectedRecord.description &&
-    //   // values.name === selectedRecord.name &&
-    //   // values.sizes === selectedRecord.sizes &&
-    //   // values.categoryId === selectedRecord.categoryId &&
-    //   // values.supplierId === selectedRecord.supplierId &&
-    //   // values.promotionPosition === selectedRecord.promotionPosition
-    //   JSON.stringify(values) === JSON.stringify(tmp)
-    // ) {
-    //   setIsModalOpen(false);
-    //   formEdit.resetFields();
-    //   setSelectedId(null);
-    //   console.log("test")
-    //   return;
-    // }
-
     setLoadingBtn(true);
     axiosClient
       .patch(`${URLProduct}/updateOne/${selectedId}`, values)
@@ -298,9 +262,6 @@ function Products() {
         setLoadingBtn(false);
       });
   };
-  const handleChange = (value) => {
-    console.log(`selected ${value}`);
-  };
   const handleOk = () => {
     formEdit.submit();
   };
@@ -310,6 +271,7 @@ function Products() {
   };
 
   const handleConfirmDelete = (_id) => {
+    setLoadingBtn(true);
     axiosClient
       .delete(URLProduct + "/deleteOne/" + _id)
       .then((response) => {
@@ -330,14 +292,13 @@ function Products() {
             ? error.response.data.error.message
             : error
         );
-        setLoading(false);
       })
-      .finally(() => {});
+      .finally(() => {
+        setLoadingBtn(false);
+      });
   };
 
   const handleFinishCreate = (values) => {
-    console.log("demo");
-    console.log(values);
     setLoadingBtn(true);
     axiosClient
       .post(`${URLProduct}/insertOne`, values)
@@ -415,11 +376,6 @@ function Products() {
               wrapperCol={{ span: 0 }}
               form={form}
               onFinish={handleFinishCreate}
-              initialValues={
-                {
-                  // attributes: [{ discount: 0, stock: 0, size: "M" }],
-                }
-              }
             >
               <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -752,7 +708,7 @@ function Products() {
             open={isModalOpen}
             onOk={handleOk}
             onCancel={handleCancel}
-            width= "900px"
+            width="900px"
             footer={[
               <Button key="back" onClick={handleCancel}>
                 Hủy
@@ -781,7 +737,7 @@ function Products() {
               }}
               onFinish={handleFinishUpdate}
             >
-               <Form.Item
+              <Form.Item
                 {...PropsFormItem_Label_Name({
                   label: "Mã sản phẩm",
                   name: "productCode",

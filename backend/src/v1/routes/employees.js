@@ -19,7 +19,7 @@ const {
   PATH_FOLDER_PUBLIC_UPLOAD,
 } = require("../configs/constants");
 const { validateId, loadEmployee } = require("../validations/commonValidators");
-const { exceptionAllowRoles, allowRoles } = require("../middleware/checkRoles");
+const { exceptionAllowRoles, allowRoles, checkLogin } = require("../middleware/checkRoles");
 //Get all employees
 router.get(
   "/",
@@ -41,7 +41,7 @@ router.get(
   "/findById/:id",
   validateId,
   passport.authenticate("jwt", { session: false }),
-  allowRoles("ADMINISTRATORS"),
+  exceptionAllowRoles("ADMINISTRATORS"),
   async (req, res, next) => {
     try {
       const { id } = req.params;

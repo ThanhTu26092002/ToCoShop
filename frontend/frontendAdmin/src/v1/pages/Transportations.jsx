@@ -12,16 +12,8 @@ import {
   notification,
   message,
   Popconfirm,
-  Radio,
 } from "antd";
-import Operation from "antd/lib/transfer/operation";
-import {
-  PlusOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  UploadOutlined,
-  EllipsisOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Content } from "antd/lib/layout/layout";
 import {
   PropsForm,
@@ -29,6 +21,7 @@ import {
   PropsFormItemEmail,
   PropsFormItemFirstName,
   PropsFormItemLastName,
+  PropsFormItemName,
   PropsFormItemPhoneNumber,
   PropsFormItemStatus,
   PropsFormItem_Label_Name,
@@ -40,7 +33,7 @@ import { URLQLLogin, URLTransportation } from "../config/constants";
 import axiosClient from "../config/axios";
 import useAuth from "../hooks/useZustand";
 import { useNavigate } from "react-router-dom";
-import { objCompare } from "../config/helperFuncs";
+import { formatterNumber, objCompare } from "../config/helperFuncs";
 import { BoldText, NumberFormatter } from "../components/subComponents";
 function Transportations() {
   const navigate = useNavigate();
@@ -49,8 +42,6 @@ function Transportations() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [transportations, setTransportations] = useState(null);
   const [refresh, setRefresh] = useState(false);
-  const [visible, setVisible] = React.useState(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -120,6 +111,7 @@ function Transportations() {
                 icon={<DeleteOutlined />}
                 type="primary"
                 danger
+                loading={loadingBtn}
                 style={{ fontWeight: 600 }}
                 onClick={() => {}}
                 title="Xóa"
@@ -137,25 +129,46 @@ function Transportations() {
     setIsModalOpen(false);
     formEdit.resetFields();
   };
+  const handleFinishCreate = (values) => {
+    setLoadingBtn(true);
+    //SUBMIT
+    let newData = { ...values };
+    console.log(newData);
+    //POST
+    axiosClient
+      .post(`${URLTransportation}/insertOne`, newData)
+      .then((response) => {
+        if (response.status === 201) {
+          setLoading(true);
+          setRefresh((e) => !e);
+          form.resetFields();
+          notification.info({
+            message: "Thông báo",
+            description: "Thêm mới thành công",
+          });
+        }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
+      });
+  };
   const handleClick_EditBtn = (record) => {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
 
-    let fieldsValues = {};
-    for (let key in record) {
-      fieldsValues[key] = record[key];
-    }
+    let fieldsValues = { ...record };
     formEdit.setFieldsValue(fieldsValues);
   };
   const handleFinishUpdate = (values) => {
     //Kiểm tra trùng dữ liệu cũ thì ko làm gì cả
-    const tmp = {
-      email: values.email,
-      password: values.password,
-      roles: values.roles,
-      status: values.status,
-    };
     const checkChangedData = objCompare(values, selectedRecord);
 
     //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
@@ -165,33 +178,15 @@ function Transportations() {
       setSelectedId(null);
       return;
     }
-
     setLoadingBtn(true);
     axiosClient
       .patch(`${URLTransportation}/updateOne/${selectedId}`, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
-          setLoading(true);
           setRefresh((e) => !e);
           formEdit.resetFields();
           setSelectedId(null);
-
-          //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
-          if (checkChangedData.email) {
-            notification.info({
-              message: "Thông báo",
-              description: "Cập nhật thành công, vui lòng đăng nhập lại",
-            });
-            const uidCheck = auth.payload.uid;
-            if (uidCheck === selectedId) {
-              setTimeout(() => {
-                signOut();
-                navigate("/login");
-              }, 3000);
-              return;
-            }
-          }
           notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
@@ -214,13 +209,24 @@ function Transportations() {
     form.resetFields();
   };
   const handleConfirmDelete = (_id) => {
-    axios
-      .delete("http://localhost:9000/v1/login/deleteOne/" + _id)
+    setLoadingBtn(true);
+    axiosClient
+      .delete(`${URLTransportation}/deleteOne/` + _id)
       .then((response) => {
         if (response.status === 200) {
           setRefresh((f) => f + 1);
           message.info("Xóa thành công");
         }
+      })
+      .catch((error) => {
+        message.error(
+          error.response.data.error.message
+            ? error.response.data.error.message
+            : error
+        );
+      })
+      .finally(() => {
+        setLoadingBtn(false);
       });
   };
   useEffect(() => {
@@ -238,20 +244,17 @@ function Transportations() {
           <Form
             {...PropsForm}
             form={form}
-            // onFinish={handleFinishCreate}
+            name="form"
+            onFinish={handleFinishCreate}
+            onFinishFailed={() => {
+              console.error("Error at onFinishFailed at formCreate");
+            }}
           >
             <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Tên phương thức ",
-                name: "name",
+              {...PropsFormItemName({
+                labelTitle: "Tên phương thức ",
+                nameTitle: "name",
               })}
-              hasFeedback
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập email",
-                },
-              ]}
             >
               <Input placeholder="Tên phương thức " />
             </Form.Item>
@@ -270,48 +273,43 @@ function Transportations() {
             >
               <InputNumber
                 defaultValue={0}
-                formatter={(value) =>
-                  ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={formatterNumber}
                 style={{ minWidth: 120, maxWidth: 360 }}
                 min={0}
                 addonAfter="VNĐ"
               />
             </Form.Item>
             <Form.Item
-              {...PropsFormItem_Label_Name({
-                label: "Tên công ty vận chuyển",
-                name: "companyName",
+              {...PropsFormItemName({
+                labelTitle: "Tên công ty vận chuyển",
+                nameTitle: "companyName",
               })}
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập số điện thoại",
-                },
-              ]}
               hasFeedback
             >
               <Input placeholder="Tên công ty vận chuyển" />
             </Form.Item>
             <Form.Item
-              {...PropsFormItemPhoneNumber}
-              name="companyPhoneNumber"
-              rules={[
-                ...PropsFormItemPhoneNumber.rules,
-                {
-                  required: true,
-                  message: "Vui lòng nhập số điện thoại",
-                },
-              ]}
+              {...PropsFormItemPhoneNumber({
+                require: true,
+                labelTitle: "Số điện thoại công ty",
+                nameTitle: "companyPhoneNumber",
+              })}
               hasFeedback
             >
               <Input placeholder="Số điện thoại công ty vận chuyển" />
             </Form.Item>
-            <Form.Item {...PropsFormItemEmail} name="companyEmail" hasFeedback>
+            <Form.Item
+              {...PropsFormItemEmail({
+                nameTitle: "companyEmail",
+                labelTitle: "Email công ty",
+              })}
+              hasFeedback
+            >
               <Input placeholder="Email" />
             </Form.Item>
             <Form.Item
               {...PropsFormItem_Label_Name({ label: "Ghi chú", name: "note" })}
+              rules={[{ max: 200, message: "Ghi chú không thể quá 200 kí tự" }]}
               hasFeedback
             >
               <TextArea rows={3} placeholder="Ghi chú..." />
@@ -333,7 +331,7 @@ function Transportations() {
             </Form.Item>
           </Form>
           <Table
-            {...PropsTable}
+            {...PropsTable({ isLoading: loading })}
             columns={columns}
             dataSource={transportations}
             pagination={{
@@ -363,19 +361,17 @@ function Transportations() {
               </Button>,
             ]}
           >
-            <Form {...PropsForm} form={formEdit} onFinish={handleFinishUpdate}>
+            <Form
+              {...PropsForm}
+              form={formEdit}
+              onFinish={handleFinishUpdate}
+              initialValues={{ note: "" }}
+            >
               <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Tên phương thức ",
-                  name: "name",
+                {...PropsFormItemName({
+                  labelTitle: "Tên phương thức ",
+                  nameTitle: "name",
                 })}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng nhập email",
-                  },
-                ]}
               >
                 <Input placeholder="Tên phương thức " />
               </Form.Item>
@@ -394,46 +390,36 @@ function Transportations() {
               >
                 <InputNumber
                   defaultValue={0}
-                  formatter={(value) =>
-                    ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={formatterNumber}
                   style={{ minWidth: 120, maxWidth: 360 }}
                   min={0}
                   addonAfter="VNĐ"
                 />
               </Form.Item>
               <Form.Item
-                {...PropsFormItem_Label_Name({
-                  label: "Tên công ty vận chuyển",
-                  name: "companyName",
+                {...PropsFormItemName({
+                  labelTitle: "Tên công ty vận chuyển",
+                  nameTitle: "companyName",
                 })}
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng nhập số điện thoại",
-                  },
-                ]}
                 hasFeedback
               >
                 <Input placeholder="Tên công ty vận chuyển" />
               </Form.Item>
               <Form.Item
-                {...PropsFormItemPhoneNumber}
-                name="companyPhoneNumber"
-                rules={[
-                  ...PropsFormItemPhoneNumber.rules,
-                  {
-                    required: true,
-                    message: "Vui lòng nhập số điện thoại",
-                  },
-                ]}
+                {...PropsFormItemPhoneNumber({
+                  require: true,
+                  labelTitle: "Số điện thoại công ty",
+                  nameTitle: "companyPhoneNumber",
+                })}
                 hasFeedback
               >
                 <Input placeholder="Số điện thoại công ty vận chuyển" />
               </Form.Item>
               <Form.Item
-                {...PropsFormItemEmail}
-                name="companyEmail"
+                {...PropsFormItemEmail({
+                  nameTitle: "companyEmail",
+                  labelTitle: "Email công ty",
+                })}
                 hasFeedback
               >
                 <Input placeholder="Email" />
@@ -443,6 +429,9 @@ function Transportations() {
                   label: "Ghi chú",
                   name: "note",
                 })}
+                rules={[
+                  { max: 200, message: "Ghi chú không thể quá 200 kí tự" },
+                ]}
                 hasFeedback
               >
                 <TextArea rows={3} placeholder="Ghi chú..." />
