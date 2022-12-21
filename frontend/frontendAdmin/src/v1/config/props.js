@@ -91,7 +91,11 @@ export const PropsFormItemFirstName = {
     },
   ],
 };
-export const PropsFormItemName = ({labelTitle= "Họ", nameTitle= "firstName", max =50})=> {
+export const PropsFormItemName = ({
+  labelTitle = "Họ",
+  nameTitle = "firstName",
+  max = 50,
+}) => {
   return {
     label: <LabelCustomization title={labelTitle} />,
     name: nameTitle,
@@ -109,7 +113,7 @@ export const PropsFormItemName = ({labelTitle= "Họ", nameTitle= "firstName", m
         message: "Trường dữ liệu không thể là khoảng trống",
       },
     ],
-  }
+  };
 };
 export const PropsFormItemLastName = {
   label: <LabelCustomization title={"Tên"} />,
@@ -130,39 +134,53 @@ export const PropsFormItemLastName = {
   ],
 };
 
-export const PropsFormItemPhoneNumber = {
-  label: <LabelCustomization title={"Số điện thoại"} />,
-  name: "phoneNumber",
-  rules: [
-    {
-      pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
-      message: "Bạn chưa nhập đúng định dạng số điện thoại",
-    },
-    {
-      max: 50,
-      message: "Số điện thoại không quá 50 kí tự!",
-    },
-    {
-      whitespace: true,
-      message: "Số điện thoại không thể là khoảng trống",
-    },
-  ],
-  onChange: (value) => {
-    this.props.setValue(value);
-  },
-};
-
-export const PropsFormItemEmail = ({ require = false }) => {
- let IsRequire = {}
-  if(require) {
-    IsRequire= {
+export const PropsFormItemPhoneNumber = ({
+  require = false,
+  nameTitle = "phoneNumber",
+  labelTitle = "Số điện thoại",
+}) => {
+  let IsRequire = {};
+  if (require) {
+    IsRequire = {
       required: true,
-      message: "Vui lòng nhập email!",
-    }
+      message: "Vui lòng nhập số điện thoại!",
+    };
   }
   return {
-    label: <LabelCustomization title={"Email"} />,
-    name: "email",
+    label: <LabelCustomization title={labelTitle} />,
+    name: nameTitle,
+    rules: [
+      {
+        pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
+        message: "Bạn chưa nhập đúng định dạng số điện thoại",
+      },
+      {
+        max: 50,
+        message: "Số điện thoại không quá 50 kí tự!",
+      },
+      {
+        whitespace: true,
+        message: "Số điện thoại không thể là khoảng trống",
+      },
+      IsRequire,
+    ],
+    onChange: (value) => {
+      this.props.setValue(value);
+    },
+  };
+};
+
+export const PropsFormItemEmail = ({ require = false, labelTitle= "Email", nameTitle= "email" }) => {
+  let IsRequire = {};
+  if (require) {
+    IsRequire = {
+      required: true,
+      message: "Vui lòng nhập email!",
+    };
+  }
+  return {
+    label: <LabelCustomization title={labelTitle} />,
+    name: nameTitle,
     rules: [
       {
         pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
@@ -172,7 +190,7 @@ export const PropsFormItemEmail = ({ require = false }) => {
         max: 50,
         message: "Email không quá 50 kí tự!",
       },
-      IsRequire
+      IsRequire,
     ],
     onChange: (value) => {
       this.props.setValue(value);

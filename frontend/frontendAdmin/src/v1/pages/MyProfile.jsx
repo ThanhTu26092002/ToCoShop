@@ -184,7 +184,6 @@ function MyProfile() {
     axiosClient
       .patch(`${URLQLLogin}/updateOne/${id}`, {
         password: values.password,
-        uid: id,
       })
       .then((response) => {
         setIsModalOpenPassword(false);

@@ -5,16 +5,9 @@ var router = express.Router();
 const { ObjectId } = require("mongodb");
 const { formatterErrorFunc } = require("../utils/formatterError");
 const { validateId } = require("../validations/commonValidators");
-const {
-  insertDocument,
-  insertDocuments,
-  updateDocument,
-  updateDocuments,
-  findDocument,
-  findDocuments,
-  deleteMany,
-  deleteOneWithId,
-} = require("../utils/MongodbHelper");
+const passport = require("passport");
+const { allowRoles } = require("../middleware/checkRoles");
+const { findDocuments } = require("../utils/MongodbHelper");
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
 const { LookupTransportation } = require("../configs/lookups");
@@ -365,90 +358,97 @@ router.post("/insertOne", async (req, res, next) => {
 // //
 
 //Update One with _Id - ok
-router.patch("/updateOne/:id", validateId, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
+router.patch(
+  "/updateOne/:id",
+  validateId,
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
 
-    //Nếu new status === CANCELED , thì tiến hành hoàn trả các sản phẩm đã có trước đó.
-    if (updateData.status && updateData.status === "CANCELED") {
-      //1. Lấy mảng các mặt hàng cần hoàn trả
-      const order = await Order.findById(id);
-      const orderDetails = [...order.orderDetails];
-      for (let i = 0; i < orderDetails.length; i++) {
-        const attributeQuantity = parseInt(orderDetails[i].quantity);
-        const attributeId = new ObjectId(orderDetails[i].productAttributeId);
-        //1. Unwin danh sách sản phẩm theo attributes
-        const aggregateProduct = [
-          {
-            $unwind: "$attributes",
-          },
-          {
-            $match: {
-              $expr: {
-                $and: [{ $eq: [attributeId, "$attributes._id"] }],
+      //Nếu new status === CANCELED , thì tiến hành hoàn trả các sản phẩm đã có trước đó.
+      if (updateData.status && updateData.status === "CANCELED") {
+        //1. Lấy mảng các mặt hàng cần hoàn trả
+        const order = await Order.findById(id);
+        const orderDetails = [...order.orderDetails];
+        for (let i = 0; i < orderDetails.length; i++) {
+          const attributeQuantity = parseInt(orderDetails[i].quantity);
+          const attributeId = new ObjectId(orderDetails[i].productAttributeId);
+          //1. Unwin danh sách sản phẩm theo attributes
+          const aggregateProduct = [
+            {
+              $unwind: "$attributes",
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: [attributeId, "$attributes._id"] }],
+                },
               },
             },
-          },
-        ];
-        //Tìm thấy rồi tiến hành cập nhật
-        const unWindProducts = await Product.aggregate(aggregateProduct);
-        const newStock = unWindProducts[0].attributes.stock + attributeQuantity;
-        for (let j = 0; j < unWindProducts.length; j++) {
-          const filter = { "attributes._id": attributeId };
-          const update = { $set: { "attributes.$.stock": newStock } };
-          const updateProductAttributeQuantity = await Product.findOneAndUpdate(
-            filter,
-            update,
-            { new: true, safe: true, upsert: true }
-          );
-          break;
-          //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+          ];
+          //Tìm thấy rồi tiến hành cập nhật
+          const unWindProducts = await Product.aggregate(aggregateProduct);
+          const newStock =
+            unWindProducts[0].attributes.stock + attributeQuantity;
+          for (let j = 0; j < unWindProducts.length; j++) {
+            const filter = { "attributes._id": attributeId };
+            const update = { $set: { "attributes.$.stock": newStock } };
+            const updateProductAttributeQuantity =
+              await Product.findOneAndUpdate(filter, update, {
+                new: true,
+                safe: true,
+                upsert: true,
+              });
+            break;
+            //Nếu có sản phẩm đáp ứng thì tiếp tục vòng lặp để kiểm tra sản phẩm tiếp theo
+          }
         }
       }
-    }
-    // Tiếp tục cập nhật Order
-    //if updating [createdDate, shippedDate]
-    //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
-    if (updateData.shippedDate) {
-      updateData.shippedDate = new Date(
-        moment(updateData.shippedDate).utc().local().format("YYYY-MM-DD")
-      );
-    }
-    if (updateData.createdDate) {
-      updateData.createdDate = new Date(
-        moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
-      );
-    }
-    // Chú ý nếu có người cố ý cập nhật orderDetails thì sẽ loại nó trước khi cập nhật
-    if (updateData.orderDetails) {
-      delete updateData.orderDetails;
-    }
+      // Tiếp tục cập nhật Order
+      //if updating [createdDate, shippedDate]
+      //convert type of [createdDate, shippedDate] from STRING to DATE with formatting 'YYYY-MM-DD
+      if (updateData.shippedDate) {
+        updateData.shippedDate = new Date(
+          moment(updateData.shippedDate).utc().local().format("YYYY-MM-DD")
+        );
+      }
+      if (updateData.createdDate) {
+        updateData.createdDate = new Date(
+          moment(updateData.createdDate).utc().local().format("YYYY-MM-DD")
+        );
+      }
+      // Chú ý nếu có người cố ý cập nhật orderDetails thì sẽ loại nó trước khi cập nhật
+      if (updateData.orderDetails) {
+        delete updateData.orderDetails;
+      }
 
-    const opts = { runValidators: true };
+      const opts = { runValidators: true };
 
-    const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
-    if (!updatedDoc) {
-      res.status(404).json({
+      const updatedDoc = await Order.findByIdAndUpdate(id, updateData, opts);
+      if (!updatedDoc) {
+        res.status(404).json({
+          ok: true,
+          error: {
+            name: "id",
+            message: `the document with following id doesn't exist in the collection ${COLLECTION_ORDERS}`,
+          },
+        });
+        return;
+      }
+
+      res.json({
         ok: true,
-        error: {
-          name: "id",
-          message: `the document with following id doesn't exist in the collection ${COLLECTION_ORDERS}`,
-        },
+        message: "Update the Id successfully",
+        result: updatedDoc,
       });
-      return;
+    } catch (err) {
+      const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
+      res.status(400).json({ error: errMsg });
     }
-
-    res.json({
-      ok: true,
-      message: "Update the Id successfully",
-      result: updatedDoc,
-    });
-  } catch (err) {
-    const errMsg = formatterErrorFunc(err, COLLECTION_ORDERS);
-    res.status(400).json({ error: errMsg });
   }
-});
+);
 //
 
 //
@@ -467,53 +467,58 @@ router.patch("/updateOne/:id", validateId, async (req, res, next) => {
 // //
 
 //Delete ONE with ID- OK
-router.delete("/deleteOne/:id", validateId, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const aggregateProduct = [
-      {
-        $match: {
-          $expr: {
-            $and: [
-              { $eq: [id, "$_id"] },
-              {
-                $or: [
-                  { $eq: ["$status", "CANCELED"] },
-                  { $eq: ["$status", "COMPLETED"] },
-                ],
-              },
-            ],
+router.delete(
+  "/deleteOne/:id",
+  validateId,
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const aggregateProduct = [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: [id, "$_id"] },
+                {
+                  $or: [
+                    { $eq: ["$status", "CANCELED"] },
+                    { $eq: ["$status", "COMPLETED"] },
+                  ],
+                },
+              ],
+            },
           },
         },
-      },
-    ];
-    // const deleteDoc = await Order.findByIdAndDelete(id);
-    const filter = {
-      _id: new ObjectId(id),
-      status: { $in: ["CANCELED", "COMPLETED"] },
-    };
-    const deleteDoc = await Order.findOneAndDelete(filter);
-    // const deleteDoc = await Order.findOneAndDelete(a);
-    if (!deleteDoc) {
-      res.status(200).json({
+      ];
+      // const deleteDoc = await Order.findByIdAndDelete(id);
+      const filter = {
+        _id: new ObjectId(id),
+        status: { $in: ["CANCELED", "COMPLETED"] },
+      };
+      const deleteDoc = await Order.findOneAndDelete(filter);
+      // const deleteDoc = await Order.findOneAndDelete(a);
+      if (!deleteDoc) {
+        res.status(200).json({
+          ok: true,
+          noneExist: `Không tồn tại đơn hàng với trạng thái CANCELED hoặc COMPLETED trong cơ sở dữ liệu ${COLLECTION_ORDERS}`,
+        });
+        return;
+      }
+      res.json({
         ok: true,
-        noneExist: `Không tồn tại đơn hàng với trạng thái CANCELED hoặc COMPLETED trong cơ sở dữ liệu ${COLLECTION_ORDERS}`,
+        message: "Delete the document in MongoDB successfully",
       });
-      return;
+    } catch (err) {
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+      res.status(400).json({
+        ok: false,
+        message: "Failed to delete the document with ID",
+        error: errMsgMongoDB,
+      });
     }
-    res.json({
-      ok: true,
-      message: "Delete the document in MongoDB successfully",
-    });
-  } catch (err) {
-    const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
-    res.status(400).json({
-      ok: false,
-      message: "Failed to delete the document with ID",
-      error: errMsgMongoDB,
-    });
   }
-});
+);
 // //
 
 // TASK 23----Get all products with totalPrice

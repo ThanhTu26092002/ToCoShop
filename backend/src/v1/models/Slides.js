@@ -6,7 +6,7 @@ const slidesSchema = new Schema(
     {
         title:{
             type: String,
-            maxLength: 80,
+            maxLength: 500,
             unique: true,
             required:true
         },
@@ -28,6 +28,7 @@ const slidesSchema = new Schema(
         status:{
             type: String,
             trim: true,
+            required:true,
             enum: ["ACTIVE", "INACTIVE"],
         }
     }

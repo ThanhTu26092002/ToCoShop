@@ -1,58 +1,93 @@
 var express = require("express");
 var router = express.Router();
-const multer = require('multer');
+const multer = require("multer");
 const Slides = require("../models/Slides");
 const upload = require("../middleware/multerUpload");
-const fs = require('fs');
+const fs = require("fs");
 const { loadSlides } = require("../validations/commonValidators");
-const {
-  findDocuments,
-} = require("../utils/MongodbHelper");
+const passport = require("passport");
+const { allowRoles } = require("../middleware/checkRoles");
+
 const {
   COLLECTION_SLIDES,
   PATH_FOLDER_PUBLIC_UPLOAD,
   PATH_FOLDER_IMAGES,
 } = require("../configs/constants");
-router.get('/', async (req, res, next) => {
-    try {
-      const slides = await Slides.find();
-      res.json(slides);
-    } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+
+
+router.get("/", async (req, res, next) => {
+  try {
+    const  filter = {
+      status: "ACTIVE",
+      sortOrder: { $in: [1,2,3,4,5] }
     }
-  });
-  router.get('/status', async (req, res, next) => {
-    try {
-      const slides = await Slides.find({status:"ACTIVE"});
-      res.json(slides);
-    } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+    const slides = await Slides.find(filter);
+    res.json(slides);
+  } catch (err) {
+    res.status(400).json({ error: { name: err.name, message: err.message } });
+  }
+});
+router.get("/all", async (req, res, next) => {
+  try {
+    const slides = await Slides.find();
+    res.json(slides);
+  } catch (err) {
+    res.status(400).json({ error: { name: err.name, message: err.message } });
+  }
+});
+router.get("/status", async (req, res, next) => {
+  try {
+  const  filter = {
+      status: "ACTIVE",
+      sortOrder: { $in: [1,2,3,4,5] }
     }
-  });
-  router.post('/', async (req, res, next) => {
+    const slides = await Slides.find(filter);
+    res.json(slides);
+  } catch (err) {
+    res.status(400).json({ error: { name: err.name, message: err.message } });
+  }
+});
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  async (req, res, next) => {
     try {
       const data = req.body;
-      console.log(data)
+      console.log(data);
       // Create a new blog post object
       const slides = new Slides(data);
- 
+
       // Insert the article in our MongoDB database
       await slides.save();
       res.status(200).json(slides);
     } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_SLIDES);
+      res.status(400).json({ ok: false, error: errMsgMongoDB });
     }
-  }); 
-  router.delete('/:id', async (req, res, next) => {
+  }
+);
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const slides = await Slides.findByIdAndDelete(id);
       res.json(slides);
     } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_SLIDES);
+      res.status(400).json({ ok: false, error: errMsgMongoDB });
     }
-  });
-  router.patch('/:id', async (req, res, next) => {
+  }
+);
+router.patch(
+  "/:id",
+  loadSlides,
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const update = req.body;
@@ -61,10 +96,17 @@ router.get('/', async (req, res, next) => {
       });
       res.json(slides);
     } catch (err) {
-      res.status(400).json({ error: { name: err.name, messgae: err.message } });
+      const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_SLIDES);
+      res.status(400).json({ ok: false, error: errMsgMongoDB });
     }
-  }); 
-  router.post("/slidesImage/:id",loadSlides, function (req, res) {
+  }
+);
+router.post(
+  "/slidesImage/:id",
+  loadSlides,
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("ADMINISTRATORS"),
+  function (req, res) {
     upload.single("file")(req, res, async function (err) {
       if (err instanceof multer.MulterError) {
         res.status(500).json({ type: "MulterError", err: err });
@@ -74,7 +116,7 @@ router.get('/', async (req, res, next) => {
           errMsg.type = "fileValidationError";
           errMsg.error = req.fileValidationError;
         } else if (req.directoryError) {
-          errMsg.type = "directoryError"; 
+          errMsg.type = "directoryError";
           errMsg.error = req.directoryError;
         }
         res.status(500).json(errMsg);
@@ -98,7 +140,7 @@ router.get('/', async (req, res, next) => {
           const currentImgUrl = req.body.currentImgUrl
             ? req.body.currentImgUrl
             : null;
-            console.log(currentImgUrl)
+          console.log(currentImgUrl);
           const currentDirPath = PATH_FOLDER_PUBLIC_UPLOAD + currentImgUrl;
           console.log("test speed update");
           const opts = { runValidators: true };
@@ -117,7 +159,7 @@ router.get('/', async (req, res, next) => {
             });
             return;
           }
-  
+
           //else, then...
           try {
             if (fs.existsSync(currentDirPath)) {
@@ -157,7 +199,6 @@ router.get('/', async (req, res, next) => {
             });
           }
         } catch (errMongoDB) {
-          console.log("having error");
           res.status(400).json({
             status: false,
             message: "Failed in upload file",
@@ -165,5 +206,6 @@ router.get('/', async (req, res, next) => {
         }
       }
     });
-  });
-  module.exports = router; 
+  }
+);
+module.exports = router;
