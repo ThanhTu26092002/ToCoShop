@@ -1,0 +1,67 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+  }
+  .guideBackground {
+    width: 80vw;
+    height: 80vh;
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+  } 
+  .sizeguideContainer {
+    width: 572px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    
+    
+  } 
+  .sizeguideContainer .titleSizeguide{
+    width: 480px;
+    height: 44px;
+    display: inline-block;
+    text-align: center;
+    margin-top: 10px;
+    background-color: black;
+    border-radius: 30px;
+    margin: auto;
+  }
+  .sizeguideContainer .titleSizeguide p{
+    font-size: 17px;
+    color: white;
+    line-height: 37px;
+  }
+  .closeSizeguidebtn {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .closeSizeguidebtn button {
+    background-color: transparent;
+    border: none;
+    font-size: 25px;
+    cursor: pointer;
+  }
+  .bodySizeguide{
+    margin-top: 10px;
+
+  }
+  table{
+    margin: auto;
+  }
+table, th,td{
+    
+    padding: 5px;
+    border-spacing: 0px;
+  }
+  th,td{
+    border: 1px solid black;
+    padding: 20px 30px;
+    border-spacing: 0px;
+    text-align: center;
+  }

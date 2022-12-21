@@ -9,6 +9,7 @@ import axios from "axios";
 import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { InputNumber } from "antd";
+import Sizeguide from "../../components/Sizeguide/Sizeguide"
 function productdetails() {
   // const queryParams = new URLSearchParams("?term=pizza&location=Bangalore")
   // for (const [key, value] of queryParams) {
@@ -44,6 +45,8 @@ function productdetails() {
   const [categoryId, setCategoryId] = useState(null); //danhmuc
     // eslint-disable-next-line react-hooks/rules-of-hooks
   const {add}=useCart((state)=>state)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [SizeguideOpen, setsizeguideOpen] = useState(false);
   const fetchProduct = async () => {
     try {
       const res = await axios.get(
@@ -96,6 +99,7 @@ useEffect(()=>{
     product && (
 
       <div className="main_product_detall">
+        {SizeguideOpen && <Sizeguide closeSizeguide={setsizeguideOpen} />}
         <Slider />
         <Search_cart />
         <div className="detail">
@@ -230,7 +234,9 @@ useEffect(()=>{
                       })}
                   </div>
                 </div>
-                <a href="#" className="btnsize">
+                <a  className="btnsize" onClick={()=>{
+                  setsizeguideOpen(true)
+                }}>
                   Bảng qui đổi kích cở
                 </a>
                 <button
