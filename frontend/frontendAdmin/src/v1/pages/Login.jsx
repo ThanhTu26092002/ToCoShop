@@ -23,6 +23,7 @@ const Login = () => {
         // Zustand: method
         console.log(response);
         signIn({
+          roles: response.data.roles,
           payload: response.data.payload,
           token: response.data.token,
           employeeInfo: response.data.employeeInfo,
@@ -66,14 +67,7 @@ const Login = () => {
         autoComplete="off"
       >
         <Form.Item
-          {...PropsFormItemEmail}
-          rules={[
-            ...PropsFormItemEmail.rules,
-            {
-              required: true,
-              message: "Vui lòng nhập email",
-            },
-          ]}
+          {...PropsFormItemEmail({require: true})}
           hasFeedback
         >
           <Input placeholder="Email" />

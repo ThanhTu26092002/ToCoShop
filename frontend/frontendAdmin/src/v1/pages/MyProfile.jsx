@@ -275,7 +275,7 @@ function MyProfile() {
       {!myProfile && <Spin size="large"></Spin>}
       {myProfile && (
         <>
-          <a>Thông Tin Cá Nhân</a>
+          <p>Thông Tin Cá Nhân</p>
           {loadingImg ? (
             <Spin size="large"></Spin>
           ) : (
@@ -390,14 +390,7 @@ function MyProfile() {
           </Form.Item>
 
           <Form.Item
-            {...PropsFormItemEmail}
-            rules={[
-              ...PropsFormItemEmail.rules,
-              {
-                required: true,
-                message: "Vui lòng nhập email",
-              },
-            ]}
+            {...PropsFormItemEmail({require: true})}
           >
             <Input placeholder="Email" />
           </Form.Item>

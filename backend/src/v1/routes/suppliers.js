@@ -16,7 +16,6 @@ const { loadSupplier, validateId } = require("../validations/commonValidators");
 
 const { findDocuments } = require("../utils/MongodbHelper");
 const { allowRoles } = require("../middleware/checkRoles");
-// const passport = require("passport");
 
 //Get all docs
 router.get("/", async (req, res, next) => {

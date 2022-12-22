@@ -13,7 +13,7 @@ const {
   COLLECTION_LOGINS,
   COLLECTION_EMPLOYEES,
 } = require("../configs/constants");
-const { exceptionAllowRoles, allowRoles, checkLogin } = require("../middleware/checkRoles");
+const { allowRoles, checkLogin } = require("../middleware/checkRoles");
 
 //Login with email and password
 //1. Đăng nhập hệ thống- email vs password , condition: ACTIVE
@@ -35,6 +35,7 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
       uid: login._id,
       email: login.email,
     };
+    const roles = login.roles
     const token = jwt.sign(payload, process.env.JWT_SETTING_SECRET, {
       expiresIn: 86400, //expires in 24 hours
       issuer: process.env.JWT_SETTING_ISSUER,
@@ -46,6 +47,7 @@ router.post("/", validateSchema(loginSchema), async (req, res) => {
       ok: true,
       login: true,
       payload,
+      roles,
       employeeInfo,
       token,
     });
@@ -169,8 +171,9 @@ router.post(
 //5. Chỉnh sửa thông tin, chú ý hoặc administrator hoặc là chính chủ cập nhật- uid===id
 router.patch(
   "/updateOne/:id",
-  passport.authenticate("jwt", { session: false }),checkLogin("ADMINISTRATORS"),
   validateId,
+  passport.authenticate("jwt", { session: false }),
+  checkLogin("ADMINISTRATORS"),
   async (req, res) => {
     try {
       const { id } = req.params;
