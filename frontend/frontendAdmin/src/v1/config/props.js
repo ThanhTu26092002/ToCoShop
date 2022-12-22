@@ -6,7 +6,7 @@ const {
 } = require("../components/subComponents");
 
 export const PropsTable = ({
-  title,
+  title = "danh sách danh mục hàng hóa",
   footer = "Nếu có vấn đề khi tương tác với hệ thống, xin vui lòng liên hệ số điện thoại 002233442",
   isLoading = false,
   isLoadingBtn = false,
@@ -25,7 +25,7 @@ export const PropsTable = ({
     },
     bordered: true,
     size: "small",
-    scroll: { x: 1500, y: 400 },
+    scroll: { x: 1500, y: 600 },
     title: () => {
       return <TitleTable title={title} />;
     },
@@ -39,6 +39,30 @@ export const PropsForm = {
   wrapperCol: { span: 16 },
   initialValues: { name: "", description: "", file: null },
   autoComplete: "off",
+};
+
+export const PropsFormItemAddress = ({
+  label = "Địa chỉ",
+  nameTitle = "detailAddress",
+}) => {
+  return {
+    label: <LabelCustomization title={label} />,
+    name: nameTitle,
+    rules: [
+      {
+        required: true,
+        message: "Vui lòng nhập địa chỉ!",
+      },
+      {
+        max: 500,
+        message: "Địa chỉ không quá 500 kí tự!",
+      },
+      {
+        whitespace: true,
+        message: "Địa chỉ không thể là khoảng trống",
+      },
+    ],
+  };
 };
 
 export const PropsFormItemDetailAddress = ({
@@ -65,10 +89,13 @@ export const PropsFormItemDetailAddress = ({
   };
 };
 
-export const PropsFormItem_Label_Name = ({ label, name }) => {
+export const PropsFormItem_Label_Name = ({
+  labelTitle = "Mô tả",
+  nameTitle = "description",
+}) => {
   const props = {
-    label: <LabelCustomization title={label} />,
-    name: name,
+    label: <LabelCustomization title={labelTitle} />,
+    name: nameTitle,
   };
   return props;
 };
@@ -170,7 +197,11 @@ export const PropsFormItemPhoneNumber = ({
   };
 };
 
-export const PropsFormItemEmail = ({ require = false, labelTitle= "Email", nameTitle= "email" }) => {
+export const PropsFormItemEmail = ({
+  require = false,
+  labelTitle = "Email",
+  nameTitle = "email",
+}) => {
   let IsRequire = {};
   if (require) {
     IsRequire = {

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import { ConfigProvider, Layout, Menu } from "antd";
 import {
   LogoutOutlined,
@@ -9,21 +9,15 @@ import {
 } from "@ant-design/icons";
 import FooterLayout from "./layout/FooterLayout";
 import HeaderLayout from "./layout/HeaderLayout";
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import MyProfile from "./pages/MyProfile";
 import Login from "./pages/Login";
 import Employees from "./pages/Employees";
-import Categories from "./pages/Categories";
-import Suppliers from "./pages/Suppliers";
+import Categories from "./pages/Categories/Categories";
+import Suppliers from "./pages/Suppliers/Suppliers";
 import Products from "./pages/Products";
-import Slides from "./pages/Slides";
+import Slides from "./pages/Sliders/Slides";
 import Orders from "./pages/orderRoutes/Orders";
 import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
@@ -31,13 +25,18 @@ import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV1.module.css";
 import Qllogin from "./pages/Qllogin";
 import { ICON_NoImage } from "./config/constants";
-import Transportations from "./pages/Transportations";
+import Transportations from "./pages/transportations/Transportations";
 const { Content, Sider } = Layout;
 
 function ToCoShopV1() {
   const navigate = useNavigate();
   const { signOut, auth } = useAuth((state) => state);
-  // console.log("show route:", window.location.pathname);
+  let roles;
+  let isAdmin = false;
+  if (auth) {
+    roles = auth.roles;
+    isAdmin = roles.includes("ADMINISTRATORS");
+  }
   function getItem(label, key, icon, content, children, type) {
     if (key === "signOut") {
       return {
@@ -82,34 +81,56 @@ function ToCoShopV1() {
         <UnorderedListOutlined />,
         <OrderDetail />
       ),
-      getItem(
-        "Thống kê",
-        "/statistics",
-        <UnorderedListOutlined />,
-        <Statistics />
-      ),
+      isAdmin &&
+        getItem(
+          "Thống kê",
+          "/statistics",
+          <UnorderedListOutlined />,
+          <Statistics />
+        ),
     ]),
-    getItem("Nhân viên", "/employees", <UsergroupAddOutlined />, <Employees />),
-    getItem("Tài khoản đăng nhập", "/Qllogin", <UnorderedListOutlined />, <Qllogin />),
-    getItem(
-      "Danh mục sản phẩm",
-      "/categories",
-      <UnorderedListOutlined />,
-      <Categories />
-    ),
-    getItem(
-      "Nhà phân phối",
-      "/suppliers",
-      <UnorderedListOutlined />,
-      <Suppliers />
-    ),
-    getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
-    getItem("Phương thức vận chuyển", "/transportation", <UnorderedListOutlined />, <Transportations />),
+    isAdmin &&
+      getItem(
+        "Nhân viên",
+        "/employees",
+        <UsergroupAddOutlined />,
+        <Employees />
+      ),
+    isAdmin &&
+      getItem(
+        "Tài khoản đăng nhập",
+        "/Qllogin",
+        <UnorderedListOutlined />,
+        <Qllogin />
+      ),
+    isAdmin &&
+      getItem(
+        "Danh mục sản phẩm",
+        "/categories",
+        <UnorderedListOutlined />,
+        <Categories />
+      ),
+    isAdmin &&
+      getItem(
+        "Nhà phân phối",
+        "/suppliers",
+        <UnorderedListOutlined />,
+        <Suppliers />
+      ),
+    isAdmin &&
+      getItem("Slides", "/slides", <UnorderedListOutlined />, <Slides />),
+    isAdmin &&
+      getItem(
+        "Phương thức vận chuyển",
+        "/transportation",
+        <UnorderedListOutlined />,
+        <Transportations />
+      ),
     getItem("Đăng xuất", "signOut", <LogoutOutlined />),
   ];
   return (
     <ConfigProvider>
-      <Layout>
+      <Layout style={{minHeight: "100vh"}}>
         {auth && (
           <Sider
             breakpoint="lg"
@@ -144,7 +165,7 @@ function ToCoShopV1() {
               }
               items={itemsAfterLogin}
               onClick={({ key }) => {
-                console.log('key', key)
+                console.log("key", key);
                 if (key === "signOut") {
                   signOut();
                   navigate("/login");
@@ -159,16 +180,19 @@ function ToCoShopV1() {
         )}
         <Layout>
           <HeaderLayout />
-          <Content
+          {/* <Content
             style={{
               margin: "24px 16px 0",
             }}
-          >
-            <div
+          > */}
+            <Content
               className="site-layout-background"
               style={{
+                margin: "24px 16px 0",
                 padding: 24,
-                minHeight: 360,
+                // minHeight: 360,
+                height: "87vh",
+              overflowY: "auto"
               }}
             >
               <Routes>
@@ -216,16 +240,16 @@ function ToCoShopV1() {
                 {/* NO MATCH ROUTE */}
                 <Route
                   path="*"
-                  element={<Navigate to="/home" replace />}
-                  // element={
-                  //   <main style={{ padding: "1rem" }}>
-                  //     <p>404 Page not found 😂😂😂</p>
-                  //   </main>
-                  // }
+                  // element={<Navigate to="/home" replace />}
+                  element={
+                    <main style={{ padding: "1rem" }}>
+                      <p>404 Page not found 😂😂😂</p>
+                    </main>
+                  }
                 />
               </Routes>
-            </div>
-          </Content>
+            </Content>
+          {/* </Content> */}
           <FooterLayout />
         </Layout>
       </Layout>

@@ -10,7 +10,6 @@ const { allowRoles } = require("../middleware/checkRoles");
 const { findDocuments } = require("../utils/MongodbHelper");
 const Supplier = require("../models/Supplier");
 const { COLLECTION_ORDERS } = require("../configs/constants");
-const { LookupTransportation } = require("../configs/lookups");
 const Product = require("../models/Product");
 const aggregateLookup = [
   {

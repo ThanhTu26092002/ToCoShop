@@ -5,12 +5,9 @@ const upload = require("../middleware/multerUpload");
 const multer = require("multer");
 const fs = require("fs");
 const passport = require("passport");
-const jwt = require("jsonwebtoken");
 var router = express.Router();
-
 const Employee = require("../models/Employee");
 const Login = require("../models/Login");
-
 const { formatterErrorFunc } = require("../utils/formatterError");
 const {
   COLLECTION_EMPLOYEES,
@@ -18,8 +15,8 @@ const {
   PATH_FOLDER_IMAGES,
   PATH_FOLDER_PUBLIC_UPLOAD,
 } = require("../configs/constants");
-const { validateId, loadEmployee } = require("../validations/commonValidators");
-const { exceptionAllowRoles, allowRoles, checkLogin } = require("../middleware/checkRoles");
+const { validateId } = require("../validations/commonValidators");
+const { exceptionAllowRoles, allowRoles } = require("../middleware/checkRoles");
 //Get all employees
 router.get(
   "/",
