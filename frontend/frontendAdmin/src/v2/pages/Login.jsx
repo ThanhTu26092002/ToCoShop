@@ -21,7 +21,6 @@ const Login = () => {
       .then((response) => {
         // localStorage.setItem("employeeInfo", JSON.stringify(response.data.employeeInfo));
         // Zustand: method
-        console.log(response);
         signIn({
           roles: response.data.roles,
           payload: response.data.payload,
@@ -60,22 +59,18 @@ const Login = () => {
         initialValues={{
           email: "",
           password: "",
-          // , remember: true
         }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
-        <Form.Item
-          {...PropsFormItemEmail({require: true})}
-          hasFeedback
-        >
+        <Form.Item {...PropsFormItemEmail({ require: true })} hasFeedback>
           <Input placeholder="Email" />
         </Form.Item>
         <Form.Item
           {...PropsFormItem_Label_Name({
-            label: "Mật khẩu",
-            name: "password",
+            labelTitle: "Mật khẩu",
+            nameTitle: "password",
           })}
           rules={[
             {

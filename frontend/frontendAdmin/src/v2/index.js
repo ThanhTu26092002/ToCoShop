@@ -11,19 +11,19 @@ import FooterLayout from "./layout/FooterLayout";
 import HeaderLayout from "./layout/HeaderLayout";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
-import MyProfile from "./pages/MyProfile";
+import MyProfile from "./pages/MyProfile/MyProfile";
 import Login from "./pages/Login";
-import Employees from "./pages/Employees";
+import Employees from "./pages/Employees/Employees";
 import Categories from "./pages/Categories/Categories";
 import Suppliers from "./pages/Suppliers/Suppliers";
-import Products from "./pages/Products";
+import Products from "./pages/Products/Products";
 import Slides from "./pages/Sliders/Slides";
 import Orders from "./pages/orderRoutes/Orders";
 import OrderDetail from "./pages/orderRoutes/OrderDetail";
 import Statistics from "./pages/orderRoutes/Statistics";
 import useAuth from "./hooks/useZustand";
 import styles from "./ToCoShopV2.module.css";
-import Qllogin from "./pages/Qllogin";
+import QLLogins from "./pages/QLLogins/QLLogins";
 import { ICON_NoImage } from "./config/constants";
 import Transportations from "./pages/transportations/Transportations";
 const { Content, Sider } = Layout;
@@ -99,9 +99,9 @@ function ToCoShopV1() {
     isAdmin &&
       getItem(
         "Tài khoản đăng nhập",
-        "/Qllogin",
+        "/QLLogins",
         <UnorderedListOutlined />,
-        <Qllogin />
+        <QLLogins />
       ),
     isAdmin &&
       getItem(

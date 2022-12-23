@@ -33,7 +33,7 @@ export const beforeUpload = (file) => {
     file.type === "image/png" ||
     file.type === "image/gif";
   if (!isImage) {
-    message.error("You can only upload jpg-jpeg-png-gif file!");
+    message.error("Bạn chỉ có thể tải ảnh định dạng: jpg-jpeg-png-gif file!");
     return false;
   } else {
     return true;
@@ -69,5 +69,9 @@ export const objCompare = (newValues, oldValues) => {
 
 export const formatterNumber = (val) => {
   if (!val) return 0;
-  return `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/\.(?=\d{0,2}$)/g, ",");
+  return `${val}`.replace(new RegExp(/\B(?=(\d{3})+(?!\d))/g), ',')
+  //  val.toLocaleString()
+
+  // return `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/\.(?=\d{0,2}$)/g, ",");
+             
 }

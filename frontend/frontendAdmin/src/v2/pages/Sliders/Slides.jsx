@@ -1,153 +1,23 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Form,
-  Space,
-  Select,
-  Layout,
-  Modal,
-  Table,
-  notification,
-  message,
-  Popconfirm,
-  Upload,
-  Radio,
-} from "antd";
-import {
-  PropsForm,
-  PropsFormItem_Label_Name,
-  PropsTable,
-} from "../../config/props";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
-
-import { URLSlides, WEB_SERVER_UPLOAD_URL } from "../../config/constants";
+import { Button, Form, Layout, Modal, notification, message } from "antd";
+import { URLSlides } from "../../config/constants";
 import axiosClient from "../../config/axios";
 import { Content } from "antd/lib/layout/layout";
-import { beforeUpload, objCompare } from "../../config/helperFuncs";
-import LabelCustomization, {
-  ColorStatus,
-} from "../../components/subComponents";
+import { objCompare } from "../../config/helperFuncs";
 import CustomFormSlider from "./components/CustomFormSlider";
+import CustomTable from "./components/CustomTable";
 
 function Slides() {
   const [slides, setSlides] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [check, setCheck] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [form] = Form.useForm();
   const [formEdit] = Form.useForm();
-  const columns = [
-    {
-      title: "Hình ảnh",
-      key: "imageUrl",
-      dataIndex: "imageUrl",
-      width: "100px",
-      render: (text) => {
-        return (
-          <div className="loadImg">
-            <img
-              src={
-                text && text !== "null"
-                  ? `${WEB_SERVER_UPLOAD_URL}/${text}`
-                  : "./images/noImage.jpg"
-              }
-              style={{ width: "100%", height: "100%" }}
-              alt=""
-            ></img>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Tiêu đề ",
-      key: "title",
-      dataIndex: "title",
-      render: (Text) => {
-        return <span style={{ fontWeight: "600" }}>{Text}</span>;
-      },
-    },
-    {
-      title: () => {
-        return "Thứ tự";
-      },
-      width: "10%",
-      key: "sortOrder",
-      dataIndex: "sortOrder",
-    },
-    {
-      title: () => {
-        return "Trạng thái";
-      },
-      width: "10%",
-      key: "status",
-      dataIndex: "status",
-      render: (text) => {
-        return <ColorStatus status={text} />;
-      },
-    },
-    {
-      title: "Mô tả",
-      key: "description",
-      dataIndex: "description",
-    },
-    {
-      title: "Thao tác",
-      fixed: "right",
-      key: "actions",
-      width: "10%",
-      render: (record) => {
-        return (
-          <Space>
-            <Upload
-              beforeUpload={(file) => beforeUpload(file)}
-              showUploadList={false}
-              name="file"
-              customRequest={(options) => {
-                handleUploadImage(options, record);
-              }}
-            >
-              <Button
-                title="Cập nhật ảnh"
-                icon={<UploadOutlined />}
-                style={{ backgroundColor: "#1890ff" }}
-              ></Button>
-            </Upload>
-            <Button
-              type="dashed"
-              icon={<EditOutlined />}
-              style={{ fontWeight: "600" }}
-              onClick={() => {
-                handleClick_EditBtn(record);
-              }}
-            ></Button>
-            <Popconfirm
-              overlayInnerStyle={{ width: 300 }}
-              title="Bạn muốn xóa không ?"
-              okText="Đồng ý"
-              cancelText="Đóng"
-              onConfirm={() => handleConfirmDelete(record._id)}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="danger"
-                style={{ fontWeight: 600 }}
-                onClick={() => {}}
-                title="Xóa"
-              ></Button>
-            </Popconfirm>
-          </Space>
-        );
-      },
-    },
-  ];
+
   var orderList = [1, 2, 3, 4, 5];
   Array.prototype.except = function (val) {
     return this.filter(function (x) {
@@ -171,17 +41,35 @@ function Slides() {
     setSelectedRecord(record);
     setIsModalOpen(true);
     setSelectedId(record._id);
-    if (record.status === "INACTIVE") {
-      setCheck(true);
-    } else {
-      setCheck(false);
-    }
+    // if (record.status === "INACTIVE") {
+    //   setCheck(true);
+    // } else {
+    //   setCheck(false);
+    // }
     let fieldsValues = {};
     for (let key in record) {
       fieldsValues[key] = record[key];
     }
     formEdit.setFieldsValue(fieldsValues);
   };
+
+  const handleFinishCreate = (values) => {
+    setLoadingBtn(true);
+    axiosClient
+      .post("http://localhost:9000/v1/slides", values)
+      .then((response) => {
+        if (response.status === 200) {
+          setRefresh((f) => f + 1);
+          form.resetFields();
+          notification.info({
+            message: "Thông báo",
+            description: "Thêm mới thành công",
+          });
+        }
+        setLoadingBtn(false);
+      });
+  };
+
   const handleFinishUpdate = (values) => {
     const oldData = {
       ...selectedRecord,
@@ -203,7 +91,6 @@ function Slides() {
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
-          setLoading(true);
           setRefresh((e) => !e);
           formEdit.resetFields();
           setSelectedId(null);
@@ -267,12 +154,6 @@ function Slides() {
       })
       .finally(() => {});
   };
-
-  React.useEffect(() => {
-    axiosClient.get("http://localhost:9000/v1/slides/all").then((response) => {
-      setSlides(response.data);
-    });
-  }, [refresh]);
   const handleConfirmDelete = (_id) => {
     setLoading(true);
     axiosClient
@@ -285,58 +166,32 @@ function Slides() {
         setLoading(false);
       });
   };
+  React.useEffect(() => {
+    setLoading(true)
+    axiosClient.get("http://localhost:9000/v1/slides/all").then((response) => {
+      setSlides(response.data);
+    setLoading(false)
+    });
+  }, [refresh]);
+
   return (
     <div>
       <Layout>
         <Content>
-          <Form
-            {...PropsForm}
-            form={form}
-            initialValues={{
-              title: "",
-              description: "",
-            }}
-            onFinish={(values) => {
-              setLoadingBtn(true);
-              axiosClient
-                .post("http://localhost:9000/v1/slides", values)
-                .then((response) => {
-                  if (response.status === 200) {
-                    setRefresh((f) => f + 1);
-                    form.resetFields();
-                    notification.info({
-                      message: "Thông báo",
-                      description: "Thêm mới thành công",
-                    });
-                  }
-                  setLoadingBtn(false);
-                });
-            }}
-          >
-            <CustomFormSlider  form={form}/>
-          
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Space wrap>
-                <Button type="primary" danger onClick={handleCancelCreate}>
-                  Hủy
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loadingBtn}>
-                  Tạo mới
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-          <Table
-            {...PropsTable({ isLoading: loading })}
-            rowKey="_id"
-            columns={columns}
-            dataSource={slides}
-            pagination={false}
+          <CustomFormSlider
+          form={form}
+            handleFinish={handleFinishCreate}
+            handleCancel={handleCancelCreate}
+            loadingBtn={loadingBtn}
+            list={list}
+          />
+
+          <CustomTable
+            loading={loading}
+            slides={slides}
+            handleUploadImage={handleUploadImage}
+            handleClick_EditBtn={handleClick_EditBtn}
+            handleConfirmDelete={handleConfirmDelete}
           />
           <Modal
             title="Chỉnh sửa thông tin Slides"
@@ -357,47 +212,12 @@ function Slides() {
               </Button>,
             ]}
           >
-            <Form form={formEdit} onFinish={handleFinishUpdate}>
-              <CustomFormSlider />
-              <Form.Item
-                {...PropsFormItem_Label_Name({
-                  labelTitle: "Trạng thái",
-                  nameTitle: "status",
-                })}
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn trạng thái",
-                  },
-                ]}
-              >
-                <Radio.Group
-                  onChange={(e) => {
-                    if (e.target.value === "INACTIVE") {
-                      setCheck(true);
-                      formEdit.setFieldsValue({ sortOrder: 0 });
-                    } else {
-                      setCheck(false);
-                      formEdit.setFieldsValue({ sortOrder: 0 });
-                    }
-                  }}
-                >
-                  <Radio value={"ACTIVE"}>Hiển thị</Radio>
-                  <Radio value={"INACTIVE"}>Không hiển thị</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item
-                label={<LabelCustomization title={"Thu tu"} />}
-                name="sortOrder"
-              >
-                <Select
-                  style={{ width: 120 }}
-                  allowClear
-                  options={list}
-                  disabled={check}
-                />
-              </Form.Item>
-            </Form>
+            <CustomFormSlider
+            form={formEdit}
+            handleFinish={handleFinishUpdate}
+            loadingBtn={loadingBtn}
+            list={list}
+          />
           </Modal>
         </Content>
       </Layout>

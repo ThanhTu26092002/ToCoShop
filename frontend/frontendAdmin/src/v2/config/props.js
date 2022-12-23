@@ -42,11 +42,11 @@ export const PropsForm = {
 };
 
 export const PropsFormItemAddress = ({
-  label = "Địa chỉ",
+  labelTitle = "Địa chỉ",
   nameTitle = "detailAddress",
 }) => {
   return {
-    label: <LabelCustomization title={label} />,
+    label: <LabelCustomization title={labelTitle} />,
     name: nameTitle,
     rules: [
       {
@@ -92,8 +92,21 @@ export const PropsFormItemDetailAddress = ({
 export const PropsFormItem_Label_Name = ({
   labelTitle = "Mô tả",
   nameTitle = "description",
+  require = false,
 }) => {
-  const props = {
+  let props;
+  if (require) {
+    props = {
+      rules: [
+        {
+          required: true,
+          message: "Trường dữ liệu không thể bỏ trống!",
+        },
+      ],
+    };
+  }
+  props = {
+    ...props,
     label: <LabelCustomization title={labelTitle} />,
     name: nameTitle,
   };

@@ -1,27 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../../css/CommonStyle.css";
-import {
-  Button,
-  Layout,
-  Table,
-  Form,
-  Popconfirm,
-  message,
-  notification,
-  Modal,
-  Upload,
-  Space,
-} from "antd";
+import { Button, Layout, Form, message, notification, Modal } from "antd";
 import { Content } from "antd/lib/layout/layout";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { URLSupplier, WEB_SERVER_UPLOAD_URL } from "../../config/constants";
-import { ImgIcon, BoldText } from "../../components/subComponents";
+import { URLSupplier } from "../../config/constants";
 import axiosClient from "../../config/axios";
-import {
-  PropsForm, PropsTable,
-} from "../../config/props";
-import { beforeUpload } from "../../config/helperFuncs";
 import CustomFormSupplier from "./components/CustomFormSupplier";
+import CustomTable from "./components/CustomTable";
 
 function Suppliers() {
   const [isCreate, setIsCreate] = useState(false);
@@ -37,116 +21,6 @@ function Suppliers() {
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
 
-  const columns = [
-    {
-      title: () => {
-        return <BoldText title={"Nhà phân phối "} />;
-      },
-      key: "name",
-      dataIndex: "name",
-      width: "10%",
-      fixed: "left",
-      render: (text) => {
-        return <BoldText title={text} />;
-      },
-    },
-    {
-      title: () => {
-        return <BoldText title={"Hình ảnh"} />;
-      },
-      key: "imageUrl",
-      dataIndex: "imageUrl",
-      width: "100px",
-      render: (text) => {
-        return (
-          <div className="loadImg">
-            <img
-              src={
-                text && text !== "null"
-                  ? `${WEB_SERVER_UPLOAD_URL}${text}`
-                  : "./images/noImage.jpg"
-              }
-              style={{ width: "100%", height: "100%" }}
-              alt=""
-            ></img>
-          </div>
-        );
-      },
-    },
-    {
-      title: () => {
-        return <BoldText title={"Email"} />;
-      },
-      key: "email",
-      dataIndex: "email",
-      width: "20%",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Số điện thoại"} />;
-      },
-      key: "phoneNumber",
-      dataIndex: "phoneNumber",
-      width: "10%",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Địa chỉ"} />;
-      },
-      key: "address",
-      dataIndex: "address",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Thao tác"} />;
-      },
-      key: "actions",
-      width: "9%",
-      fixed: "right",
-      render: (record) => {
-        return (
-          <div className="divActs">
-            <Upload
-              beforeUpload={(file) => beforeUpload(file)}
-              showUploadList={false}
-              name="file"
-              customRequest={(options) => {
-                handleUploadImage(options, record);
-              }}
-            >
-              <Button
-                title="Cập nhật ảnh"
-                icon={<ImgIcon />}
-                style={{ backgroundColor: "#1890ff" }}
-              ></Button>
-            </Upload>
-            <Button
-              icon={<EditOutlined />}
-              type="primary"
-              title="Chỉnh sửa"
-              onClick={() => handleClick_EditBtn(record)}
-            ></Button>
-            <Popconfirm
-              overlayInnerStyle={{ width: 300 }}
-              title="Bạn muốn xóa không ?"
-              okText="Đồng ý"
-              cancelText="Đóng"
-              onConfirm={() => handleConfirmDelete(record._id)}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="primary"
-                danger
-                style={{ fontWeight: 600 }}
-                onClick={() => {}}
-                title="Xóa"
-              ></Button>
-            </Popconfirm>
-          </div>
-        );
-      },
-    },
-  ];
   //
 
   const handleUploadImage = (options, record) => {
@@ -333,47 +207,22 @@ function Suppliers() {
           </Button>
         )}
         {isCreate && (
-          <Form
-            {...PropsForm}
+          <CustomFormSupplier
             form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-          >
-            <CustomFormSupplier />
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Space wrap>
-                <Button type="primary" danger onClick={handleCancelCreate}>
-                  Hủy
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loadingBtn}>
-                  Tạo mới
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
+            handleFinish={handleFinishCreate}
+            handleCancel={handleCancelCreate}
+            loadingBtn={loadingBtn}
+          />
         )}
-        <Table
-          {...PropsTable({isLoading: loading, isLoadingBtn: loadingBtn, title: "Danh sách nhà phân phối"})}
-          onRow={() => {
-            return { onClick: handleMouseLeaveCreate };
-          }}
-          columns={columns}
-          dataSource={categories}
-          pagination={{
-            total: totalDocs,
-            showTotal: (totalDocs, range) =>
-              `${range[0]}-${range[1]} of ${totalDocs} items`,
-            defaultPageSize: 10,
-            defaultCurrent: 1,
-          }}
+        <CustomTable
+          loading={loading}
+          loadingBtn={loadingBtn}
+          totalDocs={totalDocs}
+          categories={categories}
+          handleMouseLeaveCreate={handleMouseLeaveCreate}
+          handleConfirmDelete={handleConfirmDelete}
+          handleClick_EditBtn={handleClick_EditBtn}
+          handleUploadImage={handleUploadImage}
         />
         <Modal
           title="Chỉnh sửa thông tin danh mục"
@@ -395,18 +244,11 @@ function Suppliers() {
             </Button>,
           ]}
         >
-          <Form
-            {...PropsForm}
+          <CustomFormSupplier
             form={formUpdate}
-            name="formUpdate"
-            onFinish={handleFinishUpdate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formUpdate");
-              console.error("Error at onFinishFailed at formUpdate");
-            }}
-          >
-            <CustomFormSupplier />
-          </Form>
+            handleFinish={handleFinishUpdate}
+            loadingBtn={loadingBtn}
+          />
         </Modal>
       </Content>
     </Layout>
