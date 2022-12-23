@@ -1,29 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "../../css/CommonStyle.css";
-
-import {
-  Button,
-  Layout,
-  Table,
-  Form,
-  Popconfirm,
-  message,
-  notification,
-  Modal,
-  Upload,
-  Space,
-} from "antd";
+import { Button, Layout, Form, message, notification, Modal } from "antd";
 import { Content } from "antd/lib/layout/layout";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { URLCategory, WEB_SERVER_UPLOAD_URL } from "../../config/constants";
-import {
-  ImgIcon,
-  BoldText,
-} from "../../components/subComponents";
+import { URLCategory } from "../../config/constants";
 import axiosClient from "../../config/axios";
-import { beforeUpload, objCompare } from "../../config/helperFuncs";
-import { PropsForm, PropsTable } from "../../config/props";
+import { objCompare } from "../../config/helperFuncs";
 import CustomFormCategory from "./components/CustomFormCategory";
+import CustomTable from "./components/CustomTable";
 
 function Categories() {
   const [isCreate, setIsCreate] = useState(false);
@@ -38,105 +21,6 @@ function Categories() {
 
   const [formCreate] = Form.useForm();
   const [formUpdate] = Form.useForm();
-
-  const columns = [
-    {
-      title: () => {
-        return <BoldText title={"Danh mục "} />;
-      },
-      key: "name",
-      dataIndex: "name",
-      width: "10%",
-      fixed: "left",
-      // defaultSortOrder: 'ascend',
-      // sorter: (a, b) => a.name.length - b.name.length,
-      render: (text) => {
-        return <BoldText title={text} />;
-      },
-    },
-    {
-      title: () => {
-        return <BoldText title={"Hình ảnh"} />;
-      },
-      key: "imageUrl",
-      dataIndex: "imageUrl",
-      width: "100px",
-      render: (text) => {
-        return (
-          <div className="loadImg">
-            <img
-              src={
-                text && text !== "null"
-                  ? `${WEB_SERVER_UPLOAD_URL}${text}`
-                  : "./images/noImage.jpg"
-              }
-              style={{ width: "100%", height: "100%" }}
-              alt=""
-            ></img>
-          </div>
-        );
-      },
-    },
-
-    {
-      title: () => {
-        return <BoldText title={"Mô tả"} />;
-      },
-      key: "description",
-      dataIndex: "description",
-    },
-    {
-      title: () => {
-        return <BoldText title={"Thao tác"} />;
-      },
-      key: "actions",
-      width: "9%",
-      fixed: "right",
-      render: (record) => {
-        return (
-          <div className="divActs">
-            <Upload
-              beforeUpload={(file) => beforeUpload(file)}
-              showUploadList={false}
-              name="file"
-              customRequest={(options) => {
-                handleUploadImage(options, record);
-              }}
-            >
-              <Button
-                title="Cập nhật ảnh"
-                icon={<ImgIcon />}
-                style={{ backgroundColor: "#1890ff" }}
-              ></Button>
-            </Upload>
-            <Button
-              icon={<EditOutlined />}
-              type="primary"
-              title="Chỉnh sửa"
-              onClick={() => handleClick_EditBtn(record)}
-            ></Button>
-            <Popconfirm
-              overlayInnerStyle={{ width: 300 }}
-              title="Bạn muốn xóa không ?"
-              okText="Đồng ý"
-              cancelText="Đóng"
-              onConfirm={() => handleConfirmDelete(record._id)}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="primary"
-                danger
-                style={{ fontWeight: 600 }}
-                onClick={() => {}}
-                title="Xóa"
-              ></Button>
-            </Popconfirm>
-          </div>
-        );
-      },
-    },
-  ];
-  //
 
   const handleUploadImage = (options, record) => {
     setLoading(true);
@@ -160,7 +44,6 @@ function Categories() {
       .post(URL, formData, config)
       .then((response) => {
         if (response.status === 200) {
-          console.log("ok upload image");
           setRefresh((e) => !e);
           message.success(`Cập nhật hình ảnh thành công!`);
         }
@@ -234,7 +117,6 @@ function Categories() {
       setSelectedId(null);
       return;
     }
-    console.log("get", checkChangedData);
     setLoadingBtn(true);
     //POST
     axiosClient
@@ -268,10 +150,8 @@ function Categories() {
     axiosClient
       .delete(URLCategory + "/deleteOne/" + _id)
       .then((response) => {
-        console.log(response);
         if (response.status === 200) {
           if (response.data?.noneExist) {
-            console.log("test error");
             message.warning(response.data.noneExist);
           } else {
             message.info("Xóa thành công");
@@ -322,47 +202,22 @@ function Categories() {
           </Button>
         )}
         {isCreate && (
-          <Form
-            {...PropsForm}
+          <CustomFormCategory
             form={formCreate}
-            name="formCreate"
-            onFinish={handleFinishCreate}
-            onFinishFailed={() => {
-              console.error("Error at onFinishFailed at formCreate");
-            }}
-          >
-            <CustomFormCategory />
-            <Form.Item
-              wrapperCol={{
-                offset: 8,
-                span: 16,
-              }}
-            >
-              <Space wrap>
-                <Button type="primary" danger onClick={handleCancelCreate}>
-                  Hủy
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loadingBtn}>
-                  Tạo mới
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
+            handleFinish={handleFinishCreate}
+            handleCancel={handleCancelCreate}
+            loadingBtn={loadingBtn}
+          />
         )}
-        <Table
-          {...PropsTable({ isLoading: loading, isLoadingBtn: loadingBtn })}
-          onRow={() => {
-            return { onClick: handleMouseLeaveCreate };
-          }}
-          columns={columns}
-          dataSource={categories}
-          pagination={{
-            total: totalDocs,
-            showTotal: (totalDocs, range) =>
-              `${range[0]}-${range[1]} of ${totalDocs} items`,
-            defaultPageSize: 10,
-            defaultCurrent: 1,
-          }}
+        <CustomTable
+          loading={loading}
+          loadingBtn={loadingBtn}
+          handleMouseLeaveCreate={handleMouseLeaveCreate}
+          categories={categories}
+          totalDocs={totalDocs}
+          handleConfirmDelete={handleConfirmDelete}
+          handleClick_EditBtn={handleClick_EditBtn}
+          handleUploadImage={handleUploadImage}
         />
         <Modal
           title="Chỉnh sửa thông tin danh mục"
@@ -384,18 +239,11 @@ function Categories() {
             </Button>,
           ]}
         >
-          <Form
-            {...PropsForm}
+          <CustomFormCategory
             form={formUpdate}
-            name=" "
-            onFinish={handleFinishUpdate}
-            onFinishFailed={() => {
-              // message.info("Error at onFinishFailed at formUpdate");
-              console.error("Error at onFinishFailed at formUpdate");
-            }}
-          >
-            <CustomFormCategory />
-          </Form>
+            handleFinish={handleFinishUpdate}
+            loadingBtn={loadingBtn}
+          />
         </Modal>
       </Content>
     </Layout>

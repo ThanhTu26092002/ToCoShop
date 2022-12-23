@@ -11,7 +11,6 @@ import CartDetail2 from "../CartInfo/CartDetail2/CartDetail2";
 import CartDetail3 from "../CartInfo/CartDetail3/CartDetail3";
 import axios from 'axios';
 function Nav() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [modalOpen, setModalOpen] = useState(false);
   const [categories, setCategories] = useState([]);//danhmuc
   const [categoryId, setCategoryId] = useState(null);//danhmuc

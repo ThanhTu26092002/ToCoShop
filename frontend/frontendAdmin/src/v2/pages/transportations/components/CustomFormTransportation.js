@@ -19,7 +19,7 @@ function CustomFormTransportation({
     <Form
       {...PropsForm}
       form={form}
-      name="form"
+      name={form}
       onFinish={handleFinish}
       onFinishFailed={() => {
         console.error("Error at onFinishFailed at formCreate");
@@ -49,7 +49,10 @@ function CustomFormTransportation({
         >
           <InputNumber
             defaultValue={0}
-            formatter={formatterNumber}
+            // formatter={formatterNumber}
+            // formatter={formatNumberWithThousandSeparatorAndTwoDecimalPlaces}
+            formatter={value => `${value}`.replace(new RegExp(/\B(?=(\d{3})+(?!\d))/g), ',')}
+    // parser={value => value.replace(new RegExp(/\$\s?|(,*)/g), '')}
             style={{ minWidth: 120, maxWidth: 360 }}
             min={0}
             addonAfter="VNĐ"
