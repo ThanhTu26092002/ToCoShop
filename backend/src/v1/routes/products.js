@@ -517,9 +517,10 @@ router.get("/09getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
         $group: {
           ...groupBeforeFinish.$group,
           maxDiscount: { $max: "$attributes.discount" },
+          
         },
       },
-      stockTotalMoreThanZero,
+      // stockTotalMoreThanZero,
       unWindAttribute,
       {
         $match: {

@@ -79,13 +79,11 @@ function Categories() {
     setLoadingBtn(true);
     //SUBMIT
     let newData = { ...values };
-
     //POST
     axiosClient
       .post(`${URLCategory}/insertOne`, newData)
       .then((response) => {
         if (response.status === 201) {
-          setLoading(true);
           setIsCreate(false);
           setRefresh((e) => !e);
           formCreate.resetFields();

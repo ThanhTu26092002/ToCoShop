@@ -240,12 +240,12 @@ function ToCoShopV1() {
                 {/* NO MATCH ROUTE */}
                 <Route
                   path="*"
-                  // element={<Navigate to="/home" replace />}
-                  element={
-                    <main style={{ padding: "1rem" }}>
-                      <p>404 Page not found 😂😂😂</p>
-                    </main>
-                  }
+                  element={<Navigate to="/home" replace />}
+                  // element={
+                  //   <main style={{ padding: "1rem" }}>
+                  //     <p>404 Page not found 😂😂😂</p>
+                  //   </main>
+                  // }
                 />
               </Routes>
             </Content>

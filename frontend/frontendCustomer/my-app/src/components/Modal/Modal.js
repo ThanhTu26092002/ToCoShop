@@ -5,6 +5,11 @@ import { useCart } from "../../hooks/useCart";
 import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
 function Modal({ closeModal }) {
   const { items, remove, increase, decrease } = useCart((state) => state);
+  let isEmpty = false;
+  if (items.length === 0) {
+    console.log("ok");
+    isEmpty = true;
+  }
   let totalmoney = null;
   return (
     <div className="modalBackground">
@@ -23,26 +28,29 @@ function Modal({ closeModal }) {
         </div>
         <div className="body">
           <nav className="navproductdetall">
-            {items.map((i, index) => {
-              let attributesItem = null;
-              i.product.attributes.map((e) => {
-                if (e._id === i.attributeId) {
-                  console.log("itemsize", e);
-                  attributesItem = e;
-                  totalmoney +=
-                    Number(attributesItem.totalPriceEachType) *
-                    Number(i.quantity);
-                }
-              });
+            {isEmpty ? (
+              <p>Emty</p>
+            ) : (
+              items.map((i, index) => {
+                let attributesItem = null;
+                i.product.attributes.map((e) => {
+                  if (e._id === i.attributeId) {
+                    console.log("itemsize", e);
+                    attributesItem = e;
+                    totalmoney +=
+                      Number(attributesItem.totalPriceEachType) *
+                      Number(i.quantity);
+                  }
+                });
 
-              console.log("item", attributesItem);
-              return (
-                <div key={items._id}>
-                  
-                  <Productcart items={i} />
-                </div>
-              );
-            })}
+                console.log("item", attributesItem);
+                return (
+                  <div key={items._id}>
+                    <Productcart items={i} />
+                  </div>
+                );
+              })
+            )}
           </nav>
         </div>
         <div className="footer_modal">

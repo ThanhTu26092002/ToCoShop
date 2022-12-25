@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../../css/CommonStyle.css";
 import moment from "moment";
 import numeral from "numeral";
@@ -6,69 +6,23 @@ import numeral from "numeral";
 import {
   Button,
   Layout,
-  Table,
   Form,
-  Input,
-  Popconfirm,
   message,
   notification,
   Modal,
-  Upload,
-  Spin,
-  Space,
-  DatePicker,
-  Select,
-  Divider,
-  Typography,
-  InputNumber,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
-  DeleteOutlined,
-  EditOutlined,
-  EllipsisOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import TextArea from "antd/lib/input/TextArea";
-
-import {
-  dateFormatList,
   URLOrder,
   URLTransportation,
   URLProduct,
-  sizeList,
-  colorList,
 } from "../../config/constants";
-import LabelCustomization, {
-  NumberFormatter,
-  BoldText,
-  TitleTable,
-  ColorStatus,
-} from "../../components/subComponents";
 import axiosClient from "../../config/axios";
 import formattedDate from "../../utils/commonFuncs";
-import {
-  PropsForm,
-  PropsFormItemDetailAddress,
-  PropsFormItemEmail,
-  PropsFormItemFirstName,
-  PropsFormItemLastName,
-  PropsFormItemPhoneNumber,
-  PropsFormItemStatus,
-  PropsFormItem_Label_Name,
-  PropsTable,
-} from "../../config/props";
-import {
-  customCreateAHandler,
-  customDisabledDate,
-  handleOpenNewPage,
-} from "../../config/helperFuncs";
+import { customCreateAHandler } from "../../config/helperFuncs";
 import CustomTable from "./components/CustomTable";
 import CustomFormOrder from "./components/CustomFormOrder";
 import CustomFormUpdateStatus from "./components/CustomFormUpdateStatus";
-
-const { Text } = Typography;
 
 function Orders() {
   const [transportations, setTransportations] = useState([]);
@@ -79,7 +33,6 @@ function Orders() {
   const [orders, setOrders] = useState(null);
   const [changedStatus, setChangedStatus] = useState(null);
   const [totalDocs, setTotalDocs] = useState(0);
-
   const [refresh, setRefresh] = useState(false);
   const [detailCreatingStatus, setDetailCreatingStatus] = useState(false);
   const [createdDateState, setCreatedDateState] = useState(null);
@@ -423,7 +376,7 @@ function Orders() {
       newHandlers.push(newHandler);
       updateData = { ...updateData, handlers: newHandlers };
     }
-    setLoadingBtnStatus(true)
+    setLoadingBtnStatus(true);
     //POST
     axiosClient
       .patch(`${URLOrder}/updateOne/${selectedId}`, updateData)
