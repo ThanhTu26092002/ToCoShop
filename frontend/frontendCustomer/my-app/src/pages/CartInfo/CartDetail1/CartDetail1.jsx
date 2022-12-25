@@ -10,6 +10,7 @@ import {
   UpOutlined,
   RightOutlined,
   DoubleRightOutlined,
+  DoubleLeftOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -30,24 +31,68 @@ import {
 } from "antd";
 import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
 import { useCheckout } from "../../../hooks/useCheckout";
-import {
-    useNavigate,
-  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import TextArea from "antd/lib/input/TextArea";
+import CheckoutCartdetail1 from "../../../components/CartInfo/checkoutCartDetail1"
+import CheckoutCartdetail2 from "../../../components/CartInfo/checkoutCartDetail2"
+import CheckoutCartdetail3 from "../../../components/CartInfo/checkoutCartDetail3"
 //  import useCheckout from '../../../hooks/useCheckout'
 function CartDetail1() {
-    const {add}=useCheckout((state)=>state)
-    const navigate = useNavigate();
-    const [formContactInfo] = Form.useForm();
-   const handleFinishCreate=(values)=>{
-        console.log("values",values)
-         add({contactInfo:values})
-         navigate(
-            `/Thanhtoan2`
-          );
-   }
-   const handleOk = () => {
-    formContactInfo.submit();
+  const { info,add } = useCheckout((state) => state);
+  // const navigate = useNavigate();
+  const [statesListContactInfo, setStatesListContactInfo] = useState(null);
+  const [countryList, setCountryList] = useState(null);
+  const [cityListContactInfo, setCityListContactInfo] = useState(null);
+  const [cartDetail1, setCartDetail1] = useState(true);
+  const [cartDetail2, setCartDetail2] = useState(false);
+  const [cartDetail3, setCartDetail3] = useState(false);
+  const [savedContactInfo, setSavedContactInfo] = useState(null);
+  const [savedShippingInfo, setSavedShippingInfo] = useState(null);
+  const [savedOtherInfo, setSavedOtherInfo] = useState(null);
+  const [formContactInfo] = Form.useForm();
+  const [formShippingInfo] = Form.useForm();
+  const [formOtherInfo] = Form.useForm();
+  // const [formContactInfo] = Form.useForm();
+  const handleFinishCreate = (values) => {
+    console.log("handle",values)
+    setCartDetail1(false)
+    setCartDetail2(true)
+    setCartDetail3(false)
+    setSavedContactInfo(values)
+    add({contactInfo:values})
   };
+  const handleFinishCreate2 = (values) => {
+    setCartDetail1(false)
+    setCartDetail2(false)
+    setCartDetail3(true)
+    add({shippingInfo:values})
+    setSavedShippingInfo(values)
+  };
+  const handleFinishCreat3 = (values) => {
+    
+    setSavedOtherInfo(values)
+  };
+  
+  
+  useEffect(() => {
+    fetch("http://localhost:3006/data/countries+states+cities.json")
+      .then((response) => response.json())
+      .then((data) => setCountryList(data))
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+  const previousfunc =() => {
+    setCartDetail1(true)
+    setCartDetail2(false)
+    setCartDetail3(false)
+  }
+  const previousfunc1 =() => {
+    setCartDetail1(false)
+    setCartDetail2(true)
+    setCartDetail3(false)
+  }
+
   return (
     <div className="main_Cartdetall">
       <Slider />
@@ -55,79 +100,25 @@ function CartDetail1() {
         <div className="Cartdetall_title">
           <h1>Thông Tin Giỏ Hàng</h1>
         </div>
-        <div className="Cartdetall_form">
-          <h2>Thông tin người đặt hàng:</h2>
-          <div className="Cartdetall_form_main">
-            <Form
-            form={formContactInfo}
-            
-              style={{ marginLeft: 100 }}
-              //{...PropsForm}
-             // form={formCreate}
-              name="formContactInfo"
-              onFinish={handleFinishCreate}
-              onFinishFailed={() => {
-                console.error("Error at onFinishFailed at formCreate");
-              }}
-              
-            >
-              <Form.Item name="firstNameContactInfo" className="a" label="Họ:">
-                <Input style={{ marginLeft: 57 }} placeholder="Họ" />
-              </Form.Item>
-              <Form.Item name="lastNameContactInfo" className="a" label="Tên:">
-                <Input style={{ marginLeft: 57 }} placeholder="Tên" />
-              </Form.Item>
-              <Form.Item name="emailContactInfo" className="a" label="Email:">
-                <Input style={{ marginLeft: 47 }} placeholder="Email" />
-              </Form.Item>
-              <Form.Item
-                name="phoneNumberContactInfo"
-                className="a"
-                label="Số điện thoại:"
-              >
-                <Input placeholder="Số điện thoại" />
-              </Form.Item>
-              <Form.Item
-                name="countryContactInfo"
-                className="a"
-                label="Quốc gia:"
-              >
-                <Cascader
-                  style={{ width: 300, marginLeft: 27 }}
-                  placeholder="Please select"
-                />
-              </Form.Item>
-              <Form.Item name="stateContactInfo" className="a" label="Tỉnh:">
-                <Cascader
-                  style={{ width: 300, marginLeft: 57 }}
-                  placeholder="Please select"
-                />
-              </Form.Item>
-              <Form.Item
-                name="cityContactInfo"
-                className="a"
-                label="Quận/huyện:"
-              >
-                <Cascader
-                  style={{ width: 300, marginLeft: 8 }}
-                  placeholder="Please select"
-                />
-              </Form.Item>
-              <Form.Item
-                name="detailAddressContactInfo"
-                className="a"
-                label="Địa chỉ:"
-              >
-                <Input style={{ marginLeft: 37 }} placeholder="Địa chỉ" />
-              </Form.Item>
-              
-            </Form>
-          </div>
+        <div
+          className="main_body_Cartdetall1"
+          style={cartDetail1 ? { display: "block" } : { display: "none" }}
+        >
+          {cartDetail1 && <CheckoutCartdetail1   handleFinishCreate={handleFinishCreate} formContactInfo={formContactInfo} countryList={countryList} />}
         </div>
-        <div className="Cartdetallbtn">
-          
-          
-          <button onClick={handleOk}>Tiếp tục<DoubleRightOutlined /></button>
+        <div
+          className="main_body_Cartdetall2"
+          style={cartDetail2 ? { display: "block" } : { display: "none" }}
+        >
+      
+        { cartDetail2 &&<CheckoutCartdetail2 previousfunc={previousfunc} formShippingInfo={formShippingInfo} handleFinishCreate={handleFinishCreate2} countryList={countryList} info={info}/>}
+        </div>
+        <div
+          className="main_body_Cartdetall3"
+          style={cartDetail3 ? { display: "block" } : { display: "none" }}
+        >
+          {cartDetail3&&<CheckoutCartdetail3 previousfunc={previousfunc1} handleFinishCreate={handleFinishCreat3} info={info} formOtherInfo={formOtherInfo}/>}
+
         </div>
       </div>
       <Footer amount1={8}></Footer>
