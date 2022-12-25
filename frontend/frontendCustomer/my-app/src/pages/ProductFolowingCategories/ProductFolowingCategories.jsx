@@ -32,7 +32,7 @@ function Menclothes() {
           <h3>Mới nhất</h3>
         </div>
         <div className="Sort_selling">
-          <h3>Bán chạy nhất</h3>
+          <h3>Đang Khuyến Mãi</h3>
         </div>
       </div>
       <div className='listproducts'>

@@ -24,20 +24,21 @@ function Modal({ closeModal }) {
         <div className="body">
           <nav className="navproductdetall">
             {items.map((i, index) => {
-              
-               let attributesItem = null;
+              let attributesItem = null;
               i.product.attributes.map((e) => {
                 if (e._id === i.attributeId) {
                   console.log("itemsize", e);
                   attributesItem = e;
-                  totalmoney+=Number(attributesItem.totalPriceEachType)*Number(i.quantity)
-                  
+                  totalmoney +=
+                    Number(attributesItem.totalPriceEachType) *
+                    Number(i.quantity);
                 }
               });
-              
+
               console.log("item", attributesItem);
               return (
                 <div key={items._id}>
+                  
                   <Productcart items={i} />
                 </div>
               );

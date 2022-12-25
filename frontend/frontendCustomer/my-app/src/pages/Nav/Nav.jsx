@@ -10,18 +10,21 @@ import CartDetail from "../CartInfo/CartDetail1/CartDetail1";
 import CartDetail2 from "../CartInfo/CartDetail2/CartDetail2";
 import CartDetail3 from "../CartInfo/CartDetail3/CartDetail3";
 import axios from 'axios';
+import { useCart } from "../../hooks/useCart";
 function Nav() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [modalOpen, setModalOpen] = useState(false);
   const [categories, setCategories] = useState([]);//danhmuc
   const [categoryId, setCategoryId] = useState(null);//danhmuc
-
+  
+  const { items, remove, increase, decrease } = useCart((state) => state);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         axios.get("http://localhost:9000/v1/categories").then((response) => {
             setCategories(response.data.results);
         });
     }, [])
+  
   return (
 
     <BrowserRouter>
@@ -30,7 +33,7 @@ function Nav() {
         <div className='sidebar'>
           <div className='sidebar_logo'>
             <div className='container_sldebar_logo'>
-              <img src='ToCoClothes.png' alt=''></img>
+              <Link to='/'><img src='ToCoClothes.png' alt=''></img></Link>
             </div>
 
           </div>
@@ -48,7 +51,7 @@ function Nav() {
               <a className="cart_a" onClick={() => {
                 setModalOpen(true);
               }}>
-                <li > <AiOutlineShopping style={{ width: 25, height: 25 }} /><div>0</div></li>
+                <li > <AiOutlineShopping style={{ width: 25, height: 25 }} /><div>{items.length}</div></li>
               </a>
             </div>
           </div>
