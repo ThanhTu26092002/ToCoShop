@@ -46,8 +46,10 @@
   margin-inline:10px ;
   height: 100%;
   line-height: 80px;  
-  cursor: pointer;
   
+}
+.container_sldebar_extra a li svg{
+  cursor: pointer;
 }
 .container_sldebar_extra .cart_a div{
   position: relative;
@@ -144,5 +146,8 @@ nav .menu_item{
   margin-left: 20%;
   width: 80%;
   
+}
+.container_hotline1 a img:hover{
+  opacity: 0.5;
 }
 
