@@ -9,23 +9,19 @@ import Search_cart from "../../components/SearchCart/index"
 import { useParams } from "react-router-dom";
 function Menclothes() {
   const [images, setImages] = useState([]);//danhmuc
-  const [categories,setCategories]=useState([])
-
+  const[categoryName,setCategoryName]=useState(null);
   const { id } = useParams();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     axios.get("http://localhost:9000/v1/products/02getByCategoryId/"+ id).then((response) => {
+      
       setImages(response.data.results);
-      console.log("image",images)
+      setCategoryName(response.data.results[0].categories[0].name)
     });
 
 
   }, [id])
-  // useEffect(()=>{
-  //   axios.get("http://localhost:9000/v1/products/findById/"+ images[0]._id).then((response) => {
-  //     setCategories(response.data.results);
-  //   });
-  // })
+  
   return (
     <div className="Men_product">
       <Slider />
@@ -43,7 +39,7 @@ function Menclothes() {
       </div>
       <div className='listproducts'>
         <div className="listproducts_title">
-          <i><h1>O U T F I T S U M M E R</h1></i>
+       <i><h1>{categoryName}</h1></i>
           {/* <h1>{id}</h1> */}
         </div>
         <div className='listproducts_main'>

@@ -25,6 +25,7 @@ export const useCart = create(
       remove: (id) => {
         const items = get().items;
         const newItems = items.filter((x) => x.attributeId !== id);
+        
         return set({ items: newItems }, false, {
           type: "carts/removeFormCart",
         });
@@ -39,12 +40,13 @@ export const useCart = create(
         const items = get().items;
         const found = items.find((x) => x.attributeId === id);
         if ((found.quantity === 1)) {
+          if(window.confirm("bạn có muốn xóa không")){
           const newItems = items.filter(
             (x) => x.attributeId !== found.attributeId
           );
           return set({ items: newItems }, false, {
             type: "carts/decrease",
-          });
+          });}
         } else {
           found.quantity--;
           return set({ items: items }, false, { type: "carts/decrease" });
