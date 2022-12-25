@@ -13,20 +13,10 @@ function Home({categorieId}) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         console.log(categorieId);
-if(categorieId){
-    axios.get("http://localhost:9000/v1/products/02getByCategoryId/" + categorieId).then((response) => {
+    axios.get("http://localhost:9000/v1/products/07getByPromotionPosition?value=WEEKLY").then((response) => {
         console.log('data categories',response.data.results)
         setImages(response.data.results);
     });
-}else{
-    axios.get("http://localhost:9000/v1/products/01getStockTotal/").then((response) => {
-        console.log('data',response.data.results)
-        setImages(response.data.results);
-    });
-}
-        
-
-
     }, [])
 
     return (
@@ -36,7 +26,7 @@ if(categorieId){
             <Search_cart/>
             <div className='listproducts'>
                 <div className="listproducts_title">
-                    <h1>NEW ARRIVALS</h1>
+                    <h1>Gợi Ý Trong Tuần</h1>
                 </div>
 
                 <div className='listproducts_main'>
