@@ -495,7 +495,7 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
 });
 //
 // ---03--- Get products following categoryId- sản phẩm mới nhất
-router.get("/03getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res, next) => {
+router.get("/09getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res, next) => {
   try {
     const categoryId = new ObjectId(req.params.id);
     const aggregate = [
@@ -512,11 +512,11 @@ router.get("/03getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
       //Thêm field attributes.totalPriceEachType
       addFieldTotalPriceEachType,
       //
-      //Thêm trường minTotalPrice- giá sản phẩm thấp nhất cho mỗi sản phẩm và minDiscount- mức giảm thấp nhất
+      //Thêm trường maxDiscount- mức giảm nhiều nhất
       {
         $group: {
           ...groupBeforeFinish.$group,
-          minTotalPrice: { $min: "$attributes.totalPriceEachType" },
+          maxDiscount: { $max: "$attributes.discount" },
         },
       },
       stockTotalMoreThanZero,
@@ -524,7 +524,7 @@ router.get("/03getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
       {
         $match: {
           $expr: {
-            $eq: ["$minTotalPrice", "$attributes.totalPriceEachType"],
+            $eq: ["$maxDiscount", "$attributes.discount"],
           },
         },
       },
@@ -546,7 +546,7 @@ router.get("/03getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
           price: { $first: "$attributes.price" },
           attributeId: { $first: "$attributes._id" },
           stockTotal: { $first: "$stockTotal" },
-          minTotalPrice: { $first: "$minTotalPrice" },
+          maxDiscount: { $first: "$maxDiscount" },
         },
       },
 
@@ -674,8 +674,43 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
       },
       unWindAttribute,
       addFieldTotalPriceEachType,
-      groupBeforeFinish,
+      {
+        $group: {
+          ...groupBeforeFinish.$group,
+          minTotalPrice: { $min: "$attributes.totalPriceEachType" },
+        },
+      },
       stockTotalMoreThanZero,
+      unWindAttribute,
+      {
+        $match: {
+          $expr: {
+            $eq: ["$minTotalPrice", "$attributes.totalPriceEachType"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          productCode: { $first: "$productCode" },
+          name: { $first: "$name" },
+          categoryId: { $first: "$categoryId" },
+          supplierId: { $first: "$supplierId" },
+          description: { $first: "$description" },
+          promotionPosition: { $first: "$promotionPosition" },
+          imageUrls: { $first: "$imageUrls" },
+          coverImage: { $first: "$coverImage" },
+          size: { $first: "$attributes.size" },
+          color: { $first: "$attributes.color" },
+          stock: { $first: "$attributes.stock" },
+          discount: { $first: "$attributes.discount" },
+          price: { $first: "$attributes.price" },
+          attributeId: { $first: "$attributes._id" },
+          stockTotal: { $first: "$stockTotal" },
+          minTotalPrice: { $first: "$minTotalPrice" },
+        },
+      },
+      { $sort: { "_id": -1 } },
     ];
 
     const docs = await Product.aggregate(aggregate);
