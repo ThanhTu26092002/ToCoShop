@@ -15,7 +15,8 @@ const dateFormatList = ["DD-MM-YYYY", "DD-MM-YY"];
 const sizeList = ["S", "M", "L", "XL", "XXL"];
 const genderList = ["NAM", "NỮ", "KHÔNG XÁC ĐỊNH"];
 const colorList = ["Xanh Navy", "Vàng", "Xám", "Đen", "Hồng", "Trắng"];
-
+const paymentMethodList = ["CREDIT CARD", "COD"];
+const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
 const promotionPositionOptions = [
   {
     label: "Gợi ý trong tuần",
@@ -58,4 +59,6 @@ module.exports = {
   genderList,
   URLQLLogin,
   promotionPositionOptions,
+  paymentMethodList,
+  statusList
 };
