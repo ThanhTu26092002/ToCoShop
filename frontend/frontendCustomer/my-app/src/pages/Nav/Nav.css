@@ -98,7 +98,6 @@ nav .menu_item{
 }
 .menu_item a:hover{
   background: rgb(237, 234, 234);
-  text-decoration: underline;
   color: #78cccd;
 }
 .sidebar_footer{
