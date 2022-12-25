@@ -3,6 +3,7 @@ import "./style.css";
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import { AiOutlineHeart } from "react-icons/ai"
 import Productdetal from "../../../pages/ProductDetail/ProductDetail"
+import numeral from "numeral";
 function index({imgproduct}) {
   return (
     <div className='product'>
@@ -14,8 +15,8 @@ function index({imgproduct}) {
         </div>
         <div className='product_title'>
             <div className='product_price'>
-                <p>{imgproduct.name}</p>
-                {/* <p>{imgproduct.description}</p> */}
+                <p>{imgproduct.productCode}</p>
+                <p className='priceproduct'>{numeral(imgproduct.price).format("0,0")}VNĐ</p>
             </div>
             <div className='product_evaluate'>
                 <AiOutlineHeart style={{ width: 40, height: 40 }}/>

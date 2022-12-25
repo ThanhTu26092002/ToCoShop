@@ -19,12 +19,14 @@
     border: 1px solid #958f8f;
 }
 h3{
+    
     padding: 10px 20px;
 }
 .listproducts_title{
     width: 100%;
     display: flex;
     justify-content: center;
+    text-transform: capitalize;
 }
 .listproducts_main{
     width: 100%;
