@@ -51,6 +51,9 @@
 .container_sldebar_extra a li svg{
   cursor: pointer;
 }
+.container_sldebar_extra a li svg:hover{
+  color: #78cccd;
+}
 .container_sldebar_extra .cart_a div{
   position: relative;
   top: -19px;

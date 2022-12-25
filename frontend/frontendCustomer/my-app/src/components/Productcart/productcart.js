@@ -87,6 +87,7 @@ function productcart({ items }) {
         <div className="product_cart_remove">
                 
                 <CloseSquareOutlined className="iconremove" onClick={()=>{
+                 if(window.confirm("bạn có muốn xóa không"))
                   remove(items.attributeId)
                 }}/>
                 
