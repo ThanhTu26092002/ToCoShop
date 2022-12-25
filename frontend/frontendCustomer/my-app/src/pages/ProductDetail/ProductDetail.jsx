@@ -10,6 +10,8 @@ import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { InputNumber } from "antd";
 import Sizeguide from "../../components/Sizeguide/Sizeguide"
+import numeral from "numeral";
+
 function productdetails() {
   // const queryParams = new URLSearchParams("?term=pizza&location=Bangalore")
   // for (const [key, value] of queryParams) {
@@ -51,6 +53,7 @@ function productdetails() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [SizeguideOpen, setsizeguideOpen] = useState(false);
   const onChange = (value) => {
+  
     setQuantity(value)
   };
   const fetchProduct = async () => {
@@ -74,7 +77,6 @@ function productdetails() {
           res.data.results[0].categories[0]._id
       );
 
-      console.log("get data:", resCate);
       setImages(resCate.data.results);
     } catch (error) {
       console.log("err:", error);
@@ -85,7 +87,6 @@ useEffect(()=>{
   if (selectedColor_Click === selectedSize_Click) {
     product?.attributes.map((item) => {
       if (selectedColor_Click === item._id) {
-        console.log("ok")
         setProductDiscount(item.discount);
         setProductPrice(item.price);
         setProductPriceItems(item.totalPriceEachType);
@@ -124,9 +125,9 @@ useEffect(()=>{
                 </p>
                 <div className="price">
                   <p style={{ fontWeight: "bold" }}>
-                    {productPrice && <del>{productPrice}VNĐ</del>}
+                    {productPrice && <del>{numeral(productPrice).format("0,0")}VNĐ</del>}
                   </p>
-                  <p>{productPriceItems}VNĐ</p>
+                  <p>{numeral(productPriceItems).format("0,0")}VNĐ</p>
                   <div className="discount">
                     <p>giảm {productDiscount}%</p>
                   </div>
@@ -260,7 +261,6 @@ useEffect(()=>{
                 </div>
                 <div className="btn_cart_buy">
                   <a href="#" className="btncart" onClick={()=>{
-                    console.log("quantity",quantity)
                     add({product:product,quantity:quantity,attributeId:selectedColor_Click})
                   }}>
                     THÊM VÀO GIỎ HÀNG

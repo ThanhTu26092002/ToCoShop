@@ -15,7 +15,7 @@ function productcart({ items }) {
     if (e._id === items.attributeId) {
       console.log("itemsize", e);
       attributesItem = e;
-      console.log("attributeIdprice", attributesItem.price);
+      
     }
   });
 

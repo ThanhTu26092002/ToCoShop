@@ -14,7 +14,7 @@ export const useCart = create(
         const found = items.find((x) => x.attributeId === attributeId);
         if (found) {
           //found.quantity+=quantity;
-          found.quantity++
+          found.quantity=found.quantity+quantity
         } else {
           items.push({ attributeId,product, quantity });
           console.log("acd",items)
