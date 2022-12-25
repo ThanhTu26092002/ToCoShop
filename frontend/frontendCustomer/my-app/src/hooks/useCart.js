@@ -13,7 +13,8 @@ export const useCart = create(
         const items = get().items;
         const found = items.find((x) => x.attributeId === attributeId);
         if (found) {
-          found.quantity++;
+          //found.quantity+=quantity;
+          found.quantity++
         } else {
           items.push({ attributeId,product, quantity });
           console.log("acd",items)
@@ -23,23 +24,23 @@ export const useCart = create(
       },
       remove: (id) => {
         const items = get().items;
-        const newItems = items.filter((x) => x.product._id !== id);
+        const newItems = items.filter((x) => x.attributeId !== id);
         return set({ items: newItems }, false, {
           type: "carts/removeFormCart",
         });
       },
       increase: (id) => {
         const items = get().items;
-        const found = items.find((x) => x.product._id === id);
+        const found = items.find((x) => x.attributeId === id);
         found.quantity++;
         return set({ items: items }, false, { type: "carts/increase" });
       },
       decrease: (id) => {
         const items = get().items;
-        const found = items.find((x) => x.product.id === id);
+        const found = items.find((x) => x.attributeId === id);
         if ((found.quantity === 1)) {
           const newItems = items.filter(
-            (x) => x.product.id !== found.product._id
+            (x) => x.attributeId !== found.attributeId
           );
           return set({ items: newItems }, false, {
             type: "carts/decrease",
