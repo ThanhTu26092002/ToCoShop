@@ -30,11 +30,11 @@ function productcart({ items }) {
         </div>
         <div className="product_cart_detall">
           <span className="product_cart_detall_title">
-            Tên sản phẩm: <span>{items.product.name}</span>
+            Tên sản phẩm: <span>{`${items.product.name}`}</span>
           </span>
 
           <span className="product_cart_detall_title">
-            Size: <span>{attributesItem.size}</span>
+            Size:<span style={{fontWeight:600}}>{attributesItem.size}</span>
           </span>
           <span className="product_cart_detall_title">
             Màu: <span>{attributesItem.color}</span>
