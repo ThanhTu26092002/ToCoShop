@@ -55,22 +55,15 @@ function Nav() {
             </div>
           </div>
           
-          <nav>
+          <nav >
             <ul>
             {
                 categories.map((item, index)=>{
                     return(
-                       <li key= {index} className='menu_item'><Link to={`/ProductFolowingCategories/${item._id}`}>{item.name}</Link></li>
-                      // <li key= {index} className='menu_item'><Link to={`/ProductFolowingCategories?product=${item._id}&&atttribute=`}>{item.name}</Link></li>
+                       <li key= {index} className='menu_item'><Link to={`/ProductFolowingCategories/${item._id}`}>{item.name}</Link></li>                   
                     )
                 })
               }
-              {/* <li className='menu_item'><Link to='/'>N E W   F A S H I O N </Link></li>
-              <li className='menu_item'><Link to='/Menclothes'>M E N C L O T H E S</Link></li>
-              <li className='menu_item'><Link to='/'>W O M E N   C L O T H E S  </Link></li>
-              <li className='menu_item'><Link to='/'>U N I S E X </Link></li>
-              <li className='menu_item'><Link to='/'>O U T F I T W I N T E R </Link></li>
-              <li className='menu_item'><Link to='/'>O U T F I T S U M M E R  </Link></li> */}
             </ul>
           </nav>
           <div className='sidebar_footer'>
@@ -83,7 +76,7 @@ function Nav() {
               </div>
 
             </div>
-            <div className='box_hotline1'>
+            <div className='box_hotline1'>  
               <div className='container_hotline1'>
                 <a href='https://www.facebook.com/people/ToCo-Clothes/100089181962577/'><img src='image12.png' alt=''></img></a>
                 <a href='https://www.youtube.com/watch?v=ofymXsQj5mc'><img src='image13.png' alt=''></img></a>
