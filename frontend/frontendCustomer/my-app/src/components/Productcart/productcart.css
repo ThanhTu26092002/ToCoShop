@@ -1,7 +1,7 @@
 .product_cart{
     display: flex;
     margin-block: 10px;
-    padding-bottom: 10px;
+    
     border-bottom: 0.5px solid gray;
   }
 .product_cart .product_cart_img{
@@ -12,8 +12,9 @@
     border-radius: 20px;
   }
   .modalContainer .body .product_cart_detall_title{
-    display: block;
-    margin-bottom: 10px;
+    display: flex;
+    margin-bottom: 3px;
+    align-items: center;
   }
   .product_cart .product_cart_detall{
     width: 70%;
@@ -27,4 +28,33 @@
   }
   .newprice{
     color: #E54343;
+  }
+  .quantityinput{
+    display: flex;
+    width: 25%;
+    justify-content: space-between;
+    align-items: center;
+    border: 3px solid  gray;
+    border-radius: 20px;
+    overflow: hidden;
+    color: gray;
+    margin-left: 10px;
+  }
+  .quantityinput button{
+    background-color: white;
+    border: none;
+    padding: 2px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    
+  }
+  .product_cart_remove{
+    width: 10%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+  }
+  .product_cart_remove .iconremove{
+    font-size: 30px;
+    color: red;
   }

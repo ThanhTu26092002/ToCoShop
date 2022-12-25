@@ -6,7 +6,7 @@ function index() {
   return (
     <div className='search_cart'>
         <Search/>
-        <Cart/>
+        
     </div>
   )
 }

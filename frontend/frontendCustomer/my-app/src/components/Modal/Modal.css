@@ -21,14 +21,13 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     display: flex;
     flex-direction: column;
-    padding: 25px;
+    padding: 15px;
     
     
   }
   
   .modalContainer .title {
     width: 580px;
-    height: 44px;
     display: inline-block;
     text-align: center;
     margin-top: 10px;
@@ -37,7 +36,7 @@
     margin: auto;
   }
   .modalContainer .title p{
-    font-size: 17px;
+    font-size: 15px;
     color: white;
     line-height: 37px;
   }
@@ -54,7 +53,7 @@
   }
 
   .navproductdetall{
-    height: 490px;
+    height: 450px;
       overflow-y: scroll;
   }
   ::-webkit-scrollbar{

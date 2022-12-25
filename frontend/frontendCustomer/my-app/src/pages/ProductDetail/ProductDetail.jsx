@@ -44,9 +44,15 @@ function productdetails() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [categoryId, setCategoryId] = useState(null); //danhmuc
     // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [quantity, setQuantity] = useState(1); //danhmuc
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
   const {add}=useCart((state)=>state)
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [SizeguideOpen, setsizeguideOpen] = useState(false);
+  const onChange = (value) => {
+    setQuantity(value)
+  };
   const fetchProduct = async () => {
     try {
       const res = await axios.get(
@@ -74,7 +80,6 @@ function productdetails() {
       console.log("err:", error);
     }
   };
-  
   // eslint-disable-next-line react-hooks/rules-of-hooks
 useEffect(()=>{
   if (selectedColor_Click === selectedSize_Click) {
@@ -97,7 +102,7 @@ useEffect(()=>{
   return (
     
     product && (
-
+      
       <div className="main_product_detall">
         {SizeguideOpen && <Sizeguide closeSizeguide={setsizeguideOpen} />}
         <Slider />
@@ -250,13 +255,13 @@ useEffect(()=>{
                 </button>
                 <div className="amount">  
                   <h4>Amount:</h4>
-                  <InputNumber style={{ marginRight: 30 }} min={0} defaultValue={1} />
+                  <InputNumber name="productQuantity" style={{ marginRight: 30 }} min={1} defaultValue={1} onChange={onChange}/>
                   <p>{product.stockTotal} sản phẩm có sẵn</p>
                 </div>
                 <div className="btn_cart_buy">
                   <a href="#" className="btncart" onClick={()=>{
-                     console.log("selectedColor_Click",selectedColor_Click)
-                    add({product:product,quantity:1,attributeId:selectedColor_Click})
+                    console.log("quantity",quantity)
+                    add({product:product,quantity:quantity,attributeId:selectedColor_Click})
                   }}>
                     THÊM VÀO GIỎ HÀNG
                   </a>
@@ -282,15 +287,14 @@ useEffect(()=>{
             </div>
           </div>
           <div className="description">
-            <p>HÀNG TOÀN BỘ CỦA SHOP ĐỀU CÓ SẴN </p>
+            <p>{product.name}-{product.productCode} </p>
             <br />
             <p>{product.description}</p>
             <br />
-            <p> 149 Bà Triệu - Huế</p>
-            <p> Xuất xứ: Việt Nam</p>
-            <p> Hot line : 01222773986</p>
-            <p> Link facebook shop: https://m.facebook.com/ToCoClothes</p>
-            <p> https://m.facebook.com/ToCoClothes</p>
+            <p>Xuất Xứ từ thương hiệu: {product.suppliers[0].name}</p>
+            <p> Sản Xuất Tại : {product.suppliers[0].address}</p>
+            <p> Hot line : {product.suppliers[0].phoneNumber}</p>
+            <p> Email : {product.suppliers[0].email}</p>
             <br />
             <p>
               Sản phẩm của shop đảm bảo chất lượng tuyệt đối. Chất liệu đẹp,
