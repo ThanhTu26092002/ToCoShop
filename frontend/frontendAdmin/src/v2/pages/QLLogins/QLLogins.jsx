@@ -75,20 +75,18 @@ function QLLogins() {
           setSelectedId(null);
 
           //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
-          if (checkChangedData.email) {
-            notification.info({
-              message: "Thông báo",
-              description: "Cập nhật thành công, vui lòng đăng nhập lại",
-            });
             const uidCheck = auth.payload.uid;
             if (uidCheck === selectedId) {
+              notification.info({
+                message: "Thông báo",
+                description: "Cập nhật thành công, vui lòng đăng nhập lại",
+              });
               setTimeout(() => {
                 signOut();
                 navigate("/login");
               }, 3000);
               return;
             }
-          }
           notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
