@@ -1,5 +1,5 @@
 import create from "zustand";
-import { persist, devtools } from "zustand/middleware";
+import { persist, devtools } from "zustand/middleware ";
 const persistOption = {
   name: "cart-storage",
   //   getStarage: () => sessionStorage,
