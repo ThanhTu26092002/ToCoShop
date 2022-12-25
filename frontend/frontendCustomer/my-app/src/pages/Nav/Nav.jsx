@@ -85,10 +85,10 @@ function Nav() {
             </div>
             <div className='box_hotline1'>
               <div className='container_hotline1'>
-                <a href='#'><img src='image12.png' alt=''></img></a>
-                <a href='#'><img src='image13.png' alt=''></img></a>
-                <a href='#'><img src='image14.png' alt=''></img></a>
-                <a href='#'><img src='image15.png' alt=''></img></a>
+                <a href='https://www.facebook.com/people/ToCo-Clothes/100089181962577/'><img src='image12.png' alt=''></img></a>
+                <a href='https://www.youtube.com/watch?v=ofymXsQj5mc'><img src='image13.png' alt=''></img></a>
+                <a href='google.com'><img src='image14.png' alt=''></img></a>
+                <a href='google.com'><img src='image15.png' alt=''></img></a>
               </div>
             </div>
           </div>
