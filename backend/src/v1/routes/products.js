@@ -482,6 +482,7 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
           minTotalPrice: { $first: "$minTotalPrice" },
         },
       },
+      lookupCategory,
 
       { $sort: { "_id": -1 } },
     ];
