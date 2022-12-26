@@ -83,10 +83,10 @@ const lookupSupplier = {
   },
 };
 
-const stockTotalMoreThanZero = {
+const stockMoreThanZero = {
   $match: {
     $expr: {
-      $lt: [0, "$stockTotal"],
+      $lt: [0, "$attributes.stock"],
     },
   },
 };
@@ -129,7 +129,7 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-//Get the product following Id
+//Get the product following Id-- chỉ lấy sản phầm còn hàng trong kho
 router.get("/findById/:id", validateId, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -139,6 +139,7 @@ router.get("/findById/:id", validateId, async (req, res, next) => {
       { $match: { _id: formattedId } },
       // Thêm field stockTotal
       unWindAttribute,
+      stockMoreThanZero,
       addFieldTotalPriceEachType,
       groupBeforeFinish,
       //Lấy thêm thông tin category và supplier
@@ -168,6 +169,7 @@ router.get("/findByAttributeId/:id", validateId, async (req, res, next) => {
     const aggregate = [
       unWindAttribute,
       { $match: { "attributes._id": formattedId } },
+
       // Thêm field stockTotal
       addFieldTotalPriceEachType,
       groupBeforeFinish,
@@ -437,13 +439,7 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
       { $match: { categoryId } },
       unWindAttribute,
       // Loại bỏ chi tiết sản phẩm có stock=0
-      {
-        $match: {
-          $expr: {
-            $lt: [0, "$attributes.stock"],
-          },
-        },
-      },
+     stockMoreThanZero,
       //Thêm field attributes.totalPriceEachType
       addFieldTotalPriceEachType,
       {
@@ -452,7 +448,6 @@ router.get("/02getByCategoryId/:id", loadCategory, async (req, res, next) => {
           minTotalPrice: { $min: "$attributes.totalPriceEachType" },
         },
       },
-      stockTotalMoreThanZero,
       unWindAttribute,
       {
         $match: {
@@ -502,13 +497,7 @@ router.get("/09getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
       { $match: { categoryId } },
       unWindAttribute,
       // Loại bỏ chi tiết sản phẩm có stock=0
-      {
-        $match: {
-          $expr: {
-            $lt: [0, "$attributes.stock"],
-          },
-        },
-      },
+     stockMoreThanZero,
       //Thêm field attributes.totalPriceEachType
       addFieldTotalPriceEachType,
       //
@@ -568,9 +557,9 @@ router.get("/03getBySupplierId/:id", loadSupplier, async (req, res, next) => {
     const aggregate = [
       { $match: { supplierId } },
       unWindAttribute,
+      stockMoreThanZero,
       addFieldTotalPriceEachType,
       groupBeforeFinish,
-      stockTotalMoreThanZero,
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
@@ -674,6 +663,7 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
         },
       },
       unWindAttribute,
+      stockMoreThanZero,
       addFieldTotalPriceEachType,
       {
         $group: {
@@ -681,7 +671,6 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
           minTotalPrice: { $min: "$attributes.totalPriceEachType" },
         },
       },
-      stockTotalMoreThanZero,
       unWindAttribute,
       {
         $match: {
@@ -727,9 +716,9 @@ router.get("/07getByPromotionPosition", async (req, res, next) => {
 router.get("/08getStockTotalMoreThan0", async function (req, res, next) {
   const aggregate = [
     unWindAttribute,
+    stockMoreThanZero,
     addFieldTotalPriceEachType,
     groupBeforeFinish,
-    stockTotalMoreThanZero,
   ];
   try {
     const docs = await Product.aggregate(aggregate);
@@ -741,7 +730,7 @@ router.get("/08getStockTotalMoreThan0", async function (req, res, next) {
 });
 
 // ---09---Liệt kê danh sách sản phẩm thêm trường minDiscount chứa discount của mẫu attribute giảm giá lớn nhất
-router.get("/09GetAllBestDiscount", async function (req, res, next) {
+router.get("/10GetAllBestDiscount", async function (req, res, next) {
   const aggregate = [
     unWindAttribute,
     //Loại trừ những attribute có stock = 0
@@ -759,7 +748,6 @@ router.get("/09GetAllBestDiscount", async function (req, res, next) {
         maxDiscount: { $max: "$attributes.discount" },
       },
     },
-    stockTotalMoreThanZero,
   ];
   try {
     const docs = await Product.aggregate(aggregate);

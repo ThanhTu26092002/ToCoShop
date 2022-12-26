@@ -66,7 +66,7 @@ const contactInfoSchema = new Schema(
     },
     address: {
       type: addressSchema,
-      // required: true,
+      required: true,
     },
   },
   { _id: false }

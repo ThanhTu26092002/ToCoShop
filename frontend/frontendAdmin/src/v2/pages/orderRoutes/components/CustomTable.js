@@ -35,11 +35,16 @@ function CustomTable({
 
     {
       title: "Ngày đặt hàng",
-      width: "8%",
+      width: "5%",
       key: "formattedCreatedDate",
       dataIndex: "formattedCreatedDate",
     },
-
+    {
+      title: "Người đặt hàng",
+      width: "8%",
+      key: "formattedFullName",
+      dataIndex: "formattedFullName",
+    },
     {
       title: "Trạng thái",
       width: "7%",
@@ -52,7 +57,7 @@ function CustomTable({
 
     {
       title: "Ngày gửi hàng",
-      width: "8%",
+      width: "5%",
       key: "formattedSendingDate",
       dataIndex: "formattedSendingDate",
     },
@@ -69,7 +74,7 @@ function CustomTable({
 
     {
       title: "Ngày nhận hàng",
-      width: "8%",
+      width: "5%",
       key: "formattedReceivedDate",
       dataIndex: "formattedReceivedDate",
     },
