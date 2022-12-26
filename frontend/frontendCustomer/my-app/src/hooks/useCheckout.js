@@ -9,7 +9,7 @@ const persistOption = {
     persist(
         devtools((set, get) => ({
             info:{},
-            add:({contactInfo,shippingInfo,orderDetail})=>{
+            add:({contactInfo,shippingInfo,orderDetail,paymentInfo})=>{
                 let info = get().info;
                 if(contactInfo){
                     info={...info, contactInfo };
@@ -19,6 +19,9 @@ const persistOption = {
                 }
                 if(orderDetail){
                     info={...info, orderDetail };
+                }
+                if(paymentInfo){
+                    info={...info, paymentInfo };
                 }
                 
                 console.log("info",info)

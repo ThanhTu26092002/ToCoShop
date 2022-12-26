@@ -100,3 +100,13 @@
     color: white;
     text-decoration: none;
   }
+  .emptyCart{
+    width: 100%;
+    display: flex;
+   justify-content: center;
+    
+  }
+  .emptyCart img{
+    display: block;
+    opacity: 0.5;
+  }

@@ -36,12 +36,12 @@ function checkoutCartdetail2({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [statesListContactInfo, setStatesListContactInfo] = useState(null);
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  console.log("inotest",info)
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [cityListContactInfo, setCityListContactInfo] = useState(null);
   return (
-    <div>
-      <div className="Cartdetall2_form">
+      <div>
+        <div className="Cartdetall2_form">
         <h2>Thông tin người nhận hàng:</h2>
         <form style={{}}>
           <input
@@ -49,14 +49,14 @@ function checkoutCartdetail2({
             type="checkbox"
              onClick={(e) => {
                if (e.target.checked) {
-                   formShippingInfo.setFieldsValue({firstNameShippingInfo:info.contactInfo.firstNameContactInfo,
-                       lastNameShippingInfo:info.contactInfo.lastNameContactInfo,
-                       emailShippingInfo:info.contactInfo.emailContactInfo,
-                       phoneNumberShippingInfo:info.contactInfo.phoneNumberContactInfo,
-                       countryShippingInfo:info.contactInfo.countryContactInfo,
-                       stateShippingInfo:info.contactInfo.stateContactInfo,
-                       cityShippingInfo:info.contactInfo.cityContactInfo,
-                       detailAddressShippingInfo:info.contactInfo.detailAddressContactInfo,
+                   formShippingInfo.setFieldsValue({firstNameShippingInfo:info.contactInfo.firstName,
+                       lastNameShippingInfo:info.contactInfo.lastName,
+                       emailShippingInfo:info.contactInfo.email,
+                       phoneNumberShippingInfo:info.contactInfo.phoneNumber,
+                       countryShippingInfo:info.contactInfo.address.country,
+                       stateShippingInfo:info.contactInfo.address.state,
+                       cityShippingInfo:info.contactInfo.address.city,
+                       detailAddressShippingInfo:info.contactInfo.address.detailAddress,
 
                    })
                  console.log("ok", info.contactInfo);

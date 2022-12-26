@@ -45,41 +45,10 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
             <h2>Thanh toán:</h2>
             <div className="Cartdetall3_form_main">
               <Form style={{ marginLeft: 100 }}
-               onFinish={
-                // handleFinishCreate
-                console.log("ok")
-              }
                form={formOtherInfo}
                ref={formRef}
                initialValues={{paymentMethod:'COD'}}
               >
-                {/* <Form.Item className="a" label="Phương tiện vận chuyển:" name="transportationId">
-                <Select
-                        style={{ width: 250 }}
-                        loading={!transportations}
-                        placeholder="Chọn"
-                        onChange={(value) => {
-                          const found = transportations.find(
-                            (e) => e._id === value
-                          );
-                          const priceText = numeral(found.price).format("0,0");
-                          console.log("test type:", typeof Number(priceText));
-                          form.setFieldsValue({
-                            transportationPrice: priceText,
-                          });
-                        }}
-                      >
-                        {transportations &&
-                          transportations.map((t) => {
-                            const customPrice = numeral(t.price).format("0,0");
-                            return (
-                              <Select.Option key={t._id} value={t._id}>
-                                {`${t.name}`}
-                              </Select.Option>
-                            );
-                          })}
-                      </Select>
-                </Form.Item> */}
                 
                 <Form.Item
                 {...PropsFormItem_Label_Name({
@@ -135,8 +104,6 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
                   <Select
                     style={{ width: 600, marginLeft: 27 }}
                     placeholder="Chọn..."
-                    
-                    //  options={{value:'COD',label:'COD'}}
                     options={[
                       {
                         value: 'COD',
@@ -145,7 +112,6 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
                     ]}
                     disabled={true}
                   >
-                    
                   </Select>
                 </Form.Item>
               </Form>
@@ -163,14 +129,11 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
               <DoubleLeftOutlined />
             </button>
             <button onClick={()=>{
-              console.log("formOtherInfo",formRef.current)
-              handleFinishCreate.onFinish(()=>{
-                console.log("true")
-               })
+              let tmp=formOtherInfo.getFieldsValue()
+              return handleFinishCreate(tmp)
             }}>dat hang</button>
           </div>
           </div>
-          
     </div>
   )
 }
