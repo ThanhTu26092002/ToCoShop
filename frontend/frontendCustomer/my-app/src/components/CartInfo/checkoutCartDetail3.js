@@ -100,9 +100,15 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
                   }
                 />
               </Form.Item>
-                <Form.Item className="a" name="paymentMethod" label="Phương thức thanh toán:">
+                <Form.Item 
+                className="a" 
+                {...PropsFormItem_Label_Name({
+                  labelTitle: "Phương thức thanh toán",
+                  nameTitle: "paymentMethod",
+                  require: true,
+                })}>
                   <Select
-                    style={{ width: 600, marginLeft: 27 }}
+                    style={{ width: 200 }}
                     placeholder="Chọn..."
                     options={[
                       {
@@ -131,7 +137,7 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
             <button onClick={()=>{
               let tmp=formOtherInfo.getFieldsValue()
               return handleFinishCreate(tmp)
-            }}>dat hang</button>
+            }}>Xác nhận đặt hàng</button>
           </div>
           </div>
     </div>

@@ -35,7 +35,7 @@ export const PropsTable = ({
 };
 
 export const PropsForm = {
-  labelCol: { span: 8 },
+  labelCol: { span: 4 },
   wrapperCol: { span: 16 },
   initialValues: { name: "", description: "", file: null },
   autoComplete: "off",

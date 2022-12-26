@@ -1,67 +1,50 @@
-import React, { useEffect, useState,useCheckout } from "react";
+import React, { useState } from "react";
+import { DoubleRightOutlined, DoubleLeftOutlined } from "@ant-design/icons";
 import {
-  DownOutlined,
-  UpOutlined,
-  RightOutlined,
-  DoubleRightOutlined,
-  DoubleLeftOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  Input,
-  Space,
-  Select,
-  Layout,
-  InputNumber,
-  Modal,
-  Table,
-  notification,
-  message,
-  Popconfirm,
-  Upload,
-  Cascader,
-  Radio,
-} from "antd";
+  PropsFormItemDetailAddress,
+  PropsFormItemEmail,
+  PropsFormItemFirstName,
+  PropsFormItemLastName,
+  PropsFormItemPhoneNumber,
+  PropsFormItem_Label_Name,
+} from "../../config/props";
+import { Form, Input, Select } from "antd";
 import TextArea from "antd/lib/input/TextArea";
 function checkoutCartdetail2({
   handleFinishCreate,
   formShippingInfo,
   previousfunc,
   countryList,
-  info
+  info,
 }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [statesListContactInfo, setStatesListContactInfo] = useState(null);
   // eslint-disable-next-line react-hooks/rules-of-hooks
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [cityListContactInfo, setCityListContactInfo] = useState(null);
   return (
-      <div>
-        <div className="Cartdetall2_form">
+    <div>
+      <div className="Cartdetall2_form">
         <h2>Thông tin người nhận hàng:</h2>
         <form style={{}}>
           <input
             id="check"
             type="checkbox"
-             onClick={(e) => {
-               if (e.target.checked) {
-                   formShippingInfo.setFieldsValue({firstNameShippingInfo:info.contactInfo.firstName,
-                       lastNameShippingInfo:info.contactInfo.lastName,
-                       emailShippingInfo:info.contactInfo.email,
-                       phoneNumberShippingInfo:info.contactInfo.phoneNumber,
-                       countryShippingInfo:info.contactInfo.address.country,
-                       stateShippingInfo:info.contactInfo.address.state,
-                       cityShippingInfo:info.contactInfo.address.city,
-                       detailAddressShippingInfo:info.contactInfo.address.detailAddress,
-
-                   })
-                 console.log("ok", info.contactInfo);
-               }
-             }}
+            onClick={(e) => {
+              if (e.target.checked) {
+                formShippingInfo.setFieldsValue({
+                  firstNameShippingInfo: info.contactInfo.firstName,
+                  lastNameShippingInfo: info.contactInfo.lastName,
+                  emailShippingInfo: info.contactInfo.email,
+                  phoneNumberShippingInfo: info.contactInfo.phoneNumber,
+                  countryShippingInfo: info.contactInfo.address.country,
+                  stateShippingInfo: info.contactInfo.address.state,
+                  cityShippingInfo: info.contactInfo.address.city,
+                  detailAddressShippingInfo:
+                    info.contactInfo.address.detailAddress,
+                });
+                console.log("ok", info.contactInfo);
+              }
+            }}
           />
           <label htmlFor="check">Bạn là người nhận hàng </label>
         </form>
@@ -78,26 +61,41 @@ function checkoutCartdetail2({
               console.error("Error at onFinishFailed at formCreate");
             }}
           >
-            <Form.Item name="firstNameShippingInfo" className="a" label="Họ:">
-              <Input style={{ marginLeft: 57 }} placeholder="Họ" />
-            </Form.Item>
-            <Form.Item name="lastNameShippingInfo" className="a" label="Tên:">
-              <Input style={{ marginLeft: 57 }} placeholder="Tên" />
-            </Form.Item>
-            <Form.Item name="emailShippingInfo" className="a" label="Email:">
-              <Input style={{ marginLeft: 47 }} placeholder="Email" />
-            </Form.Item>
             <Form.Item
-              name="phoneNumberShippingInfo"
-              className="a"
-              label="Số điện thoại:"
+              {...PropsFormItemFirstName}
+              name="firstNameShippingInfo"
+              //  className="a"
             >
-              <Input placeholder="Số điện thoại" />
+              <Input placeholder="Họ" />
             </Form.Item>
             <Form.Item
-              name="countryShippingInfo"
-              className="a"
-              label="Quốc gia:"
+              {...PropsFormItemLastName}
+              name="lastNameShippingInfo"
+              //  className="a"
+            >
+              <Input placeholder="Tên" />
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItemEmail({ nameTitle: "emailShippingInfo" })}
+              //  className="a"
+            >
+              <Input placeholder="Email" />
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItemPhoneNumber({
+                require: true,
+                nameTitle: "phoneNumberShippingInfo",
+              })}
+              // className="a"
+            >
+              <Input placeholder="Số điện thoại người nhận" />
+            </Form.Item>
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Quốc gia",
+                nameTitle: "countryShippingInfo",
+              })}
+              // className="a"
             >
               <Select
                 placeholder="Chọn..."
@@ -106,10 +104,10 @@ function checkoutCartdetail2({
                   setStatesListContactInfo(
                     countryList.find((e) => e.name === value)
                   );
-                   formShippingInfo.setFieldsValue({
-                     stateContactInfo: null,
-                     cityContactInfo: null,
-                   });
+                  formShippingInfo.setFieldsValue({
+                    stateContactInfo: null,
+                    cityContactInfo: null,
+                  });
                 }}
                 showSearch
                 optionFilterProp="children"
@@ -127,7 +125,13 @@ function checkoutCartdetail2({
                 }
               />
             </Form.Item>
-            <Form.Item name="stateShippingInfo" className="a" label="Tỉnh:">
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Tỉnh",
+                nameTitle: "stateShippingInfo",
+              })}
+              // className="a"
+            >
               <Select
                 style={{ width: 150 }}
                 placeholder="Chọn..."
@@ -135,7 +139,7 @@ function checkoutCartdetail2({
                   setCityListContactInfo(
                     statesListContactInfo.states.find((e) => e.name === value)
                   );
-                   formShippingInfo.setFieldsValue({ cityContactInfo: null });
+                  formShippingInfo.setFieldsValue({ cityContactInfo: null });
                 }}
                 showSearch
                 optionFilterProp="children"
@@ -154,9 +158,11 @@ function checkoutCartdetail2({
               />
             </Form.Item>
             <Form.Item
-              name="cityShippingInfo"
-              className="a"
-              label="Quận/huyện:"
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Thành phố/ Huyện",
+                nameTitle: "cityShippingInfo",
+              })}
+              // className="a"
             >
               <Select
                 placeholder="Chọn..."
@@ -178,18 +184,21 @@ function checkoutCartdetail2({
               />
             </Form.Item>
             <Form.Item
-              name="detailAddressShippingInfo"
-              className="a"
-              label="Địa chỉ:"
+              {...PropsFormItemDetailAddress({
+                nameTitle: "detailAddressShippingInfo",
+              })}
+              // className="a"
             >
-              <Input style={{ marginLeft: 37 }} placeholder="Địa chỉ" />
+              <Input placeholder="Địa chỉ người nhận hàng" />
             </Form.Item>
-            <Form.Item name="note" className="a" label="Ghi chú:">
-              <TextArea
-                rows={3}
-                style={{ marginLeft: 30 }}
-                placeholder="Thời gian nhận hàng"
-              />
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Ghi chú",
+                nameTitle: "note",
+              })}
+              //  className="a"
+            >
+              <TextArea rows={3} placeholder="Thời gian nhận hàng" />
             </Form.Item>
             <div className="Cartdetall2btn">
               <button onClick={previousfunc}>
