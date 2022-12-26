@@ -8,8 +8,10 @@ import { useCart } from "../../hooks/useCart";
 import axios from "axios";
 import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
-import { InputNumber } from "antd";
-import Sizeguide from "../../components/Sizeguide/Sizeguide";
+
+import { BackTop, InputNumber } from "antd";
+import Sizeguide from "../../components/Sizeguide/Sizeguide"
+
 import numeral from "numeral";
 
 function productdetails() {
@@ -141,6 +143,13 @@ function productdetails() {
                                      backgroundColor: "black"
                                     }
                           }
+
+                          if(item.color==="Vàng"){
+                            style={
+                                     backgroundColor: "yellow"
+                                    }
+                          }
+
                           if( selectedColor_Click === item._id){
                             style={
                                       color: "orange",
@@ -173,7 +182,27 @@ function productdetails() {
                           }
                           if(item.color==="Đen"){
                             style={
+
+                                     backgroundColor: "black",
+                                     color: "white"
+                                    }
+                          }
+                          if(item.color==="Trắng"){
+                            style={
+                                     backgroundColor: "white",
+                                     color: "black"
+                                    }
+                          }
+                          if(item.color==="Vàng"){
+                            style={
+                                     backgroundColor: "yellow"
+                                    }
+                          }
+                          if(item.color==="Xám"){
+                            style={
+                                     backgroundColor: "Grey"
                                      backgroundColor: "black"
+
                                     }
                           }
                           if( selectedColor_Click === item._id){
@@ -186,6 +215,7 @@ function productdetails() {
                         return (
                           <a
                           style={style}
+
                             // style={
                             //   selectedColor_Click === item._id
                             //     ? {

@@ -13,11 +13,13 @@
     width: 100%;
     display: flex;
     
+    
 }
 .product_detall_container .product_img{
     width: 33.3333%;
     height: 500px;
     margin-left: 20px;
+    
 }
 .product_detall{
     width: 66.6666%;
@@ -28,6 +30,7 @@
 .product_img_container img{
     width: 340px;
     height: 480px;
+    cursor: pointer;
 }
 .product_detall .product_detall_main{
     padding-left: 10px;
@@ -46,7 +49,7 @@
 }
 .product_detall .product_detall_main .price>p{
     font-size: 20px;
-    color: #E54343;
+    color: #d3bfbf;
 }
 .product_detall .product_detall_main .price p>del{
     font-size: 15px;
@@ -61,11 +64,15 @@
 }
 .size,.color{
     margin-top: 10px;
+    
 }
 .size_container,.color_container{
     margin-top: 10px;
     width: 40%;
     display: flex;
+    cursor: pointer;
+    
+    
 }
 .size_container a,.color_container a{
     display: block;
@@ -74,6 +81,8 @@
     padding: 5px 30px;
     border: 0.5px solid black;
     margin-right: 10px;
+    background-color: none;
+    
 }
 .btnsize{
     margin-top: 10px;
@@ -84,6 +93,7 @@
     display: block;
     text-decoration: none;
     text-align: center;
+    cursor: pointer;
 }
 .amount{
     margin-top: 30px;
@@ -170,11 +180,12 @@
     z-index: -1;
 }
 .canclesizebtn{
-    background-color: #E54343;
-    color: white;
+    color: rgb(237, 228, 228);
     border: none;
     padding: 10px 20px;
     margin-top: 10px;
+    cursor: pointer;
+    background-color: #E54343;
 }
 
 
