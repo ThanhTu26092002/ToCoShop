@@ -31,8 +31,8 @@ function Orders() {
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [loadingBtnStatus, setLoadingBtnStatus] = useState(false);
   const [orders, setOrders] = useState(null);
-  const [changedStatus, setChangedStatus] = useState(null);
   const [totalDocs, setTotalDocs] = useState(0);
+  const [changedStatus, setChangedStatus] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [detailCreatingStatus, setDetailCreatingStatus] = useState(false);
   const [createdDateState, setCreatedDateState] = useState(null);

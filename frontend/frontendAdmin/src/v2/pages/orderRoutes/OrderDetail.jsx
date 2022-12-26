@@ -545,7 +545,10 @@ function OrderDetail() {
         }
       })
       .catch((error) => {
-        console.log(error);
+        if(error.response?.request?.status === 404){
+          setNotFound(true)
+          return;
+        }
       });
 
     setLoading(false);

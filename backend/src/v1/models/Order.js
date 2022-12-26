@@ -164,6 +164,7 @@ const paymentInfoSchema = new Schema(
       type: String,
       trim: true,
       enum: ["COD", "CREDIT CARD"],
+      default: "COD",
       required: true,
     },
     moreInfo: {
@@ -252,7 +253,7 @@ const orderSchema = new Schema(
     },
     paymentInfo: {
       type: paymentInfoSchema,
-      // required: true,
+      required: true,
     },
     orderDetails: {
       type: [orderDetailSchema],
