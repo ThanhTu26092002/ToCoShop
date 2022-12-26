@@ -8,7 +8,7 @@ import { useCart } from '../../hooks/useCart'
 import axios from "axios";
 import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
-import { InputNumber } from "antd";
+import { BackTop, InputNumber } from "antd";
 import Sizeguide from "../../components/Sizeguide/Sizeguide"
 import numeral from "numeral";
 
@@ -134,22 +134,38 @@ useEffect(()=>{
                 </div>
                 <div className="color">
                   <p>Màu: </p>
-                  <div className="color_container">
+                  <div className="color_container ">
                     {reFresh1 &&
                       product.attributes.map((item, index) => {
+                        console.log("iiii",item)
                         if (item.size === selectedSize && selectedSize) {
-                          return (
-                            <a
-                              style={
-                                selectedColor_Click === item._id
-                                  ? {
+                          let style=null;
+                          if(item.color==="Hồng"){
+                            style={
+                                     backgroundColor: "pink"
+                                    }
+                          }
+                          if(item.color==="Đen"){
+                            style={
+                                     backgroundColor: "black"
+                                    }
+                          }
+                          if(item.color==="Vàng"){
+                            style={
+                                     backgroundColor: "yellow"
+                                    }
+                          }
+                          if( selectedColor_Click === item._id){
+                            style={
                                       color: "orange",
                                       borderColor: "orange",
                                       borderWidth: "2px",
-                                      
                                     }
-                                  : {}
-                              }
+                          }
+                          
+                          return (
+                            <a  
+                              style={style}
                               onClick={() => {
                                 setSelectedColor_Click(item._id);
                                 setSelectedColor(item.color);
@@ -163,17 +179,44 @@ useEffect(()=>{
                       })}
                     {!reFresh1 &&
                       product.attributes.map((item, index) => {
+                        let style=null;
+                          if(item.color==="Hồng"){
+                            style={
+                                     backgroundColor: "pink"
+                                    }
+                          }
+                          if(item.color==="Đen"){
+                            style={
+                                     backgroundColor: "black",
+                                     color: "white"
+                                    }
+                          }
+                          if(item.color==="Trắng"){
+                            style={
+                                     backgroundColor: "white",
+                                     color: "black"
+                                    }
+                          }
+                          if(item.color==="Vàng"){
+                            style={
+                                     backgroundColor: "yellow"
+                                    }
+                          }
+                          if(item.color==="Xám"){
+                            style={
+                                     backgroundColor: "Grey"
+                                    }
+                          }
+                          if( selectedColor_Click === item._id){
+                            style={
+                                      color: "orange",
+                                      borderColor: "orange",
+                                      borderWidth: "2px",
+                                    }
+                          }
                         return (
                           <a
-                            style={
-                              selectedColor_Click === item._id
-                                ? {
-                                    color: "orange",
-                                    borderColor: "orange",
-                                    borderWidth: "2px",
-                                  }
-                                : {}
-                            }
+                          style={style}
                             onClick={() => {
                               setSelectedColor_Click(item._id);
                               setSelectedColor(item.color);

@@ -49,7 +49,7 @@
 }
 .product_detall .product_detall_main .price>p{
     font-size: 20px;
-    color: #E54343;
+    color: #d3bfbf;
 }
 .product_detall .product_detall_main .price p>del{
     font-size: 15px;
@@ -81,6 +81,7 @@
     padding: 5px 30px;
     border: 0.5px solid black;
     margin-right: 10px;
+    background-color: none;
     
 }
 .btnsize{
@@ -179,12 +180,12 @@
     z-index: -1;
 }
 .canclesizebtn{
-    background-color: #E54343;
-    color: white;
+    color: rgb(237, 228, 228);
     border: none;
     padding: 10px 20px;
     margin-top: 10px;
     cursor: pointer;
+    background-color: #E54343;
 }
 
 
