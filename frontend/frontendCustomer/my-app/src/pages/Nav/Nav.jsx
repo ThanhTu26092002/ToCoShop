@@ -6,7 +6,7 @@ import Home from "../Home/Home"
 import ProductFolowingCategories from "../ProductFolowingCategories/ProductFolowingCategories"
 import Productdetal from "../ProductDetail/ProductDetail"
 import Modal from "../../components/Modal/Modal";
-import CartDetail from "../CartInfo/CartDetail1/CartDetail1";
+import CartDetail from "../CartInfo/CartDetail1/CartDetail";
 import CartDetail2 from "../CartInfo/CartDetail2/CartDetail2";
 import CartDetail3 from "../CartInfo/CartDetail3/CartDetail3";
 import axios from 'axios';

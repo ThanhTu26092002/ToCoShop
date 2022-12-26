@@ -1,0 +1,42 @@
+.receipt{
+    width: 90%;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgb(0, 0, 0);
+    justify-content: space-between;
+    border-radius: 0px 0px 20px;
+    margin-bottom: 20px;
+}
+.receipt_detail{
+    width: 60%;
+    display: flex;
+    margin-left: 20px;
+    align-items: center;
+}
+.receipt_detail_title,.receipt_detail_information{
+    display: flex;
+    flex-direction: column;
+}
+.receipt_detail_title{
+    
+    
+}
+.receipt_detail_information{
+    margin-left: 10px;
+}
+ .receipt_img{
+    width: 15%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    
+} 
+.receipt_img img{
+    width: 100%;
+    height: 220px;
+    border-radius: 20px;
+}
+.receipt_detail span{
+    font-size: 20px;
+    margin-bottom: 10px;
+}

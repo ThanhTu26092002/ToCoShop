@@ -1,4 +1,4 @@
-import "./CartDetail1.css";
+import "./CartDetail.css";
 import React, { useState, useEffect } from "react";
 import Slider from "../../../components/slide/Slider";
 import Footer from "../../../components/Footer/Footer";
