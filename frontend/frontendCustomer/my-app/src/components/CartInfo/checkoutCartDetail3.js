@@ -1,27 +1,11 @@
 import React,{useEffect, useState,useRef} from 'react'
 import {
-    DownOutlined,
-    UpOutlined,
-    RightOutlined,
-    DoubleRightOutlined,
     DoubleLeftOutlined,
   } from "@ant-design/icons";
   import {
-    Button,
     Form,
     Input,
-    Space,
     Select,
-    Layout,
-    InputNumber,
-    Modal,
-    Table,
-    notification,
-    message,
-    Popconfirm,
-    Upload,
-    Cascader,
-    Radio,
   } from "antd";
   import axios  from 'axios'
   import numeral from "numeral";
@@ -66,7 +50,6 @@ function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo
                       {...PropsFormItem_Label_Name({
                         labelTitle: "Phương tiện vận chuyển",
                         nameTitle: "transportationId",
-                        require: true,
                       })}
                       noStyle
                     >
