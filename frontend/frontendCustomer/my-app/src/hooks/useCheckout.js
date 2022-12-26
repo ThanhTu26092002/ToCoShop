@@ -26,6 +26,9 @@ const persistOption = {
                 
                 console.log("info",info)
                 return set({ info: info }, false, { type: "info" });
+            },
+            remove:()=>{
+                return set({ info: {} }, false, { type: "info" });
             }
         })
     ),

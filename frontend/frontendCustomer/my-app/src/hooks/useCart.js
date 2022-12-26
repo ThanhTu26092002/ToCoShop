@@ -52,6 +52,9 @@ export const useCart = create(
           return set({ items: items }, false, { type: "carts/decrease" });
         }
       },
+      removeAll:()=>{
+        return set({ items: [] }, false, { type: "carts/removeAll" });
+    }
     })),
     persistOption
   )

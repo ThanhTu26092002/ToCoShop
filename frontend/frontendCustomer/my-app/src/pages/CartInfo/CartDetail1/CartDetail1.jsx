@@ -18,13 +18,13 @@ function CartDetail1() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const navigate = useNavigate();
 
-  const { info, add } = useCheckout((state) => state);
+  const { info, add, remove } = useCheckout((state) => state);
+  const { removeAll } = useCart((state) => state);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { items } = useCart((state) => state);
-  if(items.length === 0){
-navigate('/')
+  if (items.length === 0) {
+    navigate("/");
   }
-  console.log("items", items);
   const [countryList, setCountryList] = useState(null);
   const [cartDetail1, setCartDetail1] = useState(true);
   const [cartDetail2, setCartDetail2] = useState(false);
@@ -56,7 +56,6 @@ navigate('/')
 
     return;
   });
-  console.log("orderDetails", orderDetails);
   const customCreateAHandler = (firstName, lastName) => {
     const userName = "Khách hàng: " + firstName + " " + lastName;
     const currentTime = moment().format("DD-MM-YYY- HH:mm");
@@ -127,7 +126,8 @@ navigate('/')
     add({ paymentInfo: paymentInfo });
     let newOrderinfo = {
       contactInfo: info.contactInfo,
-      shippingInfo: info.shippingInfo,
+      // shippingInfo: info.shippingInfo,
+      shippingInfo: datashippinginfo2,
       orderDetails: orderDetails,
       handlers: historyInfo,
     };
@@ -138,8 +138,15 @@ navigate('/')
         if (response.status === 201) {
           notification.info({
             message: "Thông báo",
-            description: "Bạn đã tạo đơn hàng thành công",
+            description:
+              "Bạn đã tạo đơn hàng thành công. Cửa hàng sẽ nhanh chóng liên hệ với bạn!",
           });
+          setTimeout(() => {
+            remove();
+            removeAll();
+            navigate("/");
+          }, 3000);
+          return;
         }
       })
       .catch((error) => {
