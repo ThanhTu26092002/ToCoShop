@@ -33,6 +33,8 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 10px;
+    cursor: pointer;
+    
 }
 .Cartdetallbtn button{
     background-color: #9C3737;
@@ -41,9 +43,13 @@
     font-size: 20px;
     border-radius: 30px ;
     border: none;
+    cursor: pointer;
+    
 }
 .Cartdetallbtn a{
     text-decoration: none;
     color: white;
+    cursor: pointer;
+    
 }
  

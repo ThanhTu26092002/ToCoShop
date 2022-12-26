@@ -11,9 +11,11 @@
 }
 .Sort_title,.Sort_Latest,.Sort_selling{
     margin: 10px;
+    cursor: pointer;
 }
 .Sort_title{
     color: #958f8f;
+    cursor: pointer;
 }
 .Sort_Latest,.Sort_selling{
     border: 1px solid #958f8f;
