@@ -32,8 +32,11 @@ import TextArea from "antd/lib/input/TextArea";
 import { useCheckout } from "../../../hooks/useCheckout";
 import { useNavigate } from "react-router-dom";
 import { checkPropTypes } from "prop-types";
+
 function CartDetail2() {
-    
+    const [statesListContactInfo, setStatesListContactInfo] = useState(null);
+    const [cityListContactInfo, setCityListContactInfo] = useState(null);
+    const [countryList, setCountryList] = useState(null);
   const navigate = useNavigate();
   const [formShippingInfo] = Form.useForm();
   const { info,add } = useCheckout((state) => state);
@@ -47,6 +50,14 @@ function CartDetail2() {
 const handleOk = () => {
     formShippingInfo.submit();
 };
+useEffect(() => {
+    fetch("http://localhost:3000/data/countries+states+cities.json")
+      .then((response) => response.json())
+      .then((data) => setCountryList(data))
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
   return (
     <div className="main_Cartdetall2">
       <Slider />
@@ -105,21 +116,78 @@ const handleOk = () => {
                 <Input placeholder="Số điện thoại" />
               </Form.Item>
               <Form.Item  name="countryShippingInfo" className="a" label="Quốc gia:">
-                <Cascader
-                  style={{ width: 300, marginLeft: 27 }}
-                  placeholder="Quốc gia"
+              <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  onChange={(value) => {
+                    setStatesListContactInfo(
+                      countryList.find((e) => e.name === value)
+                    );
+                    formShippingInfo.setFieldsValue({
+                      stateContactInfo: null,
+                      cityContactInfo: null,
+                    });
+                  }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    countryList &&
+                    countryList.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
                 />
               </Form.Item>
               <Form.Item name="stateShippingInfo" className="a" label="Tỉnh:">
-                <Cascader
-                  style={{ width: 300, marginLeft: 57 }}
-                  placeholder="Tỉnh"
+              <Select
+                  style={{ width: 150 }}
+                  placeholder="Chọn..."
+                  onChange={(value) => {
+                    setCityListContactInfo(
+                      statesListContactInfo.states.find((e) => e.name === value)
+                    );
+                    formShippingInfo.setFieldsValue({ cityContactInfo: null });
+                  }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    statesListContactInfo &&
+                    statesListContactInfo.states.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
                 />
               </Form.Item>
               <Form.Item  name="cityShippingInfo" className="a" label="Quận/huyện:">
-                <Cascader
-                  style={{ width: 300, marginLeft: 8 }}
-                  placeholder="Quận/huyện"
+              <Select
+                  placeholder="Chọn..."
+                  style={{ width: 150 }}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={
+                    cityListContactInfo &&
+                    cityListContactInfo.cities.map((e) => {
+                      const tmp = { value: e.name, label: e.name };
+                      return tmp;
+                    })
+                  }
                 />
               </Form.Item>
               <Form.Item name="detailAddressShippingInfo" className="a" label="Địa chỉ:">
