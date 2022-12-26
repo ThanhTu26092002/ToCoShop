@@ -31,7 +31,6 @@ import {
     
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [cityListContactInfo, setCityListContactInfo] = useState(null);
-
     
   return (
     <div>

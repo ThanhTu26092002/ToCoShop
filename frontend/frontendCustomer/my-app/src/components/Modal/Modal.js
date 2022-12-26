@@ -1,7 +1,9 @@
+
 import React from "react";
 import "./Modal.css";
 import Productcart from "../Productcart/productcart";
 import { useCart } from "../../hooks/useCart";
+import numeral from "numeral";
 import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
 function Modal({ closeModal }) {
   const { items, remove, increase, decrease } = useCart((state) => state);
@@ -29,7 +31,9 @@ function Modal({ closeModal }) {
         <div className="body">
           <nav className="navproductdetall">
             {isEmpty ? (
-              <p>Emty</p>
+              <div className="emptyCart">
+                <img style={{width:300, height:300}} src="emptycart.png" alt=""></img>
+              </div>
             ) : (
               items.map((i, index) => {
                 let attributesItem = null;
@@ -54,9 +58,11 @@ function Modal({ closeModal }) {
           </nav>
         </div>
         <div className="footer_modal">
-          <div className="footer_modal_price">
+       <div className="footer_modal_price">
+       {!isEmpty&& <>
             <span>Tổng giá trị đơn hàng:</span>
-            <p>{totalmoney} VND</p>
+            <p>{numeral(totalmoney).format("0,0")}VND</p>
+            </>}
           </div>
           <div className="footer_modal_btn">
             <button
@@ -64,16 +70,17 @@ function Modal({ closeModal }) {
                 closeModal(false);
               }}
               id="cancelBtn"
-            >
-              Tiếp tục mua hàng
+            >{isEmpty?"Thêm sản phẩm":"Tiếp tục mua hàng"}
+              
             </button>
-            <button
+            {!isEmpty&&<button
               onClick={() => {
+                
                 closeModal(false);
               }}
             >
               <Link to="/Thanhtoan">Thanh toán</Link>
-            </button>
+            </button>}
           </div>
         </div>
       </div>
