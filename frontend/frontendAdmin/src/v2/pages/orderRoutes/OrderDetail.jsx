@@ -1,87 +1,33 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../css/CommonStyle.css";
 import moment from "moment";
-import numeral from "numeral";
 
 import {
   Button,
   Layout,
-  Table,
   Form,
-  Input,
-  Popconfirm,
   message,
   notification,
-  Modal,
-  Upload,
   Spin,
-  Space,
-  DatePicker,
-  Select,
-  Divider,
-  Typography,
-  InputNumber,
   Result,
 } from "antd";
 import { Content } from "antd/lib/layout/layout";
 import {
-  DeleteOutlined,
-  EditOutlined,
-  EllipsisOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import TextArea from "antd/lib/input/TextArea";
-
-import {
-  dateFormatList,
   URLOrder,
   URLTransportation,
   URLProduct,
-  sizeList,
-  colorList,
 } from "../../config/constants";
-import LabelCustomization, {
-  NumberFormatter,
-  BoldText,
-  TitleTable,
-  ColorStatus,
-} from "../../components/subComponents";
 import axiosClient from "../../config/axios";
 import formattedDate from "../../utils/commonFuncs";
-import {
-  PropsForm,
-  PropsFormItemDetailAddress,
-  PropsFormItemEmail,
-  PropsFormItemFirstName,
-  PropsFormItemLastName,
-  PropsFormItemPhoneNumber,
-  PropsFormItemStatus,
-  PropsFormItem_Label_Name,
-  PropsTable,
-} from "../../config/props";
-import {
-  customCreateAHandler,
-  customDisabledDate,
-  formatterNumber,
-  objCompare,
-} from "../../config/helperFuncs";
+import { customCreateAHandler, objCompare } from "../../config/helperFuncs";
 import CustomFormOrder from "./components/CustomFormOrder";
-const { Text } = Typography;
 
 function OrderDetail() {
   //If params id = :id
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const paymentMethodList = ["CREDIT CARD", "COD"];
-  const statusList = ["WAITING", "SHIPPING", "COMPLETED", "CANCELED"];
-
   // const [isCreate, setIsCreate] = useState(false);
-  const [selectedPaymentCreditCard, setSelectedPaymentCreditCard] =
-    useState(null);
   const [transportations, setTransportations] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,18 +35,11 @@ function OrderDetail() {
   const [notFound, setNotFound] = useState(false);
   const [order, setOrder] = useState(null);
   const [customOrder, setCustomOrder] = useState(null);
-  const [countryList, setCountryList] = useState(null);
-  const [statesListContactInfo, setStatesListContactInfo] = useState(null);
-  const [cityListContactInfo, setCityListContactInfo] = useState(null);
-  const [statesListShippingInfo, setStatesListShippingInfo] = useState(null);
-  const [cityListShippingInfo, setCityListShippingInfo] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [changedStatus, setChangedStatus] = useState(null);
   const [sendingDateState, setSendingDateState] = useState(null);
   const [receivedDateState, setReceivedDateState] = useState(null);
-  const [oldData, setOldData] = useState(null);
   const [handlerToString, setHandlerToString] = useState(null);
-  const [isShowHistory, setIsShowHistory] = useState(false);
 
   const [formUpdateOrder] = Form.useForm();
   const handleCalSumCost = () => {
@@ -119,7 +58,7 @@ function OrderDetail() {
   };
 
   const handleCancelUpdate = () => {
-    formUpdateOrder.resetFields();
+    formUpdateOrder.setFieldsValue(customOrder);
   };
 
   const handleChangeStatus = (e) => {
@@ -202,6 +141,12 @@ function OrderDetail() {
     }
   };
   const handleFinishUpdate = (values) => {
+    console.log({ values });
+    const checkChangedData = objCompare(values, customOrder);
+    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
+    if (!checkChangedData) {
+      return;
+    }
     //Show error the relative between status and sendingDate- receivedDate
     if (values.sendingDate === null) {
       if (values.status === "SHIPPING") {
@@ -221,23 +166,12 @@ function OrderDetail() {
       }
     }
 
-    //Config orderDetails before send to backend
-    // const getOrderDetails = values.orderDetails;
-    // const configOrderDetails = [];
-    // getOrderDetails.map((product) => {
-    //   let tmpProduct = products.find((e) => (e._id = product.productId));
-    //   configOrderDetails.push({
-    //     productId: product.productId,
-    //     size: product.size,
-    //     quantity: product.quantity,
-    //     price: tmpProduct.price,
-    //     discount: tmpProduct.discount,
-    //   });
-    // });
-
     //Config contacInfo
     // before that, we need to config address in contactInfo
-    let addressInfo = { detailAddress: values.detailAddressContactInfo };
+    let addressInfo = null;
+    if (values.detailAddressContactInfo) {
+      addressInfo = { detailAddress: values.detailAddressContactInfo };
+    }
     if (values.countryContactInfo) {
       addressInfo = { ...addressInfo, country: values.countryContactInfo };
     }
@@ -248,58 +182,83 @@ function OrderDetail() {
       addressInfo = { ...addressInfo, city: values.cityContactInfo };
     }
     //Now, let set up contactInfo
-    let contactInfo = { address: addressInfo };
+    let contactInfo = addressInfo ? { address: addressInfo } : null;
     if (values.email) {
       contactInfo = { ...contactInfo, email: values.emailContactInfo };
     }
-    contactInfo = {
-      ...contactInfo,
-      phoneNumber: values.phoneNumberContactInfo,
-      firstName: values.firstNameContactInfo,
-      lastName: values.lastNameContactInfo,
-    };
+    if (values.phoneNumberContactInfo) {
+      contactInfo = {
+        ...contactInfo,
+        phoneNumber: values.phoneNumberContactInfo,
+      };
+    }
+    if (values.firstNameContactInfo) {
+      contactInfo = {
+        ...contactInfo,
+        firstName: values.firstNameContactInfo,
+      };
+    }
+    if (values.lastNameContactInfo) {
+      contactInfo = {
+        ...contactInfo,
+        lastName: values.lastNameContactInfo,
+      };
+    }
 
     // Now, continue to create shippingInfo
-    let shippingInfo = undefined;
+    let shippingInfo = null;
     //set up addressShipping
-    if (values.detailAddressShippingInfo) {
-      let addressShipping = {
-        detailAddress: values.detailAddressShippingInfo,
+    let addressShipping = values.detailAddressShippingInfo
+      ? {
+          detailAddress: values.detailAddressShippingInfo,
+        }
+      : null;
+    if (values.countryShippingInfo) {
+      addressShipping = {
+        ...addressShipping,
+        country: values.countryShippingInfo,
       };
-      if (values.countryShippingInfo) {
-        addressShipping = {
-          ...addressShipping,
-          country: values.countryShippingInfo,
-        };
-      }
-      if (values.stateShippingInfo) {
-        addressShipping = {
-          ...addressShipping,
-          state: values.stateShippingInfo,
-        };
-      }
-      if (values.cityShippingInfo) {
-        addressShipping = { ...addressShipping, city: values.cityShippingInfo };
-      }
+    }
+    if (values.stateShippingInfo) {
+      addressShipping = {
+        ...addressShipping,
+        state: values.stateShippingInfo,
+      };
+    }
+    if (values.cityShippingInfo) {
+      addressShipping = { ...addressShipping, city: values.cityShippingInfo };
+    }
 
-      //Now set shippingInfo
+    //Now set shippingInfo
+    if (values.transportationId) {
       shippingInfo = {
         address: addressShipping,
         transportationId: values.transportationId,
         transportationPrice: values.transportationPrice,
       };
+    }
 
-      if (values.emailShippingInfo) {
-        shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
-      }
-      if (values.note) {
-        shippingInfo = { ...shippingInfo, note: values.note };
-      }
-
+    if (values.emailShippingInfo) {
+      shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
+    }
+    if (values.note) {
+      shippingInfo = { ...shippingInfo, note: values.note };
+    }
+    if (values.phoneNumberShippingInfo) {
       shippingInfo = {
         ...shippingInfo,
         phoneNumber: values.phoneNumberShippingInfo,
+      };
+    }
+    if (values.firstNameShippingInfo) {
+      shippingInfo = {
+        ...shippingInfo,
         firstName: values.firstNameShippingInfo,
+      };
+    }
+    if (values.lastNameShippingInfo) {
+      shippingInfo = {
+        ...shippingInfo,
         lastName: values.lastNameShippingInfo,
       };
     }
@@ -334,23 +293,34 @@ function OrderDetail() {
     let handlers = order.handlers;
     handlers.push(newHandler);
 
-    const updateDetailOrder = {
-      status: values.status,
-      sendingDate: customSendingDate,
-      receivedDate: customReceivedDate,
-      contactInfo,
-      shippingInfo,
-      paymentInfo,
-    };
-    console.log("oldValue:", order);
-    console.log("newValue:", updateDetailOrder);
-    const checkChangedData = objCompare(updateDetailOrder, order);
-    //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
-    if (!checkChangedData) {
-      return;
+    let updateDetailOrder = null;
+    if (values.status) {
+      updateDetailOrder = { ...updateDetailOrder, status: values.status };
+    }
+    if (customSendingDate) {
+      updateDetailOrder = {
+        ...updateDetailOrder,
+        sendingDate: customSendingDate,
+      };
+    }
+    if (customReceivedDate) {
+      updateDetailOrder = {
+        ...updateDetailOrder,
+        receivedDate: customReceivedDate,
+      };
+    }
+    if (contactInfo) {
+      updateDetailOrder = { ...updateDetailOrder, contactInfo };
+    }
+    if (shippingInfo) {
+      updateDetailOrder = { ...updateDetailOrder, shippingInfo };
+    }
+    if (paymentInfo) {
+      updateDetailOrder = { ...updateDetailOrder, paymentInfo };
     }
     updateDetailOrder.handlers = handlers;
-
+    console.log({ updateDetailOrder });
+    // return;
     setLoadingBtn(true);
     //SUBMIT
     //POST
@@ -358,8 +328,7 @@ function OrderDetail() {
       .patch(`${URLOrder}/updateOne/${id}`, updateDetailOrder)
       .then((response) => {
         if (response.status === 200) {
-          // setIsCreate(false);
-          // setRefresh((e) => !e);
+          setRefresh((e) => !e);
           notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
@@ -532,7 +501,7 @@ function OrderDetail() {
       });
 
     setLoading(false);
-  }, [products]);
+  }, [products, refresh]);
 
   return (
     <Layout>
@@ -552,9 +521,9 @@ function OrderDetail() {
           {loading && <Spin size="large"></Spin>}
           {!loading && (
             <CustomFormOrder
-            isFormUpdate={true}
+              isFormUpdate={true}
               form={formUpdateOrder}
-              detailCreatingStatus= {true}
+              detailCreatingStatus={true}
               products={products}
               transportations={transportations}
               handleCancel={handleCancelUpdate}
