@@ -4,19 +4,15 @@ import Images from "../../components/Listproducts/images";
 import Footer from "../../components/Footer/Footer";
 import Search_cart from "../../components/SearchCart/index";
 import { useParams } from "react-router-dom";
-import { useCart } from '../../hooks/useCart'
+import { useCart } from "../../hooks/useCart";
 import axios from "axios";
 import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { InputNumber } from "antd";
-import Sizeguide from "../../components/Sizeguide/Sizeguide"
+import Sizeguide from "../../components/Sizeguide/Sizeguide";
 import numeral from "numeral";
 
 function productdetails() {
-  // const queryParams = new URLSearchParams("?term=pizza&location=Bangalore")
-  // for (const [key, value] of queryParams) {
-  //   console.log({ key, value }) // {key: 'term', value: 'pizza'} {key: 'location', value: 'Bangalore'}
-  // }
   const search = window.location.search;
   const params = new URLSearchParams(search);
   const productId = params.get("product");
@@ -45,16 +41,15 @@ function productdetails() {
   const [selectedSize_Click, setSelectedSize_Click] = useState(atttributeId);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [categoryId, setCategoryId] = useState(null); //danhmuc
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [quantity, setQuantity] = useState(1); //danhmuc
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-  const {add}=useCart((state)=>state)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { add } = useCart((state) => state);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [SizeguideOpen, setsizeguideOpen] = useState(false);
   const onChange = (value) => {
-  
-    setQuantity(value)
+    setQuantity(value);
   };
   const fetchProduct = async () => {
     try {
@@ -63,9 +58,6 @@ function productdetails() {
       );
       setProduct(res.data.results[0]);
       res.data.results[0].attributes.map((item) => {
-      console.log("get data1:", res.data.results[0]);
-        
-
         if (item._id === atttributeId) {
           setProductDiscount(item.discount);
           setProductPrice(item.price);
@@ -83,27 +75,24 @@ function productdetails() {
     }
   };
   // eslint-disable-next-line react-hooks/rules-of-hooks
-useEffect(()=>{
-  if (selectedColor_Click === selectedSize_Click) {
-    product?.attributes.map((item) => {
-      if (selectedColor_Click === item._id) {
-        setProductDiscount(item.discount);
-        setProductPrice(item.price);
-        setProductPriceItems(item.totalPriceEachType);
-        
-      }
-    });
-  }
-},[selectedColor_Click,selectedSize_Click])
+  useEffect(() => {
+    if (selectedColor_Click === selectedSize_Click) {
+      product?.attributes.map((item) => {
+        if (selectedColor_Click === item._id) {
+          setProductDiscount(item.discount);
+          setProductPrice(item.price);
+          setProductPriceItems(item.totalPriceEachType);
+        }
+      });
+    }
+  }, [selectedColor_Click, selectedSize_Click]);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     fetchProduct();
   }, []);
 
   return (
-    
     product && (
-      
       <div className="main_product_detall">
         {SizeguideOpen && <Sizeguide closeSizeguide={setsizeguideOpen} />}
         <Slider />
@@ -125,7 +114,9 @@ useEffect(()=>{
                 </p>
                 <div className="price">
                   <p style={{ fontWeight: "bold" }}>
-                    {productPrice && <del>{numeral(productPrice).format("0,0")}VNĐ</del>}
+                    {productPrice && (
+                      <del>{numeral(productPrice).format("0,0")}VNĐ</del>
+                    )}
                   </p>
                   <p>{numeral(productPriceItems).format("0,0")}VNĐ</p>
                   <div className="discount">
@@ -134,21 +125,33 @@ useEffect(()=>{
                 </div>
                 <div className="color">
                   <p>Màu: </p>
-                  <div className="color_container">
+                  <div className="color_container ">
                     {reFresh1 &&
                       product.attributes.map((item, index) => {
+                        console.log("iiii",item)
                         if (item.size === selectedSize && selectedSize) {
-                          return (
-                            <a
-                              style={
-                                selectedColor_Click === item._id
-                                  ? {
+                          let style=null;
+                          if(item.color==="Hồng"){
+                            style={
+                                     backgroundColor: "pink"
+                                    }
+                          }
+                          if(item.color==="Đen"){
+                            style={
+                                     backgroundColor: "black"
+                                    }
+                          }
+                          if( selectedColor_Click === item._id){
+                            style={
                                       color: "orange",
                                       borderColor: "orange",
                                       borderWidth: "2px",
                                     }
-                                  : {}
-                              }
+                          }
+                          
+                          return (
+                            <a  
+                              style={style}
                               onClick={() => {
                                 setSelectedColor_Click(item._id);
                                 setSelectedColor(item.color);
@@ -162,17 +165,36 @@ useEffect(()=>{
                       })}
                     {!reFresh1 &&
                       product.attributes.map((item, index) => {
+                        let style=null;
+                          if(item.color==="Hồng"){
+                            style={
+                                     backgroundColor: "pink"
+                                    }
+                          }
+                          if(item.color==="Đen"){
+                            style={
+                                     backgroundColor: "black"
+                                    }
+                          }
+                          if( selectedColor_Click === item._id){
+                            style={
+                                      color: "orange",
+                                      borderColor: "orange",
+                                      borderWidth: "2px",
+                                    }
+                          }
                         return (
                           <a
-                            style={
-                              selectedColor_Click === item._id
-                                ? {
-                                    color: "orange",
-                                    borderColor: "orange",
-                                    borderWidth: "2px",
-                                  }
-                                : {}
-                            }
+                          style={style}
+                            // style={
+                            //   selectedColor_Click === item._id
+                            //     ? {
+                            //         color: "orange",
+                            //         borderColor: "orange",
+                            //         borderWidth: "2px",
+                            //       }
+                            //     : {}
+                            // }
                             onClick={() => {
                               setSelectedColor_Click(item._id);
                               setSelectedColor(item.color);
@@ -240,9 +262,12 @@ useEffect(()=>{
                       })}
                   </div>
                 </div>
-                <a  className="btnsize" onClick={()=>{
-                  setsizeguideOpen(true)
-                }}>
+                <a
+                  className="btnsize"
+                  onClick={() => {
+                    setsizeguideOpen(true);
+                  }}
+                >
                   Bảng qui đổi kích cở
                 </a>
                 <button
@@ -254,15 +279,29 @@ useEffect(()=>{
                 >
                   Chọn lại
                 </button>
-                <div className="amount">  
+                <div className="amount">
                   <h4>Amount:</h4>
-                  <InputNumber name="productQuantity" style={{ marginRight: 30 }} min={1} defaultValue={1} onChange={onChange}/>
+                  <InputNumber
+                    name="productQuantity"
+                    style={{ marginRight: 30 }}
+                    min={1}
+                    defaultValue={1}
+                    onChange={onChange}
+                  />
                   <p>{product.stockTotal} sản phẩm có sẵn</p>
                 </div>
                 <div className="btn_cart_buy">
-                  <a href="#" className="btncart" onClick={()=>{
-                    add({product:product,quantity:quantity,attributeId:selectedColor_Click})
-                  }}>
+                  <a
+                    href="#"
+                    className="btncart"
+                    onClick={() => {
+                      add({
+                        product: product,
+                        quantity: quantity,
+                        attributeId: selectedColor_Click,
+                      });
+                    }}
+                  >
                     THÊM VÀO GIỎ HÀNG
                   </a>
                   <a href="#" className="btnbuy">
@@ -287,7 +326,9 @@ useEffect(()=>{
             </div>
           </div>
           <div className="description">
-            <p>{product.name}-{product.productCode} </p>
+            <p>
+              {product.name}-{product.productCode}{" "}
+            </p>
             <br />
             <p>{product.description}</p>
             <br />

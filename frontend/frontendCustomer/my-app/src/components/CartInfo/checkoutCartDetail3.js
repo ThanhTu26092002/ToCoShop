@@ -1,130 +1,135 @@
-import React,{useEffect, useState,useRef} from 'react'
-import {
-    DoubleLeftOutlined,
-  } from "@ant-design/icons";
-  import {
-    Form,
-    Input,
-    Select,
-  } from "antd";
-  import axios  from 'axios'
-  import numeral from "numeral";
-import { PropsFormItem_Label_Name } from '../../config/props';
-  
-function checkoutCartDetail3({handleFinishCreate,previousfunc,info,formOtherInfo}) {
+import React, { useEffect, useState, useRef } from "react";
+import { DoubleLeftOutlined } from "@ant-design/icons";
+import { Form, Input, Select } from "antd";
+import axios from "axios";
+import numeral from "numeral";
+import { PropsFormItem_Label_Name } from "../../config/props";
+
+function checkoutCartDetail3({
+  handleFinishCreate,
+  previousfunc,
+  info,
+  formOtherInfo,
+}) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [transportations, setTransportations] = useState(null);
     // eslint-disable-next-line react-hooks/rules-of-hooks
-  const[transportations,setTransportations] = useState(null)
+    const [transportationDefault, setTransportationDefault] = useState(null);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     axios.get("http://localhost:9000/v1/transportations").then((response) => {
       setTransportations(response.data.results);
-      console.log("transportations",response.data.results)
+      setTransportationDefault(response.data.results[0]._id)
     });
   }, []);
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const formRef = useRef()
+  const formRef = useRef();
   return (
     <div>
-        <div className="Cartdetall3_form">
-            <h2>Thanh toán:</h2>
-            <div className="Cartdetall3_form_main">
-              <Form style={{ marginLeft: 100 }}
-               form={formOtherInfo}
-               ref={formRef}
-               initialValues={{paymentMethod:'COD'}}
-              >
-                
-                <Form.Item
-                {...PropsFormItem_Label_Name({
-                  labelTitle: "Phương tiện vận chuyển",
-                  nameTitle: "transportationPrice",
-                  require: true,
-                })}
-              >
-                <Input
-                  style={{ width: 400 }}
-                  disabled
-                  addonAfter={"VNĐ"}
-                  addonBefore={
-                    <Form.Item
-                      {...PropsFormItem_Label_Name({
-                        labelTitle: "Phương tiện vận chuyển",
-                        nameTitle: "transportationId",
-                      })}
-                      noStyle
-                    >
-                      <Select
-                        style={{ width: 250 }}
-                        loading={!transportations}
-                        placeholder="Chọn"
-                        onChange={(value) => {
-                          const found = transportations.find(
-                            (e) => e._id === value
-                          );
-                          console.log("found",found)
-                          const priceText = numeral(found.price).format("0,0");
-                          console.log("test type:", typeof Number(priceText));
-                          formOtherInfo.setFieldsValue({
-                            transportationPrice: priceText,
-                          });
-                        }}
-                      >
-                        {transportations &&
-                          transportations.map((t) => {
-                            const customPrice = numeral(t.price).format("0,0");
-                            return (
-                              <Select.Option key={t._id} value={t._id}>
-                                {`${t.name}`}
-                              </Select.Option>
-                            );
-                          })}
-                      </Select>
-                    </Form.Item>
-                  }
-                />
-              </Form.Item>
-                <Form.Item 
-                className="a" 
-                {...PropsFormItem_Label_Name({
-                  labelTitle: "Phương thức thanh toán",
-                  nameTitle: "paymentMethod",
-                  require: true,
-                })}>
-                  <Select
-                    style={{ width: 200 }}
-                    placeholder="Chọn..."
-                    options={[
-                      {
-                        value: 'COD',
-                        label: 'COD',
-                      }
-                    ]}
-                    disabled={true}
-                  >
-                  </Select>
-                </Form.Item>
-              </Form>
-            </div>
-          </div>
-          <div className="Cartdetall3_form_main">
-          <div className="Cartdetall3btn">
-          <img src='' alt=''></img>
-            <p>Tên sản phẩm: // Size: // Màu: //Số lượng: //Giảm giá: //Đơn giá: //Thành tiền:</p>
-            <button
-              onClick={
-                previousfunc
-              }
+      <div className="Cartdetall3_form">
+        <h2>Thanh toán:</h2>
+        <div className="Cartdetall3_form_main">
+          <Form
+            style={{ marginLeft: 100 }}
+            form={formOtherInfo}
+            ref={formRef}
+            initialValues={{
+              paymentMethod: "COD",
+              // transportationId: 4444,
+            }}
+          >
+            <Form.Item
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Phương tiện vận chuyển",
+                nameTitle: "transportationPrice",
+                require: true,
+              })}
             >
-              <DoubleLeftOutlined />
-            </button>
-            <button onClick={()=>{
-              let tmp=formOtherInfo.getFieldsValue()
-              return handleFinishCreate(tmp)
-            }}>Xác nhận đặt hàng</button>
-          </div>
-          </div>
+              <Input
+                style={{ width: 400 }}
+                disabled
+                addonAfter={"VNĐ"}
+                addonBefore={
+                  <Form.Item
+                    {...PropsFormItem_Label_Name({
+                      labelTitle: "Phương tiện vận chuyển",
+                      nameTitle: "transportationId",
+                    })}
+                    noStyle
+                    initialValue={transportationDefault}
+                  >
+                    <Select
+                      style={{ width: 250 }}
+                      loading={!transportations}
+                      placeholder="Chọn"
+                      onChange={(value) => {
+                        const found = transportations.find(
+                          (e) => e._id === value
+                        );
+                        const priceText = numeral(found.price).format("0,0");
+                        formOtherInfo.setFieldsValue({
+                          transportationPrice: priceText,
+                        });
+                      }}
+                    >
+                      {transportations &&
+                        transportations.map((t, index) => {
+                          return (
+                            <Select.Option key={t._id} value={t._id}>
+                              {`${t.name}`}
+                            </Select.Option>
+                          );
+                        })}
+                    </Select>
+                  </Form.Item>
+                }
+              />
+            </Form.Item>
+            <Form.Item
+              className="a"
+              {...PropsFormItem_Label_Name({
+                labelTitle: "Phương thức thanh toán",
+                nameTitle: "paymentMethod",
+                require: true,
+              })}
+            >
+              <Select
+                style={{ width: 200 }}
+                placeholder="Chọn..."
+                options={[
+                  {
+                    value: "COD",
+                    label: "COD",
+                  },
+                ]}
+                disabled={true}
+              ></Select>
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+      <div className="Cartdetall3_form_main">
+        <div className="Cartdetall3btn">
+          <img src="" alt=""></img>
+          <p>
+            Tên sản phẩm: // Size: // Màu: //Số lượng: //Giảm giá: //Đơn giá:
+            //Thành tiền:
+          </p>
+          <button onClick={previousfunc}>
+            <DoubleLeftOutlined />
+          </button>
+          <button
+            onClick={() => {
+              let tmp = formOtherInfo.getFieldsValue();
+              return handleFinishCreate(tmp);
+            }}
+          >
+            Xác nhận đặt hàng
+          </button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-export default checkoutCartDetail3
+export default checkoutCartDetail3;
