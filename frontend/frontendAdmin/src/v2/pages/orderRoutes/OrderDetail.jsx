@@ -22,6 +22,7 @@ import axiosClient from "../../config/axios";
 import formattedDate from "../../utils/commonFuncs";
 import { customCreateAHandler, objCompare } from "../../config/helperFuncs";
 import CustomFormOrder from "./components/CustomFormOrder";
+import numeral from "numeral";
 
 function OrderDetail() {
   //If params id = :id
@@ -145,6 +146,7 @@ function OrderDetail() {
     const checkChangedData = objCompare(values, customOrder);
     //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
     if (!checkChangedData) {
+      message.warning("Không có sự thay đổi dữ liệu");
       return;
     }
     //Show error the relative between status and sendingDate- receivedDate
@@ -165,167 +167,212 @@ function OrderDetail() {
         return;
       }
     }
-
-    //Config contacInfo
-    // before that, we need to config address in contactInfo
-    let addressInfo = null;
+    let newData = { ...order };
+    console.log("before:", newData);
     if (values.detailAddressContactInfo) {
-      addressInfo = { detailAddress: values.detailAddressContactInfo };
+      newData.contactInfo.address.detailAddress =
+        values.detailAddressContactInfo;
     }
     if (values.countryContactInfo) {
-      addressInfo = { ...addressInfo, country: values.countryContactInfo };
+      newData.contactInfo.address.country = values.countryContactInfo;
     }
     if (values.stateContactInfo) {
-      addressInfo = { ...addressInfo, state: values.stateContactInfo };
+      newData.contactInfo.address.state = values.stateContactInfo;
     }
     if (values.cityContactInfo) {
-      addressInfo = { ...addressInfo, city: values.cityContactInfo };
+      newData.contactInfo.address.city = values.cityContactInfo;
     }
-    //Now, let set up contactInfo
-    let contactInfo = addressInfo ? { address: addressInfo } : null;
     if (values.email) {
-      contactInfo = { ...contactInfo, email: values.emailContactInfo };
+      newData.contactInfo.email = values.emailContactInfo;
     }
     if (values.phoneNumberContactInfo) {
-      contactInfo = {
-        ...contactInfo,
-        phoneNumber: values.phoneNumberContactInfo,
-      };
+      newData.contactInfo.phoneNumber = values.phoneNumberContactInfo;
     }
     if (values.firstNameContactInfo) {
-      contactInfo = {
-        ...contactInfo,
-        firstName: values.firstNameContactInfo,
-      };
+      newData.contactInfo.firstName = values.firstNameContactInfo;
     }
     if (values.lastNameContactInfo) {
-      contactInfo = {
-        ...contactInfo,
-        lastName: values.lastNameContactInfo,
-      };
+      newData.contactInfo.lastName = values.lastNameContactInfo;
+    }
+    //SHIPPING INFO
+    if (values.detailAddressShippingInfo) {
+      newData.shippingInfo.address.detailAddress =
+        values.detailAddressShippingInfo;
     }
 
-    // Now, continue to create shippingInfo
-    let shippingInfo = null;
-    //set up addressShipping
-    let addressShipping = values.detailAddressShippingInfo
-      ? {
-          detailAddress: values.detailAddressShippingInfo,
-        }
-      : null;
     if (values.countryShippingInfo) {
-      addressShipping = {
-        ...addressShipping,
-        country: values.countryShippingInfo,
-      };
+      newData.shippingInfo.address.country = values.countryShippingInfo;
     }
     if (values.stateShippingInfo) {
-      addressShipping = {
-        ...addressShipping,
-        state: values.stateShippingInfo,
-      };
+      newData.shippingInfo.address.state = values.stateShippingInfo;
     }
     if (values.cityShippingInfo) {
-      addressShipping = { ...addressShipping, city: values.cityShippingInfo };
+      newData.shippingInfo.address.city = values.cityShippingInfo;
     }
-
-    //Now set shippingInfo
     if (values.transportationId) {
-      shippingInfo = {
-        address: addressShipping,
-        transportationId: values.transportationId,
-        transportationPrice: values.transportationPrice,
-      };
+      newData.shippingInfo.transportationId = values.transportationId;
+      newData.shippingInfo.transportationPrice = numeral(
+        values.transportationPrice
+      ).value();
     }
-
     if (values.emailShippingInfo) {
-      shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
+      newData.shippingInfo.email = values.emailShippingInfo;
     }
     if (values.note) {
-      shippingInfo = { ...shippingInfo, note: values.note };
+      newData.shippingInfo.note = values.note;
     }
     if (values.phoneNumberShippingInfo) {
-      shippingInfo = {
-        ...shippingInfo,
-        phoneNumber: values.phoneNumberShippingInfo,
-      };
+      newData.shippingInfo.phoneNumber = values.phoneNumberShippingInfo;
     }
     if (values.firstNameShippingInfo) {
-      shippingInfo = {
-        ...shippingInfo,
-        firstName: values.firstNameShippingInfo,
-      };
+      newData.shippingInfo.firstName = values.firstNameShippingInfo;
     }
     if (values.lastNameShippingInfo) {
-      shippingInfo = {
-        ...shippingInfo,
-        lastName: values.lastNameShippingInfo,
-      };
+      newData.shippingInfo.lastName = values.lastNameShippingInfo;
     }
+    if (values.paymentMethod) {
+      newData.paymentInfo.paymentMethod = values.paymentMethod;
+    }
+    //Config contacInfo
+    // before that, we need to config address in contactInfo
+    // let addressInfo = null;
+    // if (values.detailAddressContactInfo) {
+    //   addressInfo =  { detailAddress: values.detailAddressContactInfo? values.detailAddressContactInfo };
+    // }
+    // if (values.countryContactInfo) {
+    //   addressInfo = { ...addressInfo, country: values.countryContactInfo };
+    // }
+    // if (values.stateContactInfo) {
+    //   addressInfo = { ...addressInfo, state: values.stateContactInfo };
+    // }
+    // if (values.cityContactInfo) {
+    //   addressInfo = { ...addressInfo, city: values.cityContactInfo };
+    // }
+    // //Now, let set up contactInfo
+    // let contactInfo = addressInfo ? { address: addressInfo } : null;
+    // if (values.email) {
+    //   contactInfo = { ...contactInfo, email: values.emailContactInfo };
+    // }
+    // if (values.phoneNumberContactInfo) {
+    //   contactInfo = {
+    //     ...contactInfo,
+    //     phoneNumber: values.phoneNumberContactInfo,
+    //   };
+    // }
+    // if (values.firstNameContactInfo) {
+    //   contactInfo = {
+    //     ...contactInfo,
+    //     firstName: values.firstNameContactInfo,
+    //   };
+    // }
+    // if (values.lastNameContactInfo) {
+    //   contactInfo = {
+    //     ...contactInfo,
+    //     lastName: values.lastNameContactInfo,
+    //   };
+    // }
+
+    // Now, continue to create shippingInfo
+    // let shippingInfo = null;
+    // //set up addressShipping
+    // let addressShipping = values.detailAddressShippingInfo
+    //   ? {
+    //       detailAddress: values.detailAddressShippingInfo,
+    //     }
+    //   : null;
+    // if (values.countryShippingInfo) {
+    //   addressShipping = {
+    //     ...addressShipping,
+    //     country: values.countryShippingInfo,
+    //   };
+    // }
+    // if (values.stateShippingInfo) {
+    //   addressShipping = {
+    //     ...addressShipping,
+    //     state: values.stateShippingInfo,
+    //   };
+    // }
+    // if (values.cityShippingInfo) {
+    //   addressShipping = { ...addressShipping, city: values.cityShippingInfo };
+    // }
+
+    // //Now set shippingInfo
+    // if (values.transportationId) {
+    //   shippingInfo = {
+    //     address: addressShipping,
+    //     transportationId: values.transportationId,
+    //     transportationPrice: numeral(values.transportationPrice).value(),
+    //   };
+    // }
+
+    // if (values.emailShippingInfo) {
+    //   shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
+    // }
+    // if (values.note) {
+    //   shippingInfo = { ...shippingInfo, note: values.note };
+    // }
+    // if (values.phoneNumberShippingInfo) {
+    //   shippingInfo = {
+    //     ...shippingInfo,
+    //     phoneNumber: values.phoneNumberShippingInfo,
+    //   };
+    // }
+    // if (values.firstNameShippingInfo) {
+    //   shippingInfo = {
+    //     ...shippingInfo,
+    //     firstName: values.firstNameShippingInfo,
+    //   };
+    // }
+    // if (values.lastNameShippingInfo) {
+    //   shippingInfo = {
+    //     ...shippingInfo,
+    //     lastName: values.lastNameShippingInfo,
+    //   };
+    // }
 
     //Continue to config paymentInfo
-    let paymentInfo = undefined;
-    if (values.paymentMethod) {
-      paymentInfo = { ...paymentInfo, paymentMethod: values.paymentMethod };
-    }
-    if (values.paymentMethod === "CREDIT CARD") {
-      paymentInfo = {
-        ...paymentInfo,
-        moreInfo: {
-          cardNumber: values.cardNumber,
-          cardHolder: values.cardHolder,
-          expDate: values.expDate,
-          cvv: values.cvv,
-        },
-      };
-    }
+    // let paymentInfo = undefined;
+    // if (values.paymentMethod) {
+    //   paymentInfo = { ...paymentInfo, paymentMethod: values.paymentMethod };
+    // }
+    // if (values.paymentMethod === "CREDIT CARD") {
+    //   paymentInfo = {
+    //     ...paymentInfo,
+    //     moreInfo: {
+    //       cardNumber: values.cardNumber,
+    //       cardHolder: values.cardHolder,
+    //       expDate: values.expDate,
+    //       cvv: values.cvv,
+    //     },
+    //   };
+    // }
 
     //
-    const customSendingDate = values.sendingDate
-      ? values.sendingDate.format("YYYY-MM-DD")
-      : null;
-    const customReceivedDate = values.receivedDate
-      ? values.receivedDate.format("YYYY-MM-DD")
-      : null;
+    if(values.sendingDate){
+      newData.sendingDate = values.sendingDate.format("YYYY-MM-DD");
+    }
+    if(values.receivedDate){
+      newData.receivedDate = values.receivedDate.format("YYYY-MM-DD");
+    }
+    if(values.status){
+      newData.status = values.status;
+    }
     //Add a handler -update new status
     const actionContent = `Cập nhật thông tin đơn hàng `;
     const newHandler = customCreateAHandler(actionContent);
     let handlers = order.handlers;
     handlers.push(newHandler);
-
-    let updateDetailOrder = null;
-    if (values.status) {
-      updateDetailOrder = { ...updateDetailOrder, status: values.status };
-    }
-    if (customSendingDate) {
-      updateDetailOrder = {
-        ...updateDetailOrder,
-        sendingDate: customSendingDate,
-      };
-    }
-    if (customReceivedDate) {
-      updateDetailOrder = {
-        ...updateDetailOrder,
-        receivedDate: customReceivedDate,
-      };
-    }
-    if (contactInfo) {
-      updateDetailOrder = { ...updateDetailOrder, contactInfo };
-    }
-    if (shippingInfo) {
-      updateDetailOrder = { ...updateDetailOrder, shippingInfo };
-    }
-    if (paymentInfo) {
-      updateDetailOrder = { ...updateDetailOrder, paymentInfo };
-    }
-    updateDetailOrder.handlers = handlers;
-    console.log({ updateDetailOrder });
-    // return;
+    newData.handlers = handlers;
+    delete newData.totalPrice;
+    delete newData._id;
+    delete newData.orderDetails;
+    delete newData.orderCode;
+    delete newData.createdDate;
     setLoadingBtn(true);
     //SUBMIT
     //POST
     axiosClient
-      .patch(`${URLOrder}/updateOne/${id}`, updateDetailOrder)
+      .patch(`${URLOrder}/updateOne/${id}`, newData)
       .then((response) => {
         if (response.status === 200) {
           setRefresh((e) => !e);
@@ -391,8 +438,10 @@ function OrderDetail() {
           const orderCode = order.orderCode;
           const status = order.status;
           //Fields about ContactInfo
-          const detailAddressContactInfo =
-            order.contactInfo.address.detailAddress;
+          const detailAddressContactInfo = order.contactInfo.address
+            .detailAddress
+            ? order.contactInfo.address.detailAddress
+            : null;
           const countryContactInfo = order.contactInfo.address.country
             ? order.contactInfo.address.country
             : null;
@@ -497,7 +546,6 @@ function OrderDetail() {
       })
       .catch((error) => {
         console.log(error);
-        setNotFound(true);
       });
 
     setLoading(false);

@@ -75,6 +75,7 @@ const aggregateLookup = [
       "orderDetails.finalPrice": 0,
     },
   },
+  {$sort: {"_id": -1}}
 ];
 
 //Get all orders

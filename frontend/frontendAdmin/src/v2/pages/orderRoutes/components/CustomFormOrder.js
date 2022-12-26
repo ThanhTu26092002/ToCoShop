@@ -348,7 +348,6 @@ function CustomFormOrder({
                       {...PropsFormItem_Label_Name({
                         labelTitle: "Phương tiện vận chuyển",
                         nameTitle: "transportationId",
-                        require: true,
                       })}
                       noStyle
                     >
@@ -361,7 +360,6 @@ function CustomFormOrder({
                             (e) => e._id === value
                           );
                           const priceText = numeral(found.price).format("0,0");
-                          console.log("test type:", typeof Number(priceText));
                           form.setFieldsValue({
                             transportationPrice: priceText,
                           });
@@ -388,7 +386,8 @@ function CustomFormOrder({
                 <Input placeholder="Họ" />
               </Form.Item>
 
-              <Form.Item {...PropsFormItemLastName} name="lastNameShippingInfo">
+              <Form.Item 
+              {...PropsFormItemLastName} name="lastNameShippingInfo">
                 <Input placeholder="Last name" />
               </Form.Item>
 

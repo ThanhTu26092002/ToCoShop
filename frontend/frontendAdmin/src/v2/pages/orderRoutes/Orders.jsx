@@ -270,6 +270,9 @@ function Orders() {
     let paymentInfo = undefined;
     if (values.paymentMethod) {
       paymentInfo = { ...paymentInfo, paymentMethod: values.paymentMethod };
+    }else{
+      //Bởi vì chưa làm thanh toán CREDIT CARD, nên sẽ truyền mặc định paymentMethod:COD
+      paymentInfo = { ...paymentInfo, paymentMethod: "COD"};
     }
     if (values.paymentMethod === "CREDIT CARD") {
       paymentInfo = {
@@ -454,12 +457,13 @@ function Orders() {
         let formattedReceivedDate = e.receivedDate
           ? formattedDate(e.receivedDate)
           : "Chưa xác định";
-
+        let formattedFullName = e.contactInfo.firstName + " " + e.contactInfo.lastName
         newOrders.push({
           ...e,
           formattedCreatedDate,
           formattedSendingDate,
           formattedReceivedDate,
+          formattedFullName
         });
       });
       setOrders(newOrders);
@@ -474,7 +478,7 @@ function Orders() {
     });
   }, []);
   useEffect(() => {
-    axiosClient.get(`${URLProduct}/09GetAllBestDiscount`).then((response) => {
+    axiosClient.get(`${URLProduct}/10GetAllBestDiscount`).then((response) => {
       setProducts(response.data.results);
     });
   }, []);
