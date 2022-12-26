@@ -213,7 +213,7 @@ router.post("/insertOne", async (req, res, next) => {
         const errMsg = formatterErrorFunc(
           {
             name: "Lỗi dữ liệu",
-            message: `Vui lòng nhập đủ trường dữ liệu trong OrderDetails`,
+            message: `Vui lòng nhập đủ trường dữ liệu trong orderDetails`,
           },
           COLLECTION_ORDERS
         );

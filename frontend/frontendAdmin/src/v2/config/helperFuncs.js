@@ -17,7 +17,6 @@ export const customCreateAHandler = (actionContent) => {
   const convertedPayload = JSON.parse(payload);
   // Lấy ra từng phần nhỏ trong Object
   const employeeInfo = convertedPayload.state.auth.employeeInfo;
-
   const userId = employeeInfo._id;
   const userName = employeeInfo.firstName + " " + employeeInfo.lastName;
   const currentTime = moment().format("DD-MM-YYY- HH:mm");

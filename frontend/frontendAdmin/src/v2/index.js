@@ -130,7 +130,7 @@ function ToCoShopV1() {
   ];
   return (
     <ConfigProvider>
-      <Layout style={{minHeight: "100vh"}}>
+      <Layout style={{ minHeight: "100vh" }}>
         {auth && (
           <Sider
             breakpoint="lg"
@@ -147,6 +147,9 @@ function ToCoShopV1() {
                 src={ICON_NoImage}
                 alt="logo"
                 style={{ height: 35, width: "100%" }}
+                onError={(e) => {
+                  e.target.src = `../../${ICON_NoImage}`;
+                }}
               />
             </div>
             <Menu
@@ -185,70 +188,70 @@ function ToCoShopV1() {
               margin: "24px 16px 0",
             }}
           > */}
-            <Content
-              className="site-layout-background"
-              style={{
-                margin: "24px 16px 0",
-                padding: 24,
-                // minHeight: 360,
-                height: "87vh",
-              overflowY: "auto"
-              }}
-            >
-              <Routes>
-                <Route
-                  path="/login"
-                  element={auth ? <Navigate to="/home" replace /> : <Login />}
-                ></Route>
-                {itemsAfterLogin.map((i, index) => {
-                  if (i.children) {
-                    return (
-                      <Fragment key={index}>
-                        <Route
-                          key={index}
-                          // path={i.key}
-                        ></Route>
-                        {i.children.map((child, indexChild) => {
-                          return (
-                            <Route
-                              key={indexChild}
-                              path={child.key}
-                              element={
-                                auth ? (
-                                  child.content
-                                ) : (
-                                  <Navigate to="/login" replace />
-                                )
-                              }
-                            ></Route>
-                          );
-                        })}
-                      </Fragment>
-                    );
-                  } else {
-                    return (
+          <Content
+            className="site-layout-background"
+            style={{
+              margin: "24px 16px 0",
+              padding: 24,
+              // minHeight: 360,
+              height: "87vh",
+              overflowY: "auto",
+            }}
+          >
+            <Routes>
+              <Route
+                path="/login"
+                element={auth ? <Navigate to="/home" replace /> : <Login />}
+              ></Route>
+              {itemsAfterLogin.map((i, index) => {
+                if (i.children) {
+                  return (
+                    <Fragment key={index}>
                       <Route
                         key={index}
-                        path={i.key}
-                        element={
-                          auth ? i.content : <Navigate to="/login" replace />
-                        }
+                        // path={i.key}
                       ></Route>
-                    );
-                  }
-                })}
-                {/* NO MATCH ROUTE */}
-                <Route
-                  path="*"
-                  element={<Navigate to="/home" replace />}
-                  // element={
-                  //   <main style={{ padding: "1rem" }}>
-                  //     <p>404 Page not found 😂😂😂</p>
-                  //   </main>
-                  // }
-                />
-              </Routes>
-            </Content>
+                      {i.children.map((child, indexChild) => {
+                        return (
+                          <Route
+                            key={indexChild}
+                            path={child.key}
+                            element={
+                              auth ? (
+                                child.content
+                              ) : (
+                                <Navigate to="/login" replace />
+                              )
+                            }
+                          ></Route>
+                        );
+                      })}
+                    </Fragment>
+                  );
+                } else {
+                  return (
+                    <Route
+                      key={index}
+                      path={i.key}
+                      element={
+                        auth ? i.content : <Navigate to="/login" replace />
+                      }
+                    ></Route>
+                  );
+                }
+              })}
+              {/* NO MATCH ROUTE */}
+              <Route
+                path="*"
+                element={<Navigate to="/home" replace />}
+                // element={
+                //   <main style={{ padding: "1rem" }}>
+                //     <p>404 Page not found 😂😂😂</p>
+                //   </main>
+                // }
+              />
+            </Routes>
+          </Content>
           {/* </Content> */}
           <FooterLayout />
         </Layout>
