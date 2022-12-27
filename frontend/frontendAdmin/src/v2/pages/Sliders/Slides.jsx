@@ -11,6 +11,7 @@ function Slides() {
   const [slides, setSlides] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingBtnCreate, setLoadingBtnCreate] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +55,7 @@ function Slides() {
   };
 
   const handleFinishCreate = (values) => {
-    setLoadingBtn(true);
+    setLoadingBtnCreate(true);
     axiosClient
       .post("http://localhost:9000/v1/slides", values)
       .then((response) => {
@@ -66,7 +67,7 @@ function Slides() {
             description: "Thêm mới thành công",
           });
         }
-        setLoadingBtn(false);
+        setLoadingBtnCreate(false);
       });
   };
 
@@ -182,7 +183,7 @@ function Slides() {
           form={form}
             handleFinish={handleFinishCreate}
             handleCancel={handleCancelCreate}
-            loadingBtn={loadingBtn}
+            loadingBtn={loadingBtnCreate}
             list={list}
           />
 
