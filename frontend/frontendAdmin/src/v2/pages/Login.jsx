@@ -17,7 +17,7 @@ const Login = () => {
     const { email, password } = values;
 
     axiosClient
-      .post("http://localhost:9000/v1/login", { email, password })
+      .post("https://tococlothes.onrender.com/v1/login", { email, password })
       .then((response) => {
         // localStorage.setItem("employeeInfo", JSON.stringify(response.data.employeeInfo));
         // Zustand: method

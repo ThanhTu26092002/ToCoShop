@@ -57,7 +57,7 @@ function Slides() {
   const handleFinishCreate = (values) => {
     setLoadingBtnCreate(true);
     axiosClient
-      .post("http://localhost:9000/v1/slides", values)
+      .post("https://tococlothes.onrender.com/v1/slides", values)
       .then((response) => {
         if (response.status === 200) {
           setRefresh((f) => f + 1);
@@ -158,7 +158,7 @@ function Slides() {
   const handleConfirmDelete = (_id) => {
     setLoading(true);
     axiosClient
-      .delete("http://localhost:9000/v1/slides/" + _id)
+      .delete("https://tococlothes.onrender.com/v1/slides/" + _id)
       .then((response) => {
         if (response.status === 200) {
           setRefresh((f) => f + 1);
@@ -169,7 +169,7 @@ function Slides() {
   };
   React.useEffect(() => {
     setLoading(true)
-    axiosClient.get("http://localhost:9000/v1/slides/all").then((response) => {
+    axiosClient.get("https://tococlothes.onrender.com/v1/slides/all").then((response) => {
       setSlides(response.data);
     setLoading(false)
     });
