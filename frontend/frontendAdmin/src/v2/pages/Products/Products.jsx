@@ -178,12 +178,12 @@ function Products() {
   }, [refresh]);
 
   useEffect(() => {
-    axiosClient.get("http://localhost:9000/v1/categories").then((response) => {
+    axiosClient.get("https://tococlothes.onrender.com/v1/categories").then((response) => {
       setCategories(response.data.results);
     });
   }, []);
   useEffect(() => {
-    axiosClient.get("http://localhost:9000/v1/suppliers").then((response) => {
+    axiosClient.get("https://tococlothes.onrender.com/v1/suppliers").then((response) => {
       setSuppliers(response.data.results);
     });
   }, []);
