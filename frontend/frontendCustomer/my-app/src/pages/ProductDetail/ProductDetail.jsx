@@ -202,7 +202,7 @@ function productdetails() {
                           }
                           if(item.color==="Xám"){
                             style={
-                                     backgroundColor: "Grey"
+                                     backgroundColor: "Grey",
                                      backgroundColor: "black"
 
                                     }
