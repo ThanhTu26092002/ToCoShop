@@ -8,6 +8,7 @@
 .Cartdetall2_body{
     width: 100%;
     
+    
 }
 .Cartdetall2_title{
     width: 100%;
@@ -22,6 +23,7 @@
     border-top: 0.5px solid black;
     
     margin-bottom: 20px;
+    cursor: pointer;
 }
 .Cartdetall2_form h2{
     margin-top: 20px;
