@@ -93,4 +93,5 @@ function Modal({ closeModal }) {
   );
 }
 
+
 export default Modal;
