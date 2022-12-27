@@ -342,21 +342,6 @@ router.post("/insertOne", async (req, res, next) => {
   }
 });
 
-//
-// router.get(
-//   "/search-many",
-//   validateSchema(search_deleteManyOrdersSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-//     findDocuments({ query: query }, COLLECTION_ORDERS)
-//       .then((result) => res.status(200).json(result))
-//       .catch((err) =>
-//         res.status(500).json({ findFunction: "failed", err: err })
-//       );
-//   }
-// );
-// //
-
 //Update One with _Id - ok
 router.patch(
   "/updateOne/:id",
@@ -449,22 +434,6 @@ router.patch(
     }
   }
 );
-//
-
-//
-// router.get(
-//   "/search-many",
-//   validateSchema(search_deleteManyOrdersSchema),
-//   function (req, res, next) {
-//     const query = req.query;
-//     findDocuments({ query: query }, COLLECTION_ORDERS)
-//       .then((result) => res.status(200).json(result))
-//       .catch((err) =>
-//         res.status(500).json({ findFunction: "failed", err: err })
-//       );
-//   }
-// );
-// //
 
 //Delete ONE with ID- OK
 router.delete(
@@ -746,115 +715,61 @@ router.get("/search", function (req, res, next) {
 //
 
 //Get products sold from date1 to date2-----------  task 20---21--- 28
-router.get("/sold", function (req, res, next) {
-  const { type, dateFrom, dateTo, top } = req.query;
+router.get("/11sold",async function (req, res, next) {
+  try{
+  const {dateFrom, dateTo} = req.query;
   let start = new Date(moment(dateFrom).utc().local().format("YYYY-MM-DD"));
   let end = new Date(moment(dateTo).utc().local().format("YYYY-MM-DD"));
 
-  let aggregate = [];
-  switch (type) {
-    case "products":
-      aggregate = [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $ne: ["$status", "CANCELED"] },
-                { $gte: ["$createdDate", start] },
-                { $lte: ["$createdDate", end] },
-              ],
-            },
-          },
+  const aggregate =[
+    { $unwind: "$orderDetails" },
+    {
+      $match: {
+        $expr: {
+          $and: [
+            { $gte: ["$createdDate", start] },
+            { $lte: ["$createdDate", end] },
+          ],
         },
-        {
-          $unwind: "$orderDetails",
-        },
-        {
-          $lookup: {
-            from: "products", // foreign collection name
-            localField: "orderDetails.productId",
-            foreignField: "_id",
-            pipeline: [{ $project: { categoryId: 0, supplierId: 0 } }],
-            as: "productDetail", // alias
-          },
-        },
-        {
-          $group: {
-            _id: "$orderDetails.productId",
-            productDetail: { $first: "$productDetail" },
-            listOrders: {
-              $push: {
-                orderId: "$_id",
-                createdDate: "$createdDate",
-                orderDetails: "$orderDetails",
-              },
-            },
-          },
-        },
-      ];
-      break;
-    case "customers":
-      aggregate = [
-        { $unwind: "$orderDetails" },
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $gte: ["$createdDate", start] },
-                { $lte: ["$createdDate", end] },
-              ],
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: "customers", // foreign collection name
-            localField: "customerId",
-            foreignField: "_id",
-            // pipeline: [{$project: { : 0, supplierId: 0  }}],
-            as: "customerDetail", // alias
-          },
-        },
-        {
-          $group: {
-            _id: "$customerId",
-            customerDetail: { $first: "$customerDetail" },
-            totalAmount: {
-              $sum: {
-                $multiply: [
-                  "$orderDetails.price",
-                  "$orderDetails.quantity",
-                  {
-                    $divide: [
-                      { $subtract: [100, "$orderDetails.discount"] },
-                      100,
-                    ],
-                  },
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        status: {$first: "$status"},
+        orderCode: {$first: "$orderCode"},
+        createdDate: {$first: "$createdDate"},
+        sendingDate: {$first: "$sendingDate"},
+        receivedDate: {$first: "$receivedDate"},
+        contactInfo: {$first: "$contactInfo"},
+        paymentInfo: {$first: "$paymentInfo"},
+        shippingInfo: {$first: "$shippingInfo"},
+        totalPrice: {
+          $sum: {
+            $multiply: [
+              "$orderDetails.price",
+              "$orderDetails.quantity",
+              {
+                $divide: [
+                  { $subtract: [100, "$orderDetails.discount"] },
+                  100,
                 ],
               },
-            },
+            ],
           },
         },
-      ];
-      break;
-
-    default:
-      break;
-  }
-  let sort = { totalAmount: -1 };
-  let limit = 50;
-  if (top) limit = parseInt(top);
-  let projection = { customerId: 0, employeeId: 0 };
-
-  findDocuments(
-    { aggregate: aggregate, sort: sort, limit: limit, projection: projection },
-    COLLECTION_ORDERS
-  )
-    .then((result) => res.status(200).json(result))
-    .catch((err) =>
-      res.status(500).json({ findFunction: "failed :v", err: err })
-    );
-});
+      },
+    },
+    {$sort: { totalPrice: -1 }}
+  ];
+  const docs = await Order.aggregate(aggregate);
+  res.json({ ok: true, results: docs });
+} catch (err) {
+  const errMsgMongoDB = formatterErrorFunc(err, COLLECTION_ORDERS);
+  res.status(400).json({ ok: false, error: errMsgMongoDB });
+}
+}
+);
 //
 
 //------------------------------------------------------------------------------------------------

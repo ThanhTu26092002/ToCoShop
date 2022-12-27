@@ -1,5 +1,6 @@
 import { message } from "antd";
 import moment from "moment";
+import formattedDate from "../utils/commonFuncs";
 
 export const customDisabledDate = (current, checkingDate) => {
   return current < moment(checkingDate);
@@ -73,4 +74,44 @@ export const formatterNumber = (val) => {
 
   // return `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/\.(?=\d{0,2}$)/g, ",");
              
+}
+
+export const formatterOrdersData = (orders)=>{
+  let newOrders = [];
+  orders.map((e) => {
+    // Formatting dates before showing
+    let formattedCreatedDate = formattedDate(e.createdDate);
+    let formattedSendingDate = e.sendingDate
+      ? formattedDate(e.sendingDate)
+      : "Chưa xác định";
+    let formattedReceivedDate = e.receivedDate
+      ? formattedDate(e.receivedDate)
+      : "Chưa xác định";
+    let formattedFullName =
+      e.contactInfo.firstName + " " + e.contactInfo.lastName;
+    let formattedShippingAddress = "Chưa xác định";
+    if (e.shippingInfo) {
+      if (e.shippingInfo.address.detailAddress) {
+        formattedShippingAddress = e.shippingInfo.address.detailAddress + ", ";
+      }
+      if (e.shippingInfo.address.city) {
+        formattedShippingAddress += e.shippingInfo.address.city + ", ";
+      }
+      if (e.shippingInfo.address.state) {
+        formattedShippingAddress += e.shippingInfo.address.state + ", ";
+      }
+      if (e.shippingInfo.address.country) {
+        formattedShippingAddress += e.shippingInfo.address.country;
+      }
+    }
+    newOrders.push({
+      ...e,
+      formattedCreatedDate,
+      formattedSendingDate,
+      formattedReceivedDate,
+      formattedFullName,
+      formattedShippingAddress,
+    });
+  });
+  return  newOrders
 }

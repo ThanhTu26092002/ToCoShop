@@ -142,7 +142,7 @@ function OrderDetail() {
     }
   };
   const handleFinishUpdate = (values) => {
-    console.log({ values });
+    console.log("values", values);
     const checkChangedData = objCompare(values, customOrder);
     //Thông tin fomUpdate không thay đổi thì checkChangedData=null ko cần làm gì cả
     if (!checkChangedData) {
@@ -150,7 +150,7 @@ function OrderDetail() {
       return;
     }
     //Show error the relative between status and sendingDate- receivedDate
-    if (values.sendingDate === null) {
+    if (!values.sendingDate) {
       if (values.status === "SHIPPING") {
         message.error("Bạn chưa nhập ngày chuyển đơn hàng");
         return;
@@ -161,14 +161,13 @@ function OrderDetail() {
       }
     }
 
-    if (values.receivedDate === null) {
+    if (!values.receivedDate) {
       if (values.status === "COMPLETED") {
         message.error("Bạn chưa nhập ngày khách hàng nhận đơn hàng");
         return;
       }
     }
     let newData = { ...order };
-    console.log("before:", newData);
     if (values.detailAddressContactInfo) {
       newData.contactInfo.address.detailAddress =
         values.detailAddressContactInfo;
@@ -233,127 +232,9 @@ function OrderDetail() {
     if (values.paymentMethod) {
       newData.paymentInfo.paymentMethod = values.paymentMethod;
     }
-    //Config contacInfo
-    // before that, we need to config address in contactInfo
-    // let addressInfo = null;
-    // if (values.detailAddressContactInfo) {
-    //   addressInfo =  { detailAddress: values.detailAddressContactInfo? values.detailAddressContactInfo };
-    // }
-    // if (values.countryContactInfo) {
-    //   addressInfo = { ...addressInfo, country: values.countryContactInfo };
-    // }
-    // if (values.stateContactInfo) {
-    //   addressInfo = { ...addressInfo, state: values.stateContactInfo };
-    // }
-    // if (values.cityContactInfo) {
-    //   addressInfo = { ...addressInfo, city: values.cityContactInfo };
-    // }
-    // //Now, let set up contactInfo
-    // let contactInfo = addressInfo ? { address: addressInfo } : null;
-    // if (values.email) {
-    //   contactInfo = { ...contactInfo, email: values.emailContactInfo };
-    // }
-    // if (values.phoneNumberContactInfo) {
-    //   contactInfo = {
-    //     ...contactInfo,
-    //     phoneNumber: values.phoneNumberContactInfo,
-    //   };
-    // }
-    // if (values.firstNameContactInfo) {
-    //   contactInfo = {
-    //     ...contactInfo,
-    //     firstName: values.firstNameContactInfo,
-    //   };
-    // }
-    // if (values.lastNameContactInfo) {
-    //   contactInfo = {
-    //     ...contactInfo,
-    //     lastName: values.lastNameContactInfo,
-    //   };
-    // }
-
-    // Now, continue to create shippingInfo
-    // let shippingInfo = null;
-    // //set up addressShipping
-    // let addressShipping = values.detailAddressShippingInfo
-    //   ? {
-    //       detailAddress: values.detailAddressShippingInfo,
-    //     }
-    //   : null;
-    // if (values.countryShippingInfo) {
-    //   addressShipping = {
-    //     ...addressShipping,
-    //     country: values.countryShippingInfo,
-    //   };
-    // }
-    // if (values.stateShippingInfo) {
-    //   addressShipping = {
-    //     ...addressShipping,
-    //     state: values.stateShippingInfo,
-    //   };
-    // }
-    // if (values.cityShippingInfo) {
-    //   addressShipping = { ...addressShipping, city: values.cityShippingInfo };
-    // }
-
-    // //Now set shippingInfo
-    // if (values.transportationId) {
-    //   shippingInfo = {
-    //     address: addressShipping,
-    //     transportationId: values.transportationId,
-    //     transportationPrice: numeral(values.transportationPrice).value(),
-    //   };
-    // }
-
-    // if (values.emailShippingInfo) {
-    //   shippingInfo = { ...shippingInfo, email: values.emailShippingInfo };
-    // }
-    // if (values.note) {
-    //   shippingInfo = { ...shippingInfo, note: values.note };
-    // }
-    // if (values.phoneNumberShippingInfo) {
-    //   shippingInfo = {
-    //     ...shippingInfo,
-    //     phoneNumber: values.phoneNumberShippingInfo,
-    //   };
-    // }
-    // if (values.firstNameShippingInfo) {
-    //   shippingInfo = {
-    //     ...shippingInfo,
-    //     firstName: values.firstNameShippingInfo,
-    //   };
-    // }
-    // if (values.lastNameShippingInfo) {
-    //   shippingInfo = {
-    //     ...shippingInfo,
-    //     lastName: values.lastNameShippingInfo,
-    //   };
-    // }
-
-    //Continue to config paymentInfo
-    // let paymentInfo = undefined;
-    // if (values.paymentMethod) {
-    //   paymentInfo = { ...paymentInfo, paymentMethod: values.paymentMethod };
-    // }
-    // if (values.paymentMethod === "CREDIT CARD") {
-    //   paymentInfo = {
-    //     ...paymentInfo,
-    //     moreInfo: {
-    //       cardNumber: values.cardNumber,
-    //       cardHolder: values.cardHolder,
-    //       expDate: values.expDate,
-    //       cvv: values.cvv,
-    //     },
-    //   };
-    // }
-
     //
-    if(values.sendingDate){
-      newData.sendingDate = values.sendingDate.format("YYYY-MM-DD");
-    }
-    if(values.receivedDate){
-      newData.receivedDate = values.receivedDate.format("YYYY-MM-DD");
-    }
+      newData.sendingDate =  values.sendingDate? values.sendingDate.format("YYYY-MM-DD"): null;
+      newData.receivedDate =values.receivedDate? values.receivedDate.format("YYYY-MM-DD"): null;
     if(values.status){
       newData.status = values.status;
     }
