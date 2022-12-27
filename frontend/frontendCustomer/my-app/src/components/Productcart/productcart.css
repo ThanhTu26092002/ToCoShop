@@ -18,6 +18,9 @@
     letter-spacing: 0.1px;
     
   }
+  .product_cart_detall_title>span{
+    margin-left: 10px;
+  }
   .product_cart .product_cart_detall{
     width: 70%;
     margin-left: 10px;

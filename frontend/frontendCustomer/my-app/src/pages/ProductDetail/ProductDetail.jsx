@@ -328,9 +328,7 @@ function productdetails() {
                   >
                     THÊM VÀO GIỎ HÀNG
                   </a>
-                  <a href="#" className="btnbuy">
-                    MUA NGAY
-                  </a>
+                
                 </div>
                 <ul>
                   <li>
