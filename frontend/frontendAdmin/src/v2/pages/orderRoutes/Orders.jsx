@@ -340,7 +340,7 @@ function Orders() {
     }
     //
     //Show error the relative between status and sendingDate- receivedDate
-    if (values.sendingDate === null) {
+    if (!values.sendingDate ) {
       if (values.status === "SHIPPING") {
         message.error("Bạn chưa nhập ngày chuyển đơn hàng");
         return;
@@ -351,7 +351,7 @@ function Orders() {
       }
     }
 
-    if (values.receivedDate === null) {
+    if (!values.receivedDate ) {
       if (values.status === "COMPLETED") {
         message.error("Bạn chưa nhập ngày khách hàng nhận đơn hàng");
         return;
