@@ -15,7 +15,7 @@ function Menclothes() {
   const { id } = useParams();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    axios.get("http://localhost:9000/v1/products/02getByCategoryId/"+ id).then((response) => {
+    axios.get("https://tococlothes.onrender.com/v1/products/02getByCategoryId/"+ id).then((response) => {
       
       setImages(response.data.results);
       setImagesnew(response.data.results);
@@ -26,7 +26,7 @@ function Menclothes() {
   }, [id])
   
   const discountOnclick=()=>{
-    axios.get("http://localhost:9000/v1/products/09getByCategoryIdSortByDiscount/"+ id).then((response) => {
+    axios.get("https://tococlothes.onrender.com/v1/products/09getByCategoryIdSortByDiscount/"+ id).then((response) => {
       
       setImages(response.data.results);
       

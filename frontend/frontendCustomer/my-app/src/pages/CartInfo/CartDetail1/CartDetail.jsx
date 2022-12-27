@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 function CartDetail1() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const navigate = useNavigate();
-
   const { info, add, remove } = useCheckout((state) => state);
   const { removeAll } = useCart((state) => state);
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -133,7 +132,7 @@ function CartDetail1() {
     };
     console.log("newOrderinfo", newOrderinfo);
     axios
-      .post(`http://localhost:9000/v1/orders/insertOne`, newOrderinfo)
+      .post(`https://tococlothes.onrender.com/v1/orders/insertOne`, newOrderinfo)
       .then((response) => {
         if (response.status === 201) {
           notification.info({

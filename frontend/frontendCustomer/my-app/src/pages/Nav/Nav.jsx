@@ -17,7 +17,7 @@ function Nav() {
   const { items, remove, increase, decrease } = useCart((state) => state);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-        axios.get("http://localhost:9000/v1/categories").then((response) => {
+        axios.get("https://tococlothes.onrender.com/v1/categories").then((response) => {
             setCategories(response.data.results);
         });
     }, [])
