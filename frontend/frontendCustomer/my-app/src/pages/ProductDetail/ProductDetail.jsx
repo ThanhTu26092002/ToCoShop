@@ -56,7 +56,7 @@ function productdetails() {
   const fetchProduct = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:9000/v1/products/findById/" + productId
+        "https://tococlothes.onrender.com/v1/products/findById/" + productId
       );
       setProduct(res.data.results[0]);
       res.data.results[0].attributes.map((item) => {
@@ -67,7 +67,7 @@ function productdetails() {
         }
       });
       const resCate = await axios.get(
-        "http://localhost:9000/v1/products/02getByCategoryId/" +
+        "https://tococlothes.onrender.com/v1/products/02getByCategoryId/" +
           res.data.results[0].categories[0]._id
       );
 
@@ -104,7 +104,7 @@ function productdetails() {
             <div className="product_img">
               <div className="product_img_container">
                 <img
-                  src={"http://localhost:9000/uploads" + product.coverImage}
+                  src={"https://tococlothes.onrender.com/uploads" + product.coverImage}
                   alt=""
                 />
               </div>
