@@ -71,7 +71,6 @@ function Modal({ closeModal }) {
               }}
               id="cancelBtn"
             >{isEmpty?"Thêm sản phẩm":"Tiếp tục mua hàng"}
-              
             </button>
             {!isEmpty&&<button
               onClick={() => {

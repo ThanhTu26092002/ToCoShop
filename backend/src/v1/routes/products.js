@@ -540,7 +540,7 @@ router.get("/09getByCategoryIdSortByDiscount/:id", loadCategory, async (req, res
         },
       },
 
-      { $sort: { "_id": -1 } },
+      { $sort: { "maxDiscount": -1 } },
     ];
     const docs = await Product.aggregate(aggregate);
     res.json({ ok: true, results: docs });
