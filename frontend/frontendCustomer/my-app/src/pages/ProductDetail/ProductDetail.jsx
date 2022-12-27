@@ -218,15 +218,7 @@ function productdetails() {
                         return (
                           <a
                             style={style}
-                            // style={
-                            //   selectedColor_Click === item._id
-                            //     ? {
-                            //         color: "orange",
-                            //         borderColor: "orange",
-                            //         borderWidth: "2px",
-                            //       }
-                            //     : {}
-                            // }
+                            
                             onClick={() => {
                               setSelectedColor_Click(item._id);
                               setSelectedColor(item.color);
