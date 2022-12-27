@@ -13,7 +13,7 @@ function Home({categorieId}) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         console.log(categorieId);
-    axios.get("http://localhost:9000/v1/products/07getByPromotionPosition?value=WEEKLY").then((response) => {
+    axios.get("https://tococlothes.onrender.com/v1/products/07getByPromotionPosition?value=WEEKLY").then((response) => {
         console.log('data categories',response.data.results)
         setImages(response.data.results);
     });

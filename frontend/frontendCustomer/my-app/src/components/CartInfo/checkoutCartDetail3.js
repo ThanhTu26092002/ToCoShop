@@ -17,7 +17,7 @@ function checkoutCartDetail3({
   const [transportations, setTransportations] = useState(null);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    axios.get("http://localhost:9000/v1/transportations").then((response) => {
+    axios.get("https://tococlothes.onrender.com/v1/transportations").then((response) => {
       setTransportations(response.data.results);
       console.log("transportations", response.data.results);
     });

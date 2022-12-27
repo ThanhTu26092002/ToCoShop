@@ -21,7 +21,7 @@ function Slider(props) {
  
 
   useEffect(()=>{
-    axios.get("http://localhost:9000/v1/slides").then((response) => {
+    axios.get("https://tococlothes.onrender.com/v1/slides").then((response) => {
       
       setImages(response.data);
     });

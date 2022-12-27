@@ -31,7 +31,7 @@ function index({items}) {
     </div>
     <div className='receipt_img'>
     <img
-            src={"http://localhost:9000/uploads" + items.product.coverImage}
+            src={"https://tococlothes.onrender.com/uploads" + items.product.coverImage}
             alt=""
           />
     </div>

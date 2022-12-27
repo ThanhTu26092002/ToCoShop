@@ -8,7 +8,7 @@ function SliderContent({ activeIndex, sliderImage }) {
           key={index}
           className={index === activeIndex ? "slides active" : "inactive"}
         >
-          <img className="slide-image" src={"http://localhost:9000/uploads"+slide.imageUrl} alt="" />
+          <img className="slide-image" src={"https://tococlothes.onrender.com/uploads"+slide.imageUrl} alt="" />
           
         </div>
       ))}
