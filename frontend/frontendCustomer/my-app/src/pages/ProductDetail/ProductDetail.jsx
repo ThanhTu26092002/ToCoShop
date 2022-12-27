@@ -10,7 +10,7 @@ import "./ProductDetail.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 
 import { BackTop, InputNumber } from "antd";
-import Sizeguide from "../../components/Sizeguide/Sizeguide"
+import Sizeguide from "../../components/Sizeguide/Sizeguide";
 
 import numeral from "numeral";
 
@@ -130,10 +130,10 @@ function productdetails() {
                   <div className="color_container ">
                     {reFresh1 &&
                       product.attributes.map((item, index) => {
-                        console.log("iiii",item)
                         if (item.size === selectedSize && selectedSize) {
-                          let style=null;
-                          if(item.color==="Hồng"){
+                          let style = null;
+                          {
+                            /* if(item.color==="Hồng"){
                             style={
                                      backgroundColor: "pink"
                                     }
@@ -148,18 +148,19 @@ function productdetails() {
                             style={
                                      backgroundColor: "yellow"
                                     }
+                          } */
                           }
 
-                          if( selectedColor_Click === item._id){
-                            style={
-                                      color: "orange",
-                                      borderColor: "orange",
-                                      borderWidth: "2px",
-                                    }
+                          if (selectedColor_Click === item._id) {
+                            style = {
+                              color: "orange",
+                              borderColor: "orange",
+                              borderWidth: "2px",
+                            };
                           }
-                          
+
                           return (
-                            <a  
+                            <a
                               style={style}
                               onClick={() => {
                                 setSelectedColor_Click(item._id);
@@ -174,8 +175,9 @@ function productdetails() {
                       })}
                     {!reFresh1 &&
                       product.attributes.map((item, index) => {
-                        let style=null;
-                          if(item.color==="Hồng"){
+                        let style = null;
+                        {
+                          /* if(item.color==="Hồng"){
                             style={
                                      backgroundColor: "pink"
                                     }
@@ -204,18 +206,18 @@ function productdetails() {
                                      backgroundColor: "black"
 
                                     }
-                          }
-                          if( selectedColor_Click === item._id){
-                            style={
-                                      color: "orange",
-                                      borderColor: "orange",
-                                      borderWidth: "2px",
-                                    }
-                          }
+                          } */
+                        }
+                        if (selectedColor_Click === item._id) {
+                          style = {
+                            color: "orange",
+                            borderColor: "orange",
+                            borderWidth: "2px",
+                          };
+                        }
                         return (
                           <a
-                          style={style}
-
+                            style={style}
                             // style={
                             //   selectedColor_Click === item._id
                             //     ? {

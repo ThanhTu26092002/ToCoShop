@@ -11,6 +11,7 @@ function Transportations() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [transportations, setTransportations] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [loadingBtnCreate, setLoadingBtnCreate] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -27,7 +28,7 @@ function Transportations() {
     formEdit.resetFields();
   };
   const handleFinishCreate = (values) => {
-    setLoadingBtn(true);
+    setLoadingBtnCreate(true);
     //SUBMIT
     let newData = { ...values };
     //POST
@@ -51,7 +52,7 @@ function Transportations() {
         );
       })
       .finally(() => {
-        setLoadingBtn(false);
+        setLoadingBtnCreate(false);
       });
   };
   const handleClick_EditBtn = (record) => {
@@ -140,7 +141,7 @@ function Transportations() {
         <Content>
           <CustomFormTransportation
             form={form}
-            loadingBtn={loadingBtn}
+            loadingBtn={loadingBtnCreate}
             handleFinish={handleFinishCreate}
             handleCancel={handleCancelCreate}
           />

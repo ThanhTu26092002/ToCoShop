@@ -196,7 +196,7 @@ router.patch(
     try {
       const { id } = req.params;
       const updateData = { ...req.body };
-
+console.log('req:', updateData)
       //oldEmail chính là email cũ, lưu lại để truy vấn tìm bên Logins và cập nhật email mới
       if (updateData.oldEmail) {
         delete updateData.oldEmail;
@@ -229,6 +229,13 @@ router.patch(
               other:
                 "Don't have the document having the email in the collection Logins",
             });
+            console.log({
+              ok: true,
+              message: "Update the Id successfully",
+              result: updatedDoc,
+              other:
+                "Don't have the document having the email in the collection Logins",
+            });
             return;
           }
           //Update new email for the login
@@ -245,6 +252,14 @@ router.patch(
                 "Update the Id successfully in collection Employees and Logins",
               result: updatedDoc,
               result2: updatedDocLogin,
+            });
+            console.log({
+              ok: true,
+              message:
+                "Update the Id successfully in collection Employees and Logins",
+              result: updatedDoc,
+              result2: updatedDocLogin,
+              findDoc,
             });
             return;
           } catch (err) {

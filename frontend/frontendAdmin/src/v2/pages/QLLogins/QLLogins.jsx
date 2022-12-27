@@ -15,6 +15,7 @@ function QLLogins() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [login, setLogin] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [loadingBtnCreate, setLoadingBtnCreate] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
@@ -74,7 +75,8 @@ function QLLogins() {
           formEdit.resetFields();
           setSelectedId(null);
 
-          //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
+          if (checkChangedData.email) {
+            //Lấy uid từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
             const uidCheck = auth.payload.uid;
             if (uidCheck === selectedId) {
               notification.info({
@@ -87,6 +89,8 @@ function QLLogins() {
               }, 3000);
               return;
             }
+          }
+
           notification.info({
             message: "Thông báo",
             description: "Cập nhật thành công",
@@ -131,7 +135,7 @@ function QLLogins() {
   };
 
   const handleFinishCreate = (values) => {
-    setLoadingBtn(true);
+    setLoadingBtnCreate(true);
     if (values.confirm) {
       delete values.confirm;
     }
@@ -155,12 +159,12 @@ function QLLogins() {
         );
       })
       .finally(() => {
-        setLoadingBtn(false);
+        setLoadingBtnCreate(false);
       });
   };
 
   useEffect(() => {
-    console.log('ok')
+    console.log("ok");
     setLoading(true);
     axiosClient.get(`${URLQLLogin}/all`).then((response) => {
       let tmp = response.data.results;
@@ -173,7 +177,7 @@ function QLLogins() {
           e.formattedRoles = formattedRoles;
         }
       });
-    console.log('okkkkkkk')
+      console.log("okkkkkkk");
       setTotalDocs(tmp.length);
       setLogin(tmp);
       setLoading(false);
@@ -188,7 +192,7 @@ function QLLogins() {
             form={form}
             handleFinish={handleFinishCreate}
             handleCancel={handleCancelCreate}
-            loadingBtn={loadingBtn}
+            loadingBtn={loadingBtnCreate}
           />
           <CustomTable
             handleClick_EditBtn={handleClick_EditBtn}
