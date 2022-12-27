@@ -14,7 +14,7 @@ function index({imgproduct}) {
             <p>giảm</p>
             <p style={{color:'red',fontWeight:'bold'}}>{imgproduct.discount}%</p>
         </div>
-            <img src={"http://localhost:9000/uploads"+imgproduct.coverImage} alt=''></img>
+            <img src={"https://tococlothes.onrender.com/uploads"+imgproduct.coverImage} alt=''></img>
             {/* <div className='addToCart cart1'>
                     <a  href='#'>Add to Cart</a>
                 </div> */}  
