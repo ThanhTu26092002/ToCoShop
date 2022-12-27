@@ -232,12 +232,6 @@ function CustomTable({
       render: (record) => {
         return (
           <div className="divActs">
-            {/* <Button
-              icon={<EditOutlined />}
-              type="primary"
-              title="Đổi trạng thái"
-              onClick={() => handleClick_EditStatus(record)}
-            ></Button> */}
             <Button
               icon={<EllipsisOutlined />}
               type="primary"
@@ -293,7 +287,7 @@ function CustomTable({
                 <Table.Summary.Row>
                   <Table.Summary.Cell><LabelCustomization title={`Tổng doanh thu`}/></Table.Summary.Cell>
                   <Table.Summary.Cell>
-                    <Text type="danger">{totalAllPrice}</Text>
+                    <Text type="danger" style={{fontWeight: 700}}><NumberFormatter text={totalAllPrice} /></Text>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
                 {/* <Table.Summary.Row>
