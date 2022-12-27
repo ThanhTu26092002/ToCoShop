@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { Button, Table, Input, Space, Popconfirm  } from "antd";
+import { Button, Table, Input, Space, Popconfirm ,Typography } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,SearchOutlined 
 } from "@ant-design/icons";
-import {
+import LabelCustomization, {
   NumberFormatter,
   BoldText,
   ColorStatus,
@@ -15,6 +15,7 @@ import { handleOpenNewPage } from "../../../config/helperFuncs";
 import Highlighter from 'react-highlight-words';  
 import { useState } from "react";
 import { useRef } from "react";
+const { Text } = Typography;
 
 function CustomTable({
   handleClick_EditStatus,
@@ -277,13 +278,41 @@ function CustomTable({
       }}
       columns={columns}
       dataSource={orders}
-      pagination={{
-        total: totalDocs,
-        showTotal: (totalDocs, range) =>
-          `${range[0]}-${range[1]} of ${totalDocs} items`,
-        defaultPageSize: 10,
-        defaultCurrent: 1,
-      }}
+      pagination={false}
+      bordered
+      summary={(pageData) => {
+            let totalAllPrice = 0;
+            pageData.forEach(({ totalPrice, status }) => {
+              if(status !== "CANCELED"){
+              totalAllPrice += totalPrice;
+              }
+            });
+
+            return (
+              <>
+                <Table.Summary.Row>
+                  <Table.Summary.Cell><LabelCustomization title={`Tổng doanh thu`}/></Table.Summary.Cell>
+                  <Table.Summary.Cell>
+                    <Text type="danger">{totalAllPrice}</Text>
+                  </Table.Summary.Cell>
+                </Table.Summary.Row>
+                {/* <Table.Summary.Row>
+                  <Table.Summary.Cell>Balance</Table.Summary.Cell>
+                  <Table.Summary.Cell colSpan={2}>
+                    <Text type="danger">{totalBorrow - totalRepayment}</Text>
+                  </Table.Summary.Cell>
+                </Table.Summary.Row> */}
+              </>
+            );
+          }}
+
+      // pagination={{
+      //   total: totalDocs,
+      //   showTotal: (totalDocs, range) =>
+      //     `${range[0]}-${range[1]} of ${totalDocs} items`,
+      //   defaultPageSize: 10,
+      //   defaultCurrent: 1,
+      // }}
     />
   );
 }

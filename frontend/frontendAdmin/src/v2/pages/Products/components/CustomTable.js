@@ -18,6 +18,55 @@ function CustomTable({
   handleConfirmDelete,
   loading
 }) {
+  const filterCategories = [
+    {
+      text: "thời trang cả nam và nữ",
+      value: "thời trang cả nam và nữ",
+    },
+    {
+      text: "thời trang nữ",
+      value: "thời trang nữ",
+    },
+    {
+      text: "thời trang nam",
+      value: "thời trang nam",
+    },
+    {
+      text: "thời trang mới",
+      value: "thời trang mới",
+    },
+    {
+      text: "thời trang mùa đông",
+      value: "thời trang mùa đông",
+    },
+    {
+      text: "thời trang mùa hè",
+      value: "thời trang mùa hè",
+    },
+  ]
+
+  const filterSuppliers = [
+    {
+      text: "Adidas",
+      value: "Adidas",
+    },
+    {
+      text: "Louis Vuitton",
+      value: "Louis Vuitton",
+    },
+    {
+      text: "Hermès",
+      value: "Hermès",
+    },
+    {
+      text: "Gucci",
+      value: "Gucci",
+    },
+    {
+      text: "Dior",
+      value: "Dior",
+    },
+  ]
   const columns = [
     {
       title: "Hình ảnh",
@@ -44,6 +93,7 @@ function CustomTable({
       title: "Mã sản phẩm ",
       key: "productCode",
       dataIndex: "productCode",
+      width: "6%",
 
     //   sorter: (a, b) => a.name.length - b.name.length,
       render: (Text) => {
@@ -54,6 +104,7 @@ function CustomTable({
       title: "Tên sản phẩm ",
       key: "name",
       dataIndex: "name",
+      width: "15%",
 
       // defaultSortOrder: 'ascend',
     //   sorter: (a, b) => a.name.length - b.name.length,
@@ -66,6 +117,10 @@ function CustomTable({
       title: "Nhóm sản phẩm",
       key: "categoryName",
       dataIndex: "categoryName",
+      width: "12%",
+      filters: filterCategories,
+      onFilter: (value, record) => record.categoryName.indexOf(value) === 0,
+
       render: (text) => {
         return (
           <div style={{ textAlign: "left" }}>
@@ -83,6 +138,9 @@ function CustomTable({
       title: "NCC",
       key: "supplierName",
       dataIndex: "supplierName",
+      width: "8%",
+      filters: filterSuppliers,
+      onFilter: (value, record) => record.supplierName.indexOf(value) === 0,
       render: (text) => {
         return (
           <div style={{ textAlign: "left" }}>
