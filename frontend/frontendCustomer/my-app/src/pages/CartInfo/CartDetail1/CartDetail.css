@@ -65,8 +65,8 @@
 .Cartdetall2_form{
     margin-top: 20px;
     border-top: 0.5px solid black;
-    
     margin-bottom: 20px;
+    cursor: pointer;
 }
 .Cartdetall2_form h2{
     margin-top: 20px;
@@ -172,6 +172,9 @@
     display: block;
     cursor: pointer;
   }
+.cursor{
+    cursor: pointer;
+}
 
 
 

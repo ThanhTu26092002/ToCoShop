@@ -26,7 +26,8 @@ function checkoutCartdetail2({
       <div className="Cartdetall2_form">
         <h2>Thông tin người nhận hàng:</h2>
         <form style={{}}>
-          <input
+          <input 
+            className="cursor"
             id="check"
             type="checkbox"
             onClick={(e) => {
