@@ -29,9 +29,6 @@ function CartDetail1() {
   const [cartDetail1, setCartDetail1] = useState(true);
   const [cartDetail2, setCartDetail2] = useState(false);
   const [cartDetail3, setCartDetail3] = useState(false);
-  const [savedContactInfo, setSavedContactInfo] = useState(null);
-  const [savedShippingInfo, setSavedShippingInfo] = useState(null);
-  const [savedOtherInfo, setSavedOtherInfo] = useState(null);
   const [historyInfo, setHistoryInfo] = useState(null);
   const [formContactInfo] = Form.useForm();
   const [formShippingInfo] = Form.useForm();
@@ -68,7 +65,6 @@ function CartDetail1() {
     setCartDetail1(false);
     setCartDetail2(true);
     setCartDetail3(false);
-    setSavedContactInfo(values);
     const datacontactinfo = {
       firstName: values.firstNameContactInfo,
       lastName: values.lastNameContactInfo,
@@ -94,7 +90,6 @@ function CartDetail1() {
     setCartDetail1(false);
     setCartDetail2(false);
     setCartDetail3(true);
-    setSavedShippingInfo(values);
     const datashippinginfo = {
       firstName: values.firstNameShippingInfo,
       lastName: values.lastNameShippingInfo,
@@ -112,19 +107,24 @@ function CartDetail1() {
     // console.log("datashippinginfo",dataShippingInfo)
   };
   const handleFinishCreat3 = (values) => {
-    setSavedOtherInfo(values);
+    if(!values.transportationId){
+      //Nếu chưa chọn phương tiện vận chuyển thì báo lỗi
+      message.error("Bạn chưa chọn phương tiện vận chuyển hàng")
+      return;
+    }
     let datashippinginfo2 = info.shippingInfo;
     datashippinginfo2 = {
       ...datashippinginfo2,
       transportationId: values.transportationId,
       transportationPrice: numeral(values.transportationPrice).value(),
     };
-    add({ shippingInfo: datashippinginfo2 });
+    // add({ shippingInfo: datashippinginfo2 });
     const paymentInfo = {
       paymentMethod: values.paymentMethod,
     };
-    add({ paymentInfo: paymentInfo });
+    // add({ paymentInfo: paymentInfo });
     let newOrderinfo = {
+      paymentInfo,
       contactInfo: info.contactInfo,
       // shippingInfo: info.shippingInfo,
       shippingInfo: datashippinginfo2,
