@@ -41,10 +41,12 @@
     font-size: 20px;
     border-radius: 30px ;
     border: none;
+    cursor: pointer;
 }
 .Cartdetallbtn a{
     text-decoration: none;
     color: white;
+    cursor: pointer;
 }
 
 
@@ -76,6 +78,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+    cursor: pointer;
 }
 .Cartdetall2btn button{
     background-color: #9C3737;
@@ -84,10 +87,12 @@
     font-size: 20px;
     border-radius: 30px ;
     border: none;
+    cursor: pointer;
 }
 .Cartdetall2btn a{
     text-decoration: none;
     color: white;
+    cursor: pointer;
 }
 
 
@@ -99,20 +104,24 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    cursor: pointer;
 }
 .Cartdetall3_form_main{
     margin-top: 50px;
     border-bottom: 0.5px solid black;
     margin-bottom: 20px;
+    cursor: pointer;
 }
 .Cartdetall3_form{
     margin-top: 20px;
     border-top: 0.5px solid black;
     
     margin-bottom: 20px;
+    cursor: pointer;
 }
 .Cartdetall3_form h2{
     margin-top: 20px;
+    cursor: pointer;
 }
 .a{
     overflow:hidden
@@ -121,6 +130,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+    cursor: pointer;
 }
 .Cartdetall3btn button{
     background-color: #9C3737;
@@ -129,10 +139,12 @@
     font-size: 20px;
     border-radius: 30px ;
     border: none;
+    cursor: pointer;
 }
 .Cartdetall3btn a{
     text-decoration: none;
     color: white;
+    cursor: pointer;
 }
 .bodernone{
     
@@ -158,6 +170,7 @@
   }
   .Cartdetall3_price span{
     display: block;
+    cursor: pointer;
   }
 
 
