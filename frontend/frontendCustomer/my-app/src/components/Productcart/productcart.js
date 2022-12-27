@@ -34,10 +34,10 @@ function productcart({ items }) {
           </span>
 
           <span className="product_cart_detall_title">
-            Size: <span style={{fontWeight:600}}>{attributesItem.size}</span>
+            Size:<span style={{fontWeight:600}}>{attributesItem.size}</span>
           </span>
           <span className="product_cart_detall_title">
-            Màu: <span>{ "   " +`${attributesItem.color}`}</span>
+            Màu: <span>{`${attributesItem.color}`}</span>
           </span>
           <span className="product_cart_detall_title">
             Số lượng:
