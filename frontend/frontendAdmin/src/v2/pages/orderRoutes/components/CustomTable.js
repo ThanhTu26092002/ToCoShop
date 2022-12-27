@@ -24,23 +24,6 @@ function CustomTable({
   totalDocs,
   orders,
 }) {
-  const [value, setValue] = useState('');
-  const [dataSource, setDataSource] = useState(orders);
-
-    const FilterByNameInput = (
-      <Input
-        placeholder="Search Name"
-        value={value}
-        onChange={e => {
-          const currValue = e.target.value;
-          setValue(currValue);
-          const filteredData = orders.filter(entry =>
-            entry.formattedFullName.includes(currValue)
-          );
-          setDataSource(filteredData);
-        }}
-      />
-    );
   // const [searchText, setSearchText] = useState('');
   // const [searchedColumn, setSearchedColumn] = useState('');
   // const searchInput = useRef(null);
@@ -170,7 +153,7 @@ function CustomTable({
       dataIndex: "formattedCreatedDate",
     },
     {
-       title: FilterByNameInput,
+       title: "Tên người đặt hàng",
       width: "8%",
       key: "formattedFullName",
       dataIndex: "formattedFullName",
@@ -283,7 +266,7 @@ function CustomTable({
         return { onClick: handleMouseLeaveCreate };
       }}
       columns={columns}
-      dataSource={dataSource}
+      dataSource={orders}
       pagination={{
         total: totalDocs,
         showTotal: (totalDocs, range) =>
