@@ -195,6 +195,12 @@ function OrderDetail() {
     }
     //SHIPPING INFO
     if (values.detailAddressShippingInfo) {
+      if(!newData.shippingInfo){
+        newData.shippingInfo ={}
+      }
+      if(!newData.shippingInfo.address){
+        newData.shippingInfo.address ={}
+      }
       newData.shippingInfo.address.detailAddress =
         values.detailAddressShippingInfo;
     }
