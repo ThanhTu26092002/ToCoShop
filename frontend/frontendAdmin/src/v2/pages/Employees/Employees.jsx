@@ -9,8 +9,13 @@ import { Content } from "antd/lib/layout/layout";
 import { objCompare } from "../../config/helperFuncs";
 import CustomTable from "./components/CustomTable";
 import CustomFormEmployee from "./components/CustomFormEmployee";
+import useAuth from "../../hooks/useZustand";
+import { useNavigate } from "react-router-dom";
 
 function Employees() {
+  const navigate = useNavigate();
+  const { auth, signOut } = useAuth((state) => state);
+
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
@@ -87,7 +92,7 @@ function Employees() {
   //
   const handleFinishCreate = (values) => {
     //SUBMIT
-    setLoadingBtn(true)
+    setLoadingBtn(true);
     let formData = null;
 
     if (values.birthday) {
@@ -135,8 +140,7 @@ function Employees() {
         );
       })
       .finally(() => {
-    setLoadingBtn(false)
-
+        setLoadingBtn(false);
       });
   };
   //
@@ -158,7 +162,7 @@ function Employees() {
       formUpdate.resetFields();
       return;
     }
-    setLoadingBtnUpdate(true)
+    setLoadingBtnUpdate(true);
     //Nếu email được thay đổi thì ta phải truyền thêm một oldEmail chứa email hiện tại để truyền qua api nhằm tìm và thay thế email mới bên collection Logins
     if (checkChangedData.email) {
       checkChangedData.oldEmail = selectedRecord.email;
@@ -171,7 +175,7 @@ function Employees() {
     let URL = URLEmployee + "/updateOne/" + selectedId;
     //POST
     axiosClient
-      .patch(URL, values)
+      .patch(URL, checkChangedData)
       .then((response) => {
         if (response.status === 200) {
           setIsModalOpen(false);
@@ -179,6 +183,21 @@ function Employees() {
           setSelectedId(null);
           if (file) {
             setFile(null);
+          }
+          if (checkChangedData.email) {
+            //Lấy email từ hook useAuth để xóa auth nếu người cập nhật chính tài khoản login của họ
+            const loginEmail = auth.payload.email;
+            if (loginEmail === selectedRecord.email) {
+              notification.info({
+                message: "Thông báo",
+                description: "Cập nhật thành công, vui lòng đăng nhập lại",
+              });
+              setTimeout(() => {
+                signOut();
+                navigate("/login");
+              }, 3000);
+              return;
+            }
           }
           notification.info({
             message: "Thông báo",
@@ -194,7 +213,7 @@ function Employees() {
         );
       })
       .finally(() => {
-        setLoadingBtnUpdate(false)
+        setLoadingBtnUpdate(false);
       });
   };
   //
@@ -260,23 +279,23 @@ function Employees() {
           onCancel={handleCancel}
           width={800}
           footer={[
-              <Button key="back" onClick={handleCancel}>
-                Hủy
-              </Button>,
-              <Button
-                key="submit"
-                type="primary"
-                loading={loadingBtnUpdate}
-                onClick={handleOk}
-              >
-                Sửa
-              </Button>,
-            ]}
-          >
+            <Button key="back" onClick={handleCancel}>
+              Hủy
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              loading={loadingBtnUpdate}
+              onClick={handleOk}
+            >
+              Sửa
+            </Button>,
+          ]}
+        >
           <CustomFormEmployee
             form={formUpdate}
             handleFinish={handleFinishUpdate}
-          loadingBtn={loadingBtnUpdate}
+            loadingBtn={loadingBtnUpdate}
           />
         </Modal>
       </Content>
