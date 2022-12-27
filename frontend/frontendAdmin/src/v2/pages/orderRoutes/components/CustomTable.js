@@ -78,19 +78,6 @@ function CustomTable({
           >
             Reset
           </Button>
-          {/* <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({
-                closeDropdown: false,
-              });
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button> */}
           <Button
             type="link"
             size="small"
@@ -152,6 +139,7 @@ function CustomTable({
       width: "5%",
       key: "formattedCreatedDate",
       dataIndex: "formattedCreatedDate",
+      ...getColumnSearchProps('formattedCreatedDate'),
     },
     {
        title: "Tên người đặt hàng",

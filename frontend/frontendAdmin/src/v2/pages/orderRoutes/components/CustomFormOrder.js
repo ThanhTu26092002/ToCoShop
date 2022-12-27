@@ -82,18 +82,22 @@ function CustomFormOrder({
         onFinishFailed={() => {
           console.error("Error at onFinishFailed at this Form");
         }}
-        initialValues={isFormUpdate? {}:{
-          createdDate: moment(new Date()).format("DD-MM-YYYY"),
-          sendingDate: null,
-          receivedDate: null,
-          status: "WAITING",
-          country: null,
-          state: null,
-          city: null,
-          paymentMethod: "COD",
-          cardNumber: "5105105105105100",
-          orderDetails: [{ quantity: 1 }],
-        }}
+        initialValues={
+          isFormUpdate
+            ? {}
+            : {
+                createdDate: moment(new Date()).format("DD-MM-YYYY"),
+                sendingDate: null,
+                receivedDate: null,
+                status: "WAITING",
+                country: null,
+                state: null,
+                city: null,
+                paymentMethod: "COD",
+                cardNumber: "5105105105105100",
+                orderDetails: [{ quantity: 1 }],
+              }
+        }
       >
         {isFormUpdate && (
           <>
@@ -138,7 +142,7 @@ function CustomFormOrder({
                 })}
               </Select>
             </Form.Item>
-            { isChangeProduct &&
+            {isChangeProduct && (
               <>
                 <Form.Item
                   {...PropsFormItem_Label_Name({
@@ -180,7 +184,7 @@ function CustomFormOrder({
                   />
                 </Form.Item>
               </>
-            }
+            )}
             <Divider style={{ backgroundColor: "#e3e6f2" }} />
             {/* Part 2- Contact Information */}
             <Text
@@ -386,8 +390,7 @@ function CustomFormOrder({
                 <Input placeholder="Họ" />
               </Form.Item>
 
-              <Form.Item 
-              {...PropsFormItemLastName} name="lastNameShippingInfo">
+              <Form.Item {...PropsFormItemLastName} name="lastNameShippingInfo">
                 <Input placeholder="Last name" />
               </Form.Item>
 
