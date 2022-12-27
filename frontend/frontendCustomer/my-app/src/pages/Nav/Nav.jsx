@@ -7,8 +7,6 @@ import ProductFolowingCategories from "../ProductFolowingCategories/ProductFolow
 import Productdetal from "../ProductDetail/ProductDetail"
 import Modal from "../../components/Modal/Modal";
 import CartDetail from "../CartInfo/CartDetail1/CartDetail";
-import CartDetail2 from "../CartInfo/CartDetail2/CartDetail2";
-import CartDetail3 from "../CartInfo/CartDetail3/CartDetail3";
 import axios from 'axios';
 import { useCart } from "../../hooks/useCart";
 function Nav() {
@@ -112,8 +110,8 @@ function Nav() {
             <Route path='/ProductFolowingCategories/:id' element={<ProductFolowingCategories />} />
             <Route path='/productDetail' element={<Productdetal />} />
             <Route path='/Thanhtoan' element={<CartDetail />} />
-            <Route path='/Thanhtoan2' element={<CartDetail2 />} />
-            <Route path='/Thanhtoan3' element={<CartDetail3 />} />
+          
+            
           </Routes>
 
         </div>

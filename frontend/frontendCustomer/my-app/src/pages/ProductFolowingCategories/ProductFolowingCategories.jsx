@@ -9,6 +9,8 @@ import Search_cart from "../../components/SearchCart/index"
 import { useParams } from "react-router-dom";
 function Menclothes() {
   const [images, setImages] = useState([]);//danhmuc
+  const [imagesnew, setImagesnew] = useState([]);//danhmuc
+
   const[categoryName,setCategoryName]=useState(null);
   const { id } = useParams();
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -16,11 +18,24 @@ function Menclothes() {
     axios.get("http://localhost:9000/v1/products/02getByCategoryId/"+ id).then((response) => {
       
       setImages(response.data.results);
+      setImagesnew(response.data.results);
       setCategoryName(response.data.results[0].categories[0].name)
     });
 
 
   }, [id])
+  
+  const discountOnclick=()=>{
+    axios.get("http://localhost:9000/v1/products/09getByCategoryIdSortByDiscount/"+ id).then((response) => {
+      
+      setImages(response.data.results);
+      
+    });
+    
+  }
+  const newproduct=()=>{
+    setImages(imagesnew)
+  }
   
   return (
     <div className="Men_product">
@@ -30,10 +45,10 @@ function Menclothes() {
         <div className="Sort_title">
           <h3>Sắp xếp theo</h3>
         </div>
-        <div className="Sort_Latest">
+        <div className="Sort_Latest" onClick={newproduct}>
           <h3>Mới nhất</h3>
         </div>
-        <div className="Sort_selling">
+        <div className="Sort_selling" onClick={discountOnclick}>
           <h3>Đang Khuyến Mãi</h3>
         </div>
       </div>

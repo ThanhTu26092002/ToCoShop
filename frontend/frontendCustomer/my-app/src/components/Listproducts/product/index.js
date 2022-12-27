@@ -5,10 +5,15 @@ import { AiOutlineHeart } from "react-icons/ai"
 import Productdetal from "../../../pages/ProductDetail/ProductDetail"
 import numeral from "numeral";
 function index({imgproduct}) {
-    console.log("imgproduct",imgproduct)
+  let total=(imgproduct.price*(100-imgproduct.discount))/100
   return (
     <div className='product'>
+        
         <div className='product_img'>
+        <div className='sale'>
+            <p>giảm</p>
+            <p style={{color:'red',fontWeight:'bold'}}>{imgproduct.discount}%</p>
+        </div>
             <img src={"http://localhost:9000/uploads"+imgproduct.coverImage} alt=''></img>
             {/* <div className='addToCart cart1'>
                     <a  href='#'>Add to Cart</a>
@@ -22,8 +27,7 @@ function index({imgproduct}) {
                 
             </div>
             <div className='product_evaluate'>
-            <p className='priceproduct'>{numeral(imgproduct.minTotalPrice).format("0,0")} VNĐ</p>
-                
+            <p className='priceproduct'>{numeral(total).format("0,0")} VNĐ</p> 
             </div>
         </div>
         <Routes>

@@ -17,9 +17,10 @@
 }
 .Sort_Latest,.Sort_selling{
     border: 1px solid #958f8f;
-}
-h3{
     
+}
+.Sort_Latest h3,.Sort_selling h3{
+    cursor: pointer;
     padding: 10px 20px;
 }
 .listproducts_title{
