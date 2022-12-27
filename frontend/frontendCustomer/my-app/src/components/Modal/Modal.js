@@ -32,7 +32,13 @@ function Modal({ closeModal }) {
           <nav className="navproductdetall">
             {isEmpty ? (
               <div className="emptyCart">
-                <img style={{width:300, height:300}} src="emptycart.png" alt=""></img>
+                <img style={{width:300, height:300}} 
+                 src="emptycart.png" 
+                onError={(e) =>
+                  (e.target.onerror = null)(
+                    (e.target.src = `../../emptycart.png`)
+                  )}
+                alt=""></img>
               </div>
             ) : (
               items.map((i, index) => {
