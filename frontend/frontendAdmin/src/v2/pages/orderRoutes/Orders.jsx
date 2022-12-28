@@ -408,10 +408,14 @@ function Orders() {
         setLoadingBtnStatus(false);
       });
   };
-  const handleConfirmDelete = (_id) => {
+  const handleConfirmDelete = ({id, status}) => {
+    if(status === "WAITING" || status === "SHIPPING"){
+      message.error("Không thể xóa với đơn hàng có tình trạng WAITING hoặc SHIPPING")
+      return;
+    }
     setLoading(true);
     axiosClient
-      .delete(URLOrder + "/deleteOne/" + _id)
+      .delete(URLOrder + "/deleteOne/" + id)
       .then((response) => {
         if (response.status === 200) {
           if (response.data?.noneExist) {

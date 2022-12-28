@@ -245,7 +245,7 @@ function CustomTable({
               title="Bạn muốn xóa không ?"
               okText="Đồng ý"
               cancelText="Đóng"
-              onConfirm={() => handleConfirmDelete(record._id)}
+              onConfirm={() => handleConfirmDelete({id:record._id, status: record.status})}
             >
               <Button
                 icon={<DeleteOutlined />}

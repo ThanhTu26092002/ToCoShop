@@ -20,10 +20,6 @@ function CustomTable({
 }) {
   const filterCategories = [
     {
-      text: "thời trang cả nam và nữ",
-      value: "thời trang cả nam và nữ",
-    },
-    {
       text: "thời trang nữ",
       value: "thời trang nữ",
     },
