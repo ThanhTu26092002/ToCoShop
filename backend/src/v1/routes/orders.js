@@ -294,7 +294,6 @@ router.post("/insertOne", async (req, res, next) => {
     delete newData.size;
     delete newData.color;
     delete newData.productName;
-    console.log("data:", newData);
     //Create a new blog post object
     const order = new Order(newData);
     //Insert the product in our MongoDB database
