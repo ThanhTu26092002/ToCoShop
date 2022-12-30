@@ -178,6 +178,27 @@ function Nav() {
               </div>
 
             </div>
+            <div className='box_hotline1'>
+              <div className='container_hotline1'>
+                <a href='https://www.facebook.com/people/ToCo-Clothes/100089181962577/'><img src='image12.png' alt='' onError={(e) =>
+                  (e.target.onerror = null)(
+                    (e.target.src = `../../image12.png`)
+                  )
+                }></img></a>
+                <a href='https://www.youtube.com/watch?v=ofymXsQj5mc'><img src='image13.png' alt='' onError={(e) =>
+                  (e.target.onerror = null)(
+                    (e.target.src = `../../image13.png`)
+                  )}></img></a>
+                <a href='https://www.instagram.com/'><img src='image14.png' alt='' onError={(e) =>
+                  (e.target.onerror = null)(
+                    (e.target.src = `../../image14.png`)
+                  )}></img></a>
+                <a href='https://twitter.com/i/flow/login?input_flow_data=%7B%22requested_variant%22%3A%22eyJsYW5nIjoidmkifQ%3D%3D%22%7D'><img src='image15.png' alt='' onError={(e) =>
+                  (e.target.onerror = null)(
+                    (e.target.src = `../../image15.png`)
+                  )}></img></a>
+              </div>
+            </div>
             </div>
           </nav>
         <div className='content'>

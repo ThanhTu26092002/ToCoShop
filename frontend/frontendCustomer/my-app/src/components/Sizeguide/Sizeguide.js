@@ -1,5 +1,6 @@
 import React from "react";
 import "./Sizeguide.css";
+import "./Sizeguiderps.css";
 function Sizeguide({ closeSizeguide }) {
   return (
     <div className="guideBackground">
