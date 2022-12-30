@@ -1,0 +1,9 @@
+@media (max-width:1023px){
+   
+    .product_detall .product_detall_main .price{
+        width: 100%;
+    }
+    .btn_cart_buy{
+        width: 100%;
+    }
+}
