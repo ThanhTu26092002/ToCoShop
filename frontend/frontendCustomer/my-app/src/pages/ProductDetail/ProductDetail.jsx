@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 import axios from "axios";
 import "./ProductDetail.css";
+import "./ProductDetailrps.css";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 
 import { BackTop, InputNumber } from "antd";

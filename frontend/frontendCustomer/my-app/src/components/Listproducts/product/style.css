@@ -22,13 +22,13 @@
 }
 .product_img{
     overflow: hidden;
-    width: 250px;
-    height: 350px;
+    width: 100%;
+    height: 80%;
     position: relative;
 }
 .product img{
-    width: 250px;
-    height: 350px;
+    width: 100%;
+    height: 100%;
     transition: all 0.5s;
     
 }

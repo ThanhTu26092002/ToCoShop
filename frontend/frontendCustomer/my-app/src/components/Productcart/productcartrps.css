@@ -1,0 +1,9 @@
+@media (max-width:1023px){
+    .product_cart .product_cart_detall{
+        font-size: 14px;
+    }
+    .quantityinput button{
+        font-size: 15px;
+        padding: 2px 15px;
+    }
+}
