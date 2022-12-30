@@ -40,3 +40,8 @@
     font-size: 20px;
     margin-bottom: 10px;
 }
+@media (max-width:740px){
+    .receipt_detail span{
+        font-size: 15px;
+    }
+}

@@ -1,5 +1,6 @@
 import React from 'react'
 import "./style.css";
+import "./stylerps.css";
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import { AiOutlineHeart } from "react-icons/ai"
 import Productdetal from "../../../pages/ProductDetail/ProductDetail"

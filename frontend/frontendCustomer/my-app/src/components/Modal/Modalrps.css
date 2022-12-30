@@ -16,3 +16,8 @@
         font-size: 12px;
     }
 }
+@media (max-width:740px){
+    .navproductdetall{
+        height: 250px;
+    }
+}
