@@ -15,7 +15,7 @@
   }
   
   .modalContainer {
-    width: 772px;
+    width: 50%;
     border-radius: 12px;
     background-color: white;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -27,7 +27,7 @@
   }
   
   .modalContainer .title {
-    width: 580px;
+    width: 70%;
     display: inline-block;
     text-align: center;
     margin-top: 10px;
@@ -74,19 +74,27 @@
     justify-content: space-between;
     align-items: center;
   }
+  .footer_modal_btn{
+    display: flex;
+    width: 50%;
+    justify-content: space-between;
+    
+  }
   .modalContainer .footer_modal button {
-    width: 180px;
+    width:50%;
     height: 45px;
-    margin: 10px;
+    margin-inline: 10px;
     border: none;
     background-color: cornflowerblue;
     color: white;
     border-radius: 8px;
-    font-size: 20px;
+    font-size: 17px;
     cursor: pointer;
+    
   }
   .footer_modal_price{
     display: flex;
+    width: 50%;
   }
   .footer_modal_price span{
     font-size: 18px;

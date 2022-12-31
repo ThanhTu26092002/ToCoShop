@@ -1,0 +1,8 @@
+@media (max-width:1023px){
+    .product{
+        width: 200px;
+    }
+    .priceproduct{
+        font-size: 15px;
+    }
+}

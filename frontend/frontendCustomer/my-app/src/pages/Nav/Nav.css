@@ -68,9 +68,9 @@
   list-style: none;
   
 }
-nav{
+.sidebar nav{
   height: 340px;
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 ::-webkit-scrollbar{
   width: 2px;
@@ -81,10 +81,10 @@ nav{
   background-color: gray;
   border-radius: 10px;
 }
-nav{
+.sidebar nav{
   margin-top: 25px;
 }
-nav .menu_item{
+.sidebar nav .menu_item,.sidebarmb-menu_item{
   display: block;
   width: 100%;
   text-align: center;
@@ -93,13 +93,13 @@ nav .menu_item{
   font-weight: italic;
 }
 
-.menu_item a{
+.menu_item a,.sidebarmb-menu_item a{
   display: block;
   text-decoration: none;
   color: black;
   padding: 22px 10px;
 }
-.menu_item a:hover{
+.menu_item a:hover,.sidebarmb-menu_item a:hover{
   background: rgb(237, 234, 234);
   color: #78cccd;
 }
@@ -118,6 +118,7 @@ nav .menu_item{
   margin: auto;
   display: flex;
   align-items: center;
+  text-align: center;
 }
 .container_hotline{
   width: 100%;
@@ -155,4 +156,99 @@ nav .menu_item{
 .container_hotline1 a img:hover{
   opacity: 0.5;
 }
+.sidebarmb{
+  display: none;
+  
+}
+.sidebarmb .sidebarmb-outside{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebarmb .sidebarmb-logo {
+  width: 30%;
+}
+.sidebarmb .sidebarmb-logo img{
+  width: 100%;
+  height: 70px;
+}
+.sidebarmb-btn svg{
+  font-size: 30px;
+  margin: 10px;
+}
+.sidebarmb-extra .sidebarmb-extra-cart svg{
+  margin: 10px;
+}
+.sidebarmb-extra .sidebarmb-extra-cart div{
+  position: relative;
+  top: -28px;
+  left: -20px;
+  background-color: orangered;
+  display: inline;
+  padding: 3px 10px;
+  border-radius: 50%;
+  color: white;
+}
+.sidebarmb-nav__overlay{
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: none;
+  animation: fadeIn linear 0.2s;
+}
+.nav_mb{
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  max-width: 100%;
+  background-color: #fff;
+  z-index: 100;
+  transition: transform linear 0.2s,opacity linear 0.2s;
+  opacity: 0;
+  transform: translateX(-100%);
+}
+.nav_mb-list{
+  
+ overflow-y: scroll;
+}
+.nav_mb .nav_mb-list a{
+  text-decoration: none;
+  color: #333;
+  display: block;
+  font-size: 1rem;
+  padding-block: 20px;
+}
+.nav_mb-close{
+  width: 28px;
+  height: 28px;
+  color: #666;
+  position: absolute;
+  top: 0.4rem;
+  right: 1rem;
+}
+.nav_mb-close svg{
+  width: 28px;
+  height: 28px;
+}
+.container_nav_mb_logo{
+  text-align: center;
+}
+.container_nav_mb_logo img{
+  width: 50%;
+  height: 150px;
+}
 
+@keyframes fadeIn {
+  from{
+    opacity: 0;
+  }
+  to{
+    opacity: 1;
+  }
+}

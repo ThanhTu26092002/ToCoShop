@@ -1,5 +1,6 @@
 import React from "react";
 import "./productcart.css";
+import "./productcartrps.css";
 import numeral from "numeral";
 import { useCart } from "../../hooks/useCart";
 import {

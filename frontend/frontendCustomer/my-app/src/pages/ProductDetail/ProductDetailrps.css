@@ -1,0 +1,20 @@
+@media (max-width:1023px){
+   
+    .product_detall .product_detall_main .price{
+        width: 100%;
+    }
+    .btn_cart_buy{
+        width: 100%;
+    }
+}
+@media (max-width:740px){
+    .product_img_container img{
+        height: 346px;
+    }
+    .btnsize{
+        font-size: 10px;
+    }
+    .btncart{
+        font-size: 10px;
+    }
+}

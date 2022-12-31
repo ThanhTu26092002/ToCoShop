@@ -1,0 +1,23 @@
+@media (max-width:1023px){
+    .modalContainer{
+        width: 60%;
+    }
+    .navproductdetall{
+        height: 300px;
+    }
+    .modalContainer .footer_modal button {
+        font-size: 10px;
+       
+    }
+    .footer_modal_price span{
+        font-size: 12px;
+    }
+    .footer_modal_price p{
+        font-size: 12px;
+    }
+}
+@media (max-width:740px){
+    .navproductdetall{
+        height: 250px;
+    }
+}
