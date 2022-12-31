@@ -34,4 +34,18 @@
   .transporationUI_Iphone {
     display: block;
   }
+.chosenProduct h2{
+font-weight: 600;
+font-size: 1em;
+margin-bottom: 8px;
+}
+.sumPrice span{
+  font-size: 16px;
+  margin-left: 16px;
+}
+.sumPrice .totalMoney,.sumPrice .shippingCost,.sumPrice .totalMoneyreceipt{
+  color:coral;
+  display: inline;
+}
+
 }

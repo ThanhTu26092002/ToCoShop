@@ -178,12 +178,10 @@ function checkoutCartDetail3({
           </Form>
         </div>
       </div>
+      <div className={styles.chosenProduct}>
       <div className="Cartdetall3_form_main bodernone">
         <h2>Đơn hàng của bạn là: </h2>
         <nav className="nav_Cartdetall3">
-          {/* <Receipt/>
-           <Receipt/>
-           <Receipt/> */}
           {items.map((i, index) => {
             let attributesItem = null;
             i.product.attributes.map((e) => {
@@ -195,20 +193,24 @@ function checkoutCartDetail3({
               }
             });
             return (
-              <div key={items._id}>
+              <div key={items._id} >
                 <Receipt items={i} />
               </div>
             );
           })}
         </nav>
       </div>
+      </div>
+      <div className={styles.sumPrice}>
       <div className="Cartdetall3_price">
-        <span>Tạm tính: {numeral(totalmoney).format("0,0")} VNĐ </span>
-        <span>Vận chuyển: {numeral(shippingCost).format("0,0")} VNĐ</span>
+        <span>Tạm tính:<span className={styles.totalMoney}> {numeral(totalmoney).format("0,0")} VNĐ </span> </span>
+        <span>Vận chuyển: <span className={styles.shippingCost}> {numeral(shippingCost).format("0,0")} VNĐ</span> </span>
         {totalMoneyreceiptShow && (
-          <span>Tổng tiền: {numeral(totalMoneyreceipt).format("0,0")} VNĐ</span>
+          <span>Tổng tiền: <span className={styles.totalMoneyreceipt}> {numeral(totalMoneyreceipt).format("0,0")} VNĐ</span> </span>
         )}
       </div>
+      </div>
+     
       <div className="Cartdetall3btn ">
         <div className={styles.btnPre}>
           <button onClick={previousfunc}>
