@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import styles from "./checkoutCartDetail2.module.css";
 import { DoubleRightOutlined, DoubleLeftOutlined } from "@ant-design/icons";
 import {
+  PropsForm,
   PropsFormItemDetailAddress,
   PropsFormItemEmail,
   PropsFormItemFirstName,
@@ -23,10 +25,10 @@ function checkoutCartdetail2({
   const [cityListContactInfo, setCityListContactInfo] = useState(null);
   return (
     <div>
-      <div className="Cartdetall2_form">
+      <div className={styles.cartDetail2}>
         <h2>Thông tin người nhận hàng:</h2>
         <form style={{}}>
-          <input 
+          <input
             className="cursor"
             id="check"
             type="checkbox"
@@ -50,35 +52,24 @@ function checkoutCartdetail2({
           <label htmlFor="check">Bạn là người nhận hàng </label>
         </form>
 
-        <div className="Cartdetall2_form_main">
+        <div className={styles.cartDetail_main}>
           <Form
-            style={{ marginLeft: 100 }}
             form={formShippingInfo}
-            //{...PropsForm}
-            // form={formCreate}
+            {...PropsForm}
             name="formShippingInfo"
             onFinish={handleFinishCreate}
             onFinishFailed={() => {
               console.error("Error at onFinishFailed at formCreate");
             }}
           >
-            <Form.Item
-              {...PropsFormItemFirstName}
-              name="firstNameShippingInfo"
-              //  className="a"
-            >
+            <Form.Item {...PropsFormItemFirstName} name="firstNameShippingInfo">
               <Input placeholder="Họ" />
             </Form.Item>
-            <Form.Item
-              {...PropsFormItemLastName}
-              name="lastNameShippingInfo"
-              //  className="a"
-            >
+            <Form.Item {...PropsFormItemLastName} name="lastNameShippingInfo">
               <Input placeholder="Tên" />
             </Form.Item>
             <Form.Item
               {...PropsFormItemEmail({ nameTitle: "emailShippingInfo" })}
-              //  className="a"
             >
               <Input placeholder="Email" />
             </Form.Item>
@@ -188,7 +179,6 @@ function checkoutCartdetail2({
               {...PropsFormItemDetailAddress({
                 nameTitle: "detailAddressShippingInfo",
               })}
-              // className="a"
             >
               <Input placeholder="Địa chỉ người nhận hàng" />
             </Form.Item>
@@ -197,17 +187,29 @@ function checkoutCartdetail2({
                 labelTitle: "Ghi chú",
                 nameTitle: "note",
               })}
-              //  className="a"
             >
               <TextArea rows={3} placeholder="Thời gian nhận hàng" />
             </Form.Item>
             <div className="Cartdetall2btn">
-              <button onClick={previousfunc}>
-                <DoubleLeftOutlined />
-              </button>
-              <button type="submit">
-                Tiếp tục <DoubleRightOutlined />
-              </button>
+              <div className={styles.btnPre}>
+                <button onClick={previousfunc}>
+                  <DoubleLeftOutlined />
+                </button>
+              </div>
+              <div className={styles.btnSubmit}>
+                <div className="Cartdetallbtn">
+                  <button type="submit">
+                    Tiếp tục
+                    <DoubleRightOutlined />
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.btnSubmitIphone}>
+                <div className="Cartdetallbtn ">
+                  <button type="submit">Tiếp tục</button>
+                </div>
+              </div>
             </div>
           </Form>
         </div>

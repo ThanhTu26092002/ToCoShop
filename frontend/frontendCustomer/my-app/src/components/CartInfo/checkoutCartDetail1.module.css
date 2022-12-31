@@ -1,0 +1,29 @@
+.btnSubmitIphone {
+  display: none;
+}
+/* MObile: width<740px */
+@media only screen and (max-width: 46.1875em) {
+  .cartDetail1 {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  .cartDetail1 > h2 {
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+  .btnSubmit
+{
+    display: none;
+}
+.btnSubmitIphone {
+    display: block;
+  }
+  .btnSubmitIphone button {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    padding: 0px 20px;
+  }
+}

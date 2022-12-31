@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import {
-
-  DoubleRightOutlined,
-} from "@ant-design/icons";
-import {
-  Form,
-  Input,
-  Select,
-} from "antd";
+import styles from "./checkoutCartDetail1.module.css";
+import { DoubleRightOutlined } from "@ant-design/icons";
+import { Form, Input, Select } from "antd";
 import {
   PropsForm,
   PropsFormItemDetailAddress,
@@ -29,9 +23,9 @@ function checkoutCartdetail1({
 
   return (
     <div>
-      <div className="Cartdetall_form">
+      <div className={styles.cartDetail1}>
         <h2>Thông tin người đặt hàng:</h2>
-        <div className="Cartdetall_form_main">
+        <div className={styles.cartDetail_main}>
           <Form
             form={formContactInfo}
             // style={{ marginLeft: 100 }}
@@ -67,7 +61,6 @@ function checkoutCartdetail1({
                 labelTitle: "Quốc gia",
                 nameTitle: "countryContactInfo",
               })}
-              // className="a"
             >
               <Select
                 placeholder="Chọn..."
@@ -102,7 +95,6 @@ function checkoutCartdetail1({
                 labelTitle: "Tỉnh",
                 nameTitle: "stateContactInfo",
               })}
-              // className="a"
             >
               <Select
                 style={{ width: 150 }}
@@ -134,7 +126,6 @@ function checkoutCartdetail1({
                 labelTitle: "Thành phố/ Huyện",
                 nameTitle: "cityContactInfo",
               })}
-              // className="a"
             >
               <Select
                 placeholder="Chọn..."
@@ -159,15 +150,24 @@ function checkoutCartdetail1({
               {...PropsFormItemDetailAddress({
                 nameTitle: "detailAddressContactInfo",
               })}
-              // className="a"
             >
               <Input placeholder="Địa chỉ cụ thể" />
             </Form.Item>
-            <div className="Cartdetallbtn">
-              <button type="submit">
-                Tiếp tục
-                <DoubleRightOutlined />
-              </button>
+            <div className={styles.btnSubmit}>
+              <div className="Cartdetallbtn">
+                <button type="submit">
+                  Tiếp tục
+                  <DoubleRightOutlined />
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.btnSubmitIphone}>
+              <div className="Cartdetallbtn ">
+                <button type="submit">
+                  Tiếp tục
+                </button>
+              </div>
             </div>
           </Form>
         </div>
