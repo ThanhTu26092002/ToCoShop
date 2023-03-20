@@ -80,7 +80,7 @@ function Nav() {
                     (e.target.onerror = null)(
                       (e.target.src = `../../image11.png`)
                     )}></img>
-                  <span>0 9 0 5 9 0 5 9 9 9 </span>
+                  <span>0 9 6 7 1 1 6 8 0 1 </span>
                 </a>
               </div>
 
